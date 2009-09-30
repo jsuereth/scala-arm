@@ -24,7 +24,7 @@ import scala.util.control.Exception
  */
 trait ManagedResource[+R, H] {
   /**
-   * This method is used to 
+   * This method is used to perform operations on a resource while the resource is open.
    */
   def map[B](f : H => B) : TranslatedResource[R, B]
   //TODO - Should flatmap extract?
@@ -162,9 +162,18 @@ object ManagedResource {
 	 * it must contain the code that actually acquires the resource. Clients
 	 * are encouraged to write specialized methods to instantiate
 	 * ManagedResources rather than relying on ad-hoc usage of this method. */
-	def apply[A <: { def close() : Unit }](opener : => A) =
+	def apply[A <: { def close() : Unit }](opener : => A) : ManagedResource[A,A] =
 		new AbstractNoHandleManagedResource[A] {
 			override def resource = opener
 			override def unsafeClose(r : A) = r.close()
 	}
+	/**
+         * Creates a new ManagedResource with the given open/close methods
+         */
+        def make[H, R](r : R, opener : R => H, closer : H => Unit, nonFatalExceptions : List[Class[_<:Throwable]] = List(classOf[Throwable])) : ManagedResource[R,H] = new AbstractManagedResource[R,H] {
+           override val resource = r
+           override protected def open(res : R) = opener(res)
+	   override protected def unsafeClose(handle : H) : Unit = closer(handle)
+           override protected val caughtException = nonFatalExceptions
+        }
 }
