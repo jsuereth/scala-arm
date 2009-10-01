@@ -16,6 +16,7 @@ package scala.resource
 import scala.collection.Traversable
 import scala.collection.Sequence
 import scala.collection.Iterator
+import scala.collection.Iterable
 import scala.util.control.Exception
 
 
@@ -93,18 +94,25 @@ trait TranslatedResource[+R, A] {
    *        An either where the left hand side is the currently contained resource unless exceptions, in which case the right hand side will contain the sequence of throwable encountered.
    */
   def either : Either[Sequence[Throwable], A]
+
+  /**
+   * This method creates a Traversable in which all performed methods are done withing the context of an "open" resource
+   */
+  def toTraversable[B](f : A => Iterator[B]) : Traversable[B]
 }
 
 /**
  * And implementation of a TranslatedResource that defers all processing until the user pulls out information using either or opt functions.
  */
-class DefferedTranslatedResource[+R,H,A](val resource : ManagedResource[R,H], val translate : H => A) extends TranslatedResource[R,A] { self =>
+class DeferredTranslatedResource[+R,H,A](val resource : ManagedResource[R,H], val translate : H => A) extends TranslatedResource[R,A] { self =>
 
-   override def map[B](f : A => B) = new DefferedTranslatedResource(resource, translate.andThen(f))
+   override def map[B](f : A => B) = new DeferredTranslatedResource(resource, translate.andThen(f))
 
    override def either = resource acquireFor translate
 
    override def opt = either.right.toOption
+
+   override def toTraversable[B](f : A => Iterator[B]) = resource.toTraversable(translate andThen f)
 }
 
 /**
@@ -126,7 +134,7 @@ trait AbstractManagedResource[R,H] extends ManagedResource[R,H] { self =>
   /**
    * The list of exceptions that get caught during ARM and will not prevent a call to close.
    */
-  protected def caughtException : List[Class[_]] = List(classOf[Throwable])
+  protected def caughtException : Sequence[Class[_]] = List(classOf[Throwable])
 
 
   override def acquireFor[B](f : H => B) : Either[List[Throwable], B] = {
@@ -145,7 +153,7 @@ trait AbstractManagedResource[R,H] extends ManagedResource[R,H] { self =>
      override protected def iterator(handle : H) = f(handle)
   }
 
-  override def map[B](f : H => B) : TranslatedResource[R, B] = new DefferedTranslatedResource(this, f)
+  override def map[B](f : H => B) : TranslatedResource[R, B] = new DeferredTranslatedResource(this, f)
   
 }
 
