@@ -28,9 +28,14 @@ trait ManagedResource[+R, H] {
    * This method is used to perform operations on a resource while the resource is open.
    */
   def map[B](f : H => B) : TranslatedResource[R, B]
-  //TODO - Should flatmap extract?
+  /**
+   * This method is used to immediately perform operations on a resource while it is open, ensuring the resource is closed before returning.
+   */
   //def flatMap[B](f : H => B) : B    
-  //def foreach(f : H => Unit) : Unit
+  /**
+   * This method is used to immediately perform operations on a resource while it is open, ensuring the resource is closed before returning.
+   */
+  def foreach(f : H => Unit) : Unit
 
   /**
    * Aquires the resource for the Duration of a given function, closing when complete and returning the result.
@@ -75,7 +80,14 @@ trait TranslatedResource[+R, A] {
    * This method is used to translate a resource further.
    */
   def map[B](f : A => B) : TranslatedResource[R, B]
-
+  /**
+   * This method is used to immediately perform operations on a resource while it is open, ensuring the resource is closed before returning.
+   */
+  def flatMap[B](f : A => B) : TranslatedResource[R,B]    
+  /**
+   * This method is used to immediately perform operations on a resource while it is open, ensuring the resource is closed before returning.
+   */
+  def foreach(f : A => Unit) : Unit
   /** 
    * This method is used to extract the resource being managed.   
    *
@@ -107,12 +119,22 @@ trait TranslatedResource[+R, A] {
 class DeferredTranslatedResource[+R,H,A](val resource : ManagedResource[R,H], val translate : H => A) extends TranslatedResource[R,A] { self =>
 
    override def map[B](f : A => B) = new DeferredTranslatedResource(resource, translate.andThen(f))
+   override def flatMap[B](f : A => B) =  map(f)
+   override def foreach(f : A => Unit) : Unit = resource acquireAndGet translate.andThen(f)
 
    override def either = resource acquireFor translate
 
    override def opt = either.right.toOption
 
    override def toTraversable[B](f : A => Iterator[B]) = resource.toTraversable(translate andThen f)
+
+   override def equals(that : Any) = that match {
+       case x : DeferredTranslatedResource[R,H,A] => (x.resource == resource) && (x.translate == translate)
+       case _ => false
+   }
+   override def hashCode() : Int = (resource.hashCode << 7) + translate.hashCode + 13
+
+   override def toString = "DefferredTranslatedResource(" + resource + ", " + translate + ")"
 }
 
 /**
@@ -154,6 +176,9 @@ trait AbstractManagedResource[R,H] extends ManagedResource[R,H] { self =>
   }
 
   override def map[B](f : H => B) : TranslatedResource[R, B] = new DeferredTranslatedResource(this, f)
+
+  //override def flatMap[B](f : H => B) : B  = acquireAndGet(f)
+  override def foreach(f : H => Unit) : Unit = acquireAndGet(f)
   
 }
 
@@ -178,7 +203,7 @@ object ManagedResource {
 	/**
          * Creates a new ManagedResource with the given open/close methods
          */
-        def make[H, R](r : R, opener : R => H, closer : H => Unit, nonFatalExceptions : List[Class[_<:Throwable]] = List(classOf[Throwable])) : ManagedResource[R,H] = new AbstractManagedResource[R,H] {
+        def make[H, R](r : R)(opener : R => H)(closer : H => Unit, nonFatalExceptions : List[Class[_<:Throwable]] = List(classOf[Throwable])) : ManagedResource[R,H] = new AbstractManagedResource[R,H] {
            override val resource = r
            override protected def open(res : R) = opener(res)
 	   override protected def unsafeClose(handle : H) : Unit = closer(handle)
