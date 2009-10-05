@@ -16,9 +16,10 @@ import scala.collection.Traversable
 
 /** 
  * This trait provides a means to ensure traversable access to items inside a resource, while ensuring that the
- * resource is opened/closed appropriately before/after the traversal.   
+ * resource is opened/closed appropriately before/after the traversal.
  */
 trait ManagedTraversable[+A, H, B] extends Traversable[B] {
+
   /**
    * The resource we plan to traverse through  
    */
@@ -29,11 +30,9 @@ trait ManagedTraversable[+A, H, B] extends Traversable[B] {
    */
   protected def iterator(v : H) : Iterator[B]
 
-
   /**
    * Executes a given function against all items in the resource.  The resource is opened/closed during the call
    * to this method.
    */
   def foreach[U](f: B => U): Unit = resource.acquireFor( r => iterator(r).foreach(f) )
-
 }
