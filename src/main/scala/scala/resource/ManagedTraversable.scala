@@ -18,16 +18,16 @@ import scala.collection.Traversable
  * This trait provides a means to ensure traversable access to items inside a resource, while ensuring that the
  * resource is opened/closed appropriately before/after the traversal.   
  */
-trait ManagedTraversable[+A, H, B] extends Traversable[B] {
+trait ManagedTraversable[A, +B] extends Traversable[B] {
   /**
    * The resource we plan to traverse through  
    */
-  val resource : ManagedResource[A,H]
+  val resource : ManagedResource[A]
 
   /**
    * This method gives us an iterator over items in a resource.                               
    */
-  protected def iterator(v : H) : Iterator[B]
+  protected def iterator(v : A) : Iterator[B]
 
 
   /**
