@@ -1,14 +1,11 @@
 package scala.resource
 
-
 import _root_.java.{io => jio}
-
 
 /**
  * This is a basic abstraction for an iterator that fetches new content as needed.
  */
 abstract class FetchIterator[T] extends Iterator[T] {
-
 	var fetched = false
 	var nextItem : Option[T] = None
 	protected def fetchNext(): Option[T]
@@ -25,6 +22,7 @@ abstract class FetchIterator[T] extends Iterator[T] {
 		nextItem.get
 	}
 }
+
 /** This class creates an iterator from a buffered iterator.  Used to test toTraverable method */
 class JavaBufferedReaderLineIterator(br : jio.BufferedReader) extends FetchIterator[String] {
   override def fetchNext() = br.readLine() match {
