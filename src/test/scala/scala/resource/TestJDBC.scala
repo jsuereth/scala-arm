@@ -1,17 +1,20 @@
 package scala.resource
 
+import java.sql._
+import resource._
+import org.junit._
+import Assert._
 /**
- * Created by IntelliJ IDEA.
- * User: josh
- * Date: Nov 2, 2009
- * Time: 7:53:02 PM
- * To change this template use File | Settings | File Templates.
+ * This class is just to make sure we compile...
  */
+object JDBCHelper {
 
-
-object TestJDBC {
-  import java.sql._
-  import resource._
+  val initDriver = {
+        val name = "org.apache.derby.jdbc.EmbeddedDriver";
+        Class.forName(name).newInstance();
+        name
+   }
+  
 
   //TODO - This is a kludge!
   class ResultSetIterator(resultSet : ResultSet) extends scala.Iterator[ResultSet] {
@@ -24,24 +27,21 @@ object TestJDBC {
      def next(): ResultSet = resultSet
   }
 
-  def test() : scala.collection.Traversable[Int] = {
+  
+}
 
-    val connFactory : ManagedResource[Connection] = managed(DriverManager.getConnection("","",""))
+class TestJDBC {
+  import JDBCHelper._
+  
+  val tmp = initDriver  //Hack to init the JDBC driver...
 
-    for {
-      connection <- connFactory
-      stmt <- managed(connection.prepareStatement("select * from foo where id = ?"))
-      resultSet <- managed { stmt.setLong(1,2); stmt.getResultSet() }
-      row <- new ResultSetIterator(resultSet)
-    } {
-      println(row.getInt(1))
-    }
+  @Test
+  def test() : Unit = {
 
-
-    val results = connFactory.flatMap( c => managed(c.prepareStatement("foo!"))).flatMap(s => managed(s.getResultSet)).toTraversable(r => new ResultSetIterator(r))
+    val connFactory : ManagedResource[Connection] = ManagedResource(DriverManager.getConnection("jdbc:derby:derbyDB;create=true","",""))
+    val results = connFactory.flatMap( c => ManagedResource(c.prepareStatement("foo!"))).flatMap(s => ManagedResource(s.getResultSet)).toTraversable(r => new ResultSetIterator(r))
     val ids = for { row <- results } yield row.getInt(1)            
 
-    ids
+    ()
   }
-
 }

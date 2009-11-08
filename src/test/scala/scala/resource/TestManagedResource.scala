@@ -30,3 +30,25 @@ class JavaBufferedReaderLineIterator(br : jio.BufferedReader) extends FetchItera
     case s => Some(s)
   }
 }
+
+
+class FakeResource {
+   import java.util.concurrent.atomic.AtomicBoolean
+
+   private val opened = new AtomicBoolean(false)
+
+   def open() : Unit = {
+      if(!opened.compareAndSet(false,true)) {
+         error("Attempting to open already opened resource!")
+      }
+   }
+
+   def close() : Unit = {
+     if(!opened.compareAndSet(true, false)) {
+        error("Attempting to close unopened resource!")
+     }
+   }
+
+   def generateData = if(opened.get) Math.random else error("Attempted to generate data when resource is not opened!")
+
+}
