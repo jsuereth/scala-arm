@@ -21,16 +21,6 @@ import scala.Either
 
 
 /**
- * This trait's existence signifies that a ManagedResource can be converted into a ManagedTraversable safely or needs to remaining inside the monad.
- */
-trait CanSafelyTranslate[-MappedElem, +To] {
-  /**
-   * This method takes a managed resource and a mapping function and returns a new result (inside/outside the managed resource).
-   */
-  def apply[T](from : ManagedResource[T],  converter : T => MappedElem) : To
-}
-
-/**
  * This class encapsulates a method of ensuring a resource is opened/closed during critical stages of its lifecycle.
  */
 trait ManagedResource[+R] {
@@ -86,145 +76,7 @@ trait ManagedResource[+R] {
    *          The other resource
    */
   def and[B](that : ManagedResource[B]) : ManagedResource[(R,B)]
-
-  /**
-   *  This method returns a clone of this object where all operations are defered until forced.
-   *
-   * @returns
-   * A lazy version of the ManagedResource
-   */
-  //def defer : ManagedResource[R,H]
 }
-
-/**
- * This trait represents a resource that has been modified (or will be modified) inside an ARM block in such
- * a way that the resulting value can be extracted outside of the "ManagedResource" monad.
- */
-trait ExtractableManagedResource[+A] extends ManagedResource[A] {
-
-
-  /** 
-   * This method is used to extract the resource being managed.   
-   *
-   * This allows you to pull information out of the Managed resource, as such, the Resource will not be "available"
-   * after this method call.
-   *
-   * @returns
-   *       Some(containedValue) if there have been no processing errors, None otherwise
-   */
-  def opt : Option[A]
-
-  /**
-   * This method is used to extract the resource being managed.
-   *
-   * This allows you to pull information out of the Managed resource, as such, the Resource will not be "available"
-   * after this method call.
-   *
-   * @returns
-   *        An either where the left hand side is the currently contained resource unless exceptions, in which case
-   *        the right hand side will contain the sequence of throwable encountered.
-   */
-  def either : Either[Sequence[Throwable], A]
-}
-
-/**
- * This class implements ManagedResource methods in terms of acquireFor
- */
-trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
-
-  import ManagedResource._
-  
-  //TODO - Will the exception list always have size 1?
-  override def acquireAndGet[B](f : R => B) : B = acquireFor(f).fold( liste => throw liste.head, x => x)
-
-  override def toTraversable[B](f : R => Iterator[B]) : Traversable[B] = new ManagedTraversable[R,B] {
-    val resource = self
-    override protected def iterator(resource : R) = f(resource)
-  }
-
-  //override def map[B, To](f : R => B)(implicit translator : CanSafelyTranslate[B,To]) : To = translator(self,f)
-  override def map[B](f : R => B) : ExtractableManagedResource[B] = flatMap(f)(stayManaged)
-
-  /*override def flatMap[B](f : R => ManagedResource[B]) : ManagedResource[B] = new ManagedResourceOperations[B] {
-      override def acquireFor[C](f2 : B => C) : Either[List[Throwable], C] = {
-        self.acquireFor( r => f(r).acquireFor(f2)).fold(x => Left(x), x => x)
-      }
-    }*/
-  override def flatMap[B, To](f : R => B)(implicit translator : CanSafelyTranslate[B,To]) : To = translator(self,f)
-  
-  override def foreach(f : R => Unit) : Unit = acquireAndGet(f)
-
-  override def and[B](that : ManagedResource[B]) : ManagedResource[(R,B)] = resource.and(self,that)
-}
-
-
-/**
- * An implementation of an ExtractableManagedResource that defers all processing until the user pulls out information using
- * either or opt functions.
- */
-private[resource] class DeferredExtractableManagedResource[+A,R](val resource : ManagedResource[R], val translate : R => A) extends 
-  ExtractableManagedResource[A] with ManagedResourceOperations[A] { self =>
-
-  override def acquireFor[B](f : A => B) : Either[List[Throwable], B] = resource acquireFor translate.andThen(f)
-
-  override def either = resource acquireFor translate
-
-  override def opt = either.right.toOption
-
-  override def equals(that : Any) = that match {
-    case x : DeferredExtractableManagedResource[A,R] => (x.resource == resource) && (x.translate == translate)
-    case _ => false
-  }
-  override def hashCode() : Int = (resource.hashCode << 7) + translate.hashCode + 13
-
-  override def toString = "DeferredExtractableManagedResource(" + resource + ", " + translate + ")"
-}
-
-
-/**
- * Abstract class implementing most of the managed resource features.
- */
-trait AbstractManagedResource[+R,H] extends ManagedResource[R] with ManagedResourceOperations[R] { self =>
-
-  /** 
-   * Opens a given resource, returning a handle to execute against during the "session" of the resource being open.
-   */
-  protected def open : H
-
-  /**
-   * Closes a resource using the handle.  This method will throw any exceptions normally occuring during the close of
-   * a resource.
-   */
-  protected def unsafeClose(handle : H) : Unit
-
-  /** 
-   * Returns the resource that we are managing.
-   */
-  protected def translate(handle : H) : R
-  /**
-   * The list of exceptions that get caught during ARM and will not prevent a call to close.
-   */
-  protected def caughtException : Sequence[Class[_]] = List(classOf[Throwable])
-
-  override def acquireFor[B](f : R => B) : Either[List[Throwable], B] = {
-    import Exception._
-    val handle = open
-    val result  = catching(caughtException : _*) either (f(translate(handle)))
-    val close = catching(caughtException : _*) either unsafeClose(handle)
-    //Combine resulting exceptions as necessary     
-    result.left.map[List[Throwable]]( _ :: close.left.toOption.toList)
-  }
-}
-
-
-
-/**
- * This class is used when a resource is its own handle.
- */
-trait AbstractUntranslatedManagedResource[R] extends AbstractManagedResource[R,R] { self =>
-  override protected def translate(handle : R) : R = handle
-}
-
 
 /**
  * TODO - Place real usage stuff here!
@@ -263,7 +115,7 @@ object ManagedResource {
    * </pre>
    */
   def extractOption[T] = new CanSafelyTranslate[T, Option[T]] {
-     def apply[A](from : ManagedResource[A], converter : A => T) : Option[T] = from.map(converter).opt
+     def apply[A](from : ManagedResource[A], converter : A => T) : Option[T] = (new DeferredExtractableManagedResource(from, converter)).opt
   }
 	/**
 	 * Creates a ManagedResource for any type with a close method. Note that the opener argument is evaluated on demand,
