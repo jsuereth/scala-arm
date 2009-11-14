@@ -14,7 +14,6 @@
 package scala.resource
 
 import scala.collection.Traversable
-import scala.collection.Sequence
 import scala.collection.Iterator
 import scala.util.control.Exception
 
@@ -33,8 +32,8 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
     override protected def iterator(resource : R) = f(resource)
   }
 
-  //override def map[B, To](f : R => B)(implicit translator : CanSafelyTranslate[B,To]) : To = translator(self,f)
-  override def map[B](f : R => B) : ExtractableManagedResource[B] = flatMap(f)(stayManaged)
+  override def map[B, To](f : R => B)(implicit translator : CanSafelyTranslate[B,To]) : To = translator(self,f)
+  //override def map[B](f : R => B) : ExtractableManagedResource[B] = flatMap(f)(stayManaged)
 
   /*override def flatMap[B](f : R => ManagedResource[B]) : ManagedResource[B] = new ManagedResourceOperations[B] {
       override def acquireFor[C](f2 : B => C) : Either[List[Throwable], C] = {

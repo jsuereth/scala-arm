@@ -14,7 +14,7 @@
 package scala.resource
 
 import scala.collection.Traversable
-import scala.collection.Sequence
+import scala.collection.Seq
 import scala.collection.Iterator
 import scala.util.control.Exception
 
@@ -65,7 +65,7 @@ trait AbstractManagedResource[+R,H] extends ManagedResource[R] with ManagedResou
   /**
    * The list of exceptions that get caught during ARM and will not prevent a call to close.
    */
-  protected def caughtException : Sequence[Class[_]] = List(classOf[Throwable])
+  protected def caughtException : Seq[Class[_]] = List(classOf[Throwable])
 
   override def acquireFor[B](f : R => B) : Either[List[Throwable], B] = {
     import Exception._

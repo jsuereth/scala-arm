@@ -14,7 +14,6 @@
 package scala.resource
 
 import scala.collection.Traversable
-import scala.collection.Sequence
 import scala.collection.Iterator
 import scala.util.control.Exception
 import scala.Either
@@ -28,8 +27,8 @@ trait ManagedResource[+R] {
   /**
    * This method is used to perform operations on a resource while the resource is open.
    */
-  //def map[B, To](f : R => B)(implicit translator : CanSafelyTranslate[B,To]) : To
-  def map[B](f : R => B) : ExtractableManagedResource[B]
+  def map[B, To](f : R => B)(implicit translator : CanSafelyTranslate[B,To]) : To
+  //def map[B](f : R => B) : ExtractableManagedResource[B]
 
   /**
    * This method is used to immediately perform operations on a resource while it is open, ensuring the resource is
@@ -78,10 +77,15 @@ trait ManagedResource[+R] {
   def and[B](that : ManagedResource[B]) : ManagedResource[(R,B)]
 }
 
-/**
- * TODO - Place real usage stuff here!
- */
-object ManagedResource {
+trait LowPriorityManagedResourceImplicits {
+  /** This translate method converts from ManagedResource to ExtractableManagedResource, keeping the processed result inside the managed monad. */
+  implicit def stayManaged[B] = new CanSafelyTranslate[B, ExtractableManagedResource[B]] {
+    def apply[A](from : ManagedResource[A],  converter : A => B) : ExtractableManagedResource[B] =  new DeferredExtractableManagedResource(from, converter)
+  }
+}
+
+trait HighPriorityManagedResourceImplicits extends LowPriorityManagedResourceImplicits {
+
   /** Assumes any mapping function to an iterator type creates a "traversable" */
   implicit def convertToTraversable[A] = new CanSafelyTranslate[Iterator[A], Traversable[A]] {
      def apply[T](from : ManagedResource[T],  converter : T => Iterator[A]) : Traversable[A] = from.toTraversable(converter)    
@@ -95,10 +99,13 @@ object ManagedResource {
           }
       }
   }
-  /** This translate method converts from ManagedResource to ExtractableManagedResource, keeping the processed result inside the managed monad. */
-  def stayManaged[B] = new CanSafelyTranslate[B, ExtractableManagedResource[B]] {
-    def apply[A](from : ManagedResource[A],  converter : A => B) : ExtractableManagedResource[B] =  new DeferredExtractableManagedResource(from, converter)
-  }
+}
+
+/**
+ * TODO - Place real usage stuff here!
+ */
+object ManagedResource extends HighPriorityManagedResourceImplicits {
+
   /** 
    * This method can be used to extract from a ManagedResource some value while mapping/flatMapping.
    *  e.g. <pre> val x : ManagedResource[Foo]
@@ -106,7 +113,7 @@ object ManagedResource {
    * </pre>
    */
   def extractUnManaged[T] = new CanSafelyTranslate[T, T] {
-     def apply[A](from : ManagedResource[A], converter : A => T) : T = from.acquireAndGet(converter)
+     def apply[A](from : ManagedResource[A], converter : A => T) : T = from.acquireAndGet(converter)     
   }
   /** 
    * This method can be used to extract from a ManagedResource some value while mapping/flatMapping.

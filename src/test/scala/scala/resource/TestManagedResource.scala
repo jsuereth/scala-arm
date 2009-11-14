@@ -62,6 +62,7 @@ class ManagedFakeResource(r : FakeResource) extends AbstractManagedResource[Fake
 
 import org.junit._
 import Assert._
+import ManagedResource._
 
 class TestManagedResource {
    @Test

@@ -13,7 +13,7 @@
 
 package scala.resource
 
-import collection.Sequence
+import collection.Seq
 
 /**
  * This trait represents a resource that has been modified (or will be modified) inside an ARM block in such
@@ -43,5 +43,5 @@ trait ExtractableManagedResource[+A] extends ManagedResource[A] {
    *        An either where the left hand side is the currently contained resource unless exceptions, in which case
    *        the right hand side will contain the sequence of throwable encountered.
    */
-  def either : Either[Sequence[Throwable], A]
+  def either : Either[Seq[Throwable], A]
 }
