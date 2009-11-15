@@ -138,6 +138,39 @@ object ManagedResource extends HighPriorityManagedResourceImplicits {
 			override def unsafeClose(r : A) = r.close()
 	  }
 
+  /**
+   * Takes a sequence of ManagedResource objects and traits them as a ManagedResource of a Sequence of Objects.
+   *
+   * This is useful for dealing with many resources within the same scope.
+   *
+   * @param resource   A collection of ManageResources of the same type
+   * @return  A ManagedResoruce of a collection of types
+   */
+  def join[A, MR <: ManagedResource[A], CC <: Seq[ MR ] ](resources : CC) : ManagedResource[Seq[A]] = {
+    //TODO - Use foldLeft
+    //TODO - Don't use such a sucky algorithm...
+    //We currently assume 1 resource
+    //TODO - See if we can provide Hlist implementation as well...
+    val itr = (resources.reverseIterator : Iterator[ManagedResource[A]])
+    val first : ManagedResource[A] = itr.next
+    var toReturn : ManagedResource[Seq[A]] = first.map( x => Seq(x))
+    while(itr.hasNext) {
+      val r1 = toReturn
+      val r2 : ManagedResource[A] = itr.next
+      toReturn = new ManagedResource[Seq[A]] with ManagedResourceOperations[Seq[A]] {
+        override def acquireFor[B](f : Seq[A] => B) : Either[List[Throwable], B] = r1.acquireFor {
+            r1seq =>
+               r2.acquireAndGet { r2item =>
+                  f( r2item :: r1seq.toList)
+               }
+        }
+      }
+    }
+    toReturn
+  }
+
 }
+
+
 
 

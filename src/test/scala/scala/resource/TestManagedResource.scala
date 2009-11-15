@@ -182,5 +182,21 @@ class TestManagedResource {
       }      
       assertTrue("Failed to extract a result", result != null)
       assertFalse("Failed to close resource", r.isOpened)
-   }  
+   }
+  @Test
+  def mustJoinSequence() {
+    val resources =  (1 to 10).map(i => new FakeResource()).toSeq
+    val managedResources = resources.map(r => new ManagedFakeResource(r))
+    val unified = ManagedResource.join[FakeResource,ManagedFakeResource,Seq[ManagedFakeResource]](managedResources)
+
+    for(all <- unified) {
+      assertTrue("Failed to open resources!", all.forall(_.isOpened))
+      all.map(_.generateData).sum      //Make sure no errors are thrown...
+
+      assertTrue("Failed to order properly!", all.zip(resources).forall({ case (x,y) => x == y }))      
+    }
+
+     assertFalse("Failed to close resource!", resources.forall(_.isOpened))
+
+  }
 }
