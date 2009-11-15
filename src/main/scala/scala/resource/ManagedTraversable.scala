@@ -18,7 +18,7 @@ import scala.collection.Traversable
  * This trait provides a means to ensure traversable access to items inside a resource, while ensuring that the
  * resource is opened/closed appropriately before/after the traversal.
  */
-trait ManagedTraversable[A, +B] extends Traversable[B] {
+trait ManagedTraversable[+B, A] extends Traversable[B] {
   /**
    * The resource we plan to traverse through  
    */
@@ -27,11 +27,11 @@ trait ManagedTraversable[A, +B] extends Traversable[B] {
   /**
    * This method gives us an iterator over items in a resource.                               
    */
-  protected def iterator(v : A) : Iterator[B]
+  protected def internalForeach[U](resource: A, f : B => U) : Unit
 
   /**
    * Executes a given function against all items in the resource.  The resource is opened/closed during the call
    * to this method.
    */
-  def foreach[U](f: B => U): Unit = resource.acquireFor( r => iterator(r).foreach(f) )
+  def foreach[U](f: B => U): Unit = resource.acquireFor( r => internalForeach(r, f) )
 }

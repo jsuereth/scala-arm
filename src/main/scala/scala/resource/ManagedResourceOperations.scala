@@ -27,9 +27,9 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
   //TODO - Will the exception list always have size 1?
   override def acquireAndGet[B](f : R => B) : B = acquireFor(f).fold( liste => throw liste.head, x => x)
 
-  override def toTraversable[B](f : R => Iterator[B]) : Traversable[B] = new ManagedTraversable[R,B] {
+  override def toTraversable[B](f : R => Iterator[B]) : Traversable[B] = new ManagedTraversable[B,R] {
     val resource = self
-    override protected def iterator(resource : R) = f(resource)
+    override protected def internalForeach[U](resource: R, g : B => U) : Unit = f(resource).foreach(g) 
   }
 
   override def map[B, To](f : R => B)(implicit translator : CanSafelyTranslate[B,To]) : To = translator(self,f)
