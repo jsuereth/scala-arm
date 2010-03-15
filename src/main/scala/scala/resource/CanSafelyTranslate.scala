@@ -14,7 +14,7 @@
 package scala.resource
 
 /**
- * This trait's existence signifies that a ManagedResource can be converted into a ManagedTraversable safely or needs to remaining inside the monad.
+ * This trait's existence signifies that a ManagedResource can be converted into a another type safely or needs to remaining inside the monad.
  */
 trait CanSafelyTranslate[-MappedElem, +To] {
   /**

@@ -13,10 +13,8 @@
 
 package scala.resource
 
-import scala.collection.Traversable
-import scala.collection.Seq
-import scala.collection.Iterator
-import scala.util.control.Exception
+import _root_.scala.collection.Seq
+import _root_.scala.util.control.Exception
 
 
 /**

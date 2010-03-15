@@ -13,11 +13,11 @@
 
 package scala.resource
 
-import scala.collection.Traversable
-import scala.collection.Iterator
-import scala.util.control.Exception
-import scala.Either
-
+import _root_.scala.collection.Traversable
+import _root_.scala.collection.Iterator
+import _root_.scala.util.control.Exception
+import _root_.scala.Either
+import util.continuations.{cpsParam, cps}
 
 /**
  * This class encapsulates a method of ensuring a resource is opened/closed during critical stages of its lifecycle.
@@ -75,6 +75,18 @@ trait ManagedResource[+R] {
    *          The other resource
    */
   def and[B](that : ManagedResource[B]) : ManagedResource[(R,B)]
+
+  /**
+   * Reflects the resource for use in a continuation.
+   */
+  def reflect[B] :  R @cpsParam[B,Either[List[Throwable], B]]
+
+
+  /**
+   * Reflects the resource for use in a continuation.  Exceptions will not be stored in an Either, but thrown after
+   * resource management is complete
+   */
+  def reflectUnsafe[B] : R @cps[B]
 }
 
 trait LowPriorityManagedResourceImplicits {

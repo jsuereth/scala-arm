@@ -12,7 +12,8 @@
 
 package scala.resource
 
-import scala.collection.Traversable
+import _root_.scala.collection.Traversable
+import scala.util.continuations._
 
 /** 
  * This trait provides a means to ensure traversable access to items inside a resource, while ensuring that the
@@ -34,4 +35,18 @@ trait ManagedTraversable[+B, A] extends Traversable[B] {
    * to this method.
    */
   def foreach[U](f: B => U): Unit = resource.acquireFor( r => internalForeach(r, f) )
+
+  /**
+   * This is a continuation-based implementation of a fold over the resource-traversable
+   *
+   * @param initialState The initial state for the fold
+   * @return The continuation context for operating the fold. 
+   */
+  def reflectiveFold[U](initialState : U) : Tuple2[U, B] @cps[U] = {
+       //TODO - Figure out how people can end iteration early....
+       shift {
+         k : ( Tuple2[U,B] => U ) =>
+           foldLeft(initialState) { (state,value) => k((state,value)) }
+       }
+   }
 }

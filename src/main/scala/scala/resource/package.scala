@@ -1,5 +1,6 @@
 package scala
 
+import resource.{ManagedResourceOperations, AbstractManagedResource, AbstractUntranslatedManagedResource, ManagedResource}
 
 package object resource {
 	  /**
@@ -34,13 +35,14 @@ package object resource {
      * "ands" two managed resources together.
      */
     def and[A,B](r1 : ManagedResource[A], r2 : ManagedResource[B]) : ManagedResource[(A,B)] = new ManagedResource[(A,B)] with ManagedResourceOperations[(A,B)] {
+      import scala.util.continuations._
       override def acquireFor[C](f : ((A,B)) => C) : Either[List[Throwable], C] = {
-        val result = r1.acquireFor({ opened1 =>
-            r2.acquireFor({ opened2 =>
-              f((opened1, opened2))
-            })
-        })
-        result.fold( errors => Left(errors), y => y)      
+        val result = reset {
+          val resource1 = r1.reflect[Either[List[Throwable],C]]
+          val resource2 = r2.reflect[C]
+          f(resource1,resource2)
+        }
+        result.fold(x => Left(x), y => y)
       }
     }
 }
