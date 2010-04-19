@@ -80,7 +80,8 @@ trait ManagedResource[+R] {
    * Reflects the resource for use in a continuation.
    */
   def reflect[B] :  R @cpsParam[B,Either[List[Throwable], B]]
-
+  
+  def reflect2[B] : R @cps[Either[List[Throwable], B]]
 
   /**
    * Reflects the resource for use in a continuation.  Exceptions will not be stored in an Either, but thrown after
@@ -180,6 +181,14 @@ object ManagedResource extends HighPriorityManagedResourceImplicits {
     }
     toReturn
   }
+
+//We really wish continuations worked this way...
+//  def join2[A, MR <: ManagedResource[A], CC <: Seq[MR]](resources : CC) : ManagedResource[Seq[A]] = {
+//    val x = new ManagedResource[Seq[A]] with ManagedResourceOperations[Seq[A]] {
+//      override def acquireFor[B](f : Seq[A] => B) : Either[List[Throwable],B] = f(resources.map(_.reflect[B]))
+//    }
+//
+//  }
 
 }
 

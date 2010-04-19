@@ -39,6 +39,14 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
 
   override def and[B](that : ManagedResource[B]) : ManagedResource[(R,B)] = resource.and(self,that)
 
+
+  override def reflect2[B] : R @cps[Either[List[Throwable], B]] = shift {
+    k : (R => Either[List[Throwable],B]) =>
+
+            //Either[List[Throwable],Either[List[Throwable],B]]
+      acquireFor(k).fold(list => Left(list), identity)
+  }
+
   override def reflect[B] : R @cpsParam[B,Either[List[Throwable], B]] = shift(acquireFor)
 
   override def reflectUnsafe[B] : R @cps[B] = shift(acquireAndGet)

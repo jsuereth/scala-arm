@@ -25,7 +25,7 @@
 		</license>
 	</licenses>
 	<properties>
-		<scala.version>2.8.0-SNAPSHOT</scala.version>
+		<scala.version>2.8.0.RC1</scala.version>
 		<java.src.version>1.6</java.src.version>
 		<derby.version>10.5.3.0_1</derby.version>
 	</properties>

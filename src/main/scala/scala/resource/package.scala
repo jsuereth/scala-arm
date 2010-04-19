@@ -3,6 +3,8 @@ package scala
 import resource.{ManagedResourceOperations, AbstractManagedResource, AbstractUntranslatedManagedResource, ManagedResource}
 
 package object resource {
+
+  type ErrorHolder[A] = Either[List[Throwable],A]
 	  /**
 	   * Creates a ManagedResource for any type with a close method. Note that the opener argument is evaluated on demand,
 	   * possibly more than once, so it must contain the code that actually acquires the resource. Clients are encouraged
@@ -38,12 +40,30 @@ package object resource {
       import scala.util.continuations._
       override def acquireFor[C](f : ((A,B)) => C) : Either[List[Throwable], C] = {
         val result = reset {
-          val resource1 = r1.reflect[Either[List[Throwable],C]]
+          val resource1 = r1.reflect[ErrorHolder[C]]
           val resource2 = r2.reflect[C]
-          f(resource1,resource2)
+          f((resource1,resource2))
         }
         result.fold(x => Left(x), y => y)
       }
     }
+  import scala.util.continuations._
+  def withResources[C](f : => C @cps[Either[List[Throwable],C]]) = reset { Right(f) }
+
+  def and2[A,B](r1 : ManagedResource[A], r2 : ManagedResource[B]) = new ManagedResource[(A,B)] with ManagedResourceOperations[(A,B)] {
+
+    override def acquireFor[C](f : ((A,B)) => C) = withResources {
+      val resource1 = r1.reflect2[C]
+      val resource2 = r2.reflect2[C]
+      f((resource1, resource2))
+    }
+  }
+
+  /*def joinResources[A](resources : Seq[ManagedResource[A]]) : ManagedResource[Seq[A]] = new ManagedResource[Seq[A]] with ManagedResourceOperations[Seq[A]] {
+    def acquireFor[C](f : Seq[A] => C) = withResources {
+      val rs = resources.map(_.reflect[C])
+      f(rs)
+    }
+  } */
 }
 
