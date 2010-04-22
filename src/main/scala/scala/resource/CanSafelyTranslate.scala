@@ -23,3 +23,6 @@ trait CanSafelyTranslate[-MappedElem, +To] {
   def apply[T](from : ManagedResource[T],  converter : T => MappedElem) : To
 }
 
+
+object CanSafelyTranslate extends HighPriorityManagedResourceImplicits
+
