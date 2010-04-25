@@ -90,37 +90,10 @@ trait ManagedResource[+R] {
   def reflectUnsafe[B] : R @cps[B]
 }
 
-trait LowPriorityManagedResourceImplicits {
-  /** This translate method converts from ManagedResource to ExtractableManagedResource, keeping the processed result inside the managed monad. */
-  implicit def stayManaged[B] = new CanSafelyTranslate[B, ExtractableManagedResource[B]] {
-    def apply[A](from : ManagedResource[A],  converter : A => B) : ExtractableManagedResource[B] =  new DeferredExtractableManagedResource(from, converter)
-  }
-}
-
-trait HighPriorityManagedResourceImplicits extends LowPriorityManagedResourceImplicits {
-
-  /** Assumes any mapping function to an iterator type creates a "traversable" */
-  implicit def convertToTraversable[A, CC[A] <: Traversable[A]] = new CanSafelyTranslate[CC[A], Traversable[A]] {
-     override def apply[T](from : ManagedResource[T],  converter : T => CC[A]) : Traversable[A] = new ManagedTraversable[A,Traversable[A]] {
-        override val resource = from.map(converter)
-        override protected def internalForeach[U](resource: Traversable[A], f : A => U) : Unit = resource.foreach(f)
-     }
-  }
-
-  /** Assumes any mapping can remain in monad */
-  implicit def stayManagedFlatten[B] = new CanSafelyTranslate[ManagedResource[B], ManagedResource[B]] {
-      def apply[A](from : ManagedResource[A],  converter : A => ManagedResource[B]) : ManagedResource[B] = new ManagedResourceOperations[B] {
-          override def acquireFor[C](f2 : B => C) : Either[List[Throwable], C] = {
-            from.acquireFor( r => converter(r).acquireFor(f2)).fold(x => Left(x), x => x)
-          }
-      }
-  }
-}
-
 /**
  * TODO - Place real usage stuff here!
  */
-object ManagedResource extends HighPriorityManagedResourceImplicits {
+object ManagedResource {
 
   /** 
    * This method can be used to extract from a ManagedResource some value while mapping/flatMapping.

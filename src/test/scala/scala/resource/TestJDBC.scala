@@ -1,7 +1,6 @@
 package scala.resource
 
 import java.sql._
-import resource._
 import org.junit._
 import Assert._
 /**
@@ -39,7 +38,7 @@ class TestJDBC {
   def test() : Unit = {
 
     val connFactory : ManagedResource[Connection] = ManagedResource(DriverManager.getConnection("jdbc:derby:derbyDB;create=true","",""))
-    val results = connFactory.flatMap( c => ManagedResource(c.prepareStatement("foo!"))).flatMap(s => ManagedResource(s.getResultSet)).toTraversable(r => new ResultSetIterator(r))
+    val results = connFactory.flatMap( c => ManagedResource(c.prepareStatement("foo!"))).flatMap(s => ManagedResource(s.getResultSet)).toTraversable(r => new ResultSetIterator(r)).view
     val ids = for { row <- results } yield row.getInt(1)            
 
     ()

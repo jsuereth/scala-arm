@@ -48,8 +48,8 @@ class FakeResource {
         error("Attempting to close unopened resource!")
      }
    }
-
-   def generateData = if(opened.get) Math.random else error("Attempted to generate data when resource is not opened!")
+   protected def makeData = Math.random
+   def generateData = if(opened.get) makeData else error("Attempted to generate data when resource is not opened!")
    def isOpened = opened.get
 }
 
@@ -62,7 +62,6 @@ class ManagedFakeResource(r : FakeResource) extends AbstractManagedResource[Fake
 
 import org.junit._
 import Assert._
-import ManagedResource._
 
 class TestManagedResource {
    @Test
@@ -197,6 +196,38 @@ class TestManagedResource {
     }
 
      assertFalse("Failed to close resource!", resources.forall(_.isOpened))
+
+  }
+
+
+  @Test
+  def mustCreateTraversable() {
+    val resource : ManagedResource[FakeResource] = new ManagedFakeResource(new FakeResource {
+      override protected def makeData = 1.0
+    })
+    val traversable : Traversable[Double] = resource.map(_.generateData).map( x => List(x))
+    traversable.foreach { x =>
+      assertTrue("Failed to traverse correct data!", math.abs(1.0 - x) < 0.0001)
+    }
+  }
+
+  @Test
+  def mustErrorOnTraversal() {
+    var caught = false
+    try {
+      val resource = new ManagedFakeResource(new FakeResource {
+        override protected def makeData = 1.0
+      })
+      val traversable : Traversable[Any] = resource.map(ignore => (new Traversable[Any] {
+        def foreach[U](f : Any => U) : Unit = error("Do not continue!")
+      } : Traversable[Any]))
+
+      traversable.foreach( x => ())
+    } catch {
+      case e =>
+         caught = true
+    }
+    assertTrue("Exceptions during traversale are propogated by default!",caught)
 
   }
 }
