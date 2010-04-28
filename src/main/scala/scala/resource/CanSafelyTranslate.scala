@@ -35,10 +35,10 @@ trait LowPriorityManagedResourceImplicits {
 trait HighPriorityManagedResourceImplicits extends LowPriorityManagedResourceImplicits {
 
   /** Assumes any mapping function to an iterator type creates a "traversable" */
-  implicit def convertToTraversable[A, CC[X] <: Traversable[X]] = new CanSafelyTranslate[CC[A], Traversable[A]] {
-     override def apply[T](from : ManagedResource[T],  converter : T => CC[A]) : Traversable[A] = new ManagedTraversable[A,CC[A]] {
-        override val resource : ManagedResource[CC[A]] = from.map(converter)(stayManaged)
-        override protected def internalForeach[U](r: CC[A], f : A => U) : Unit = r.foreach(f)
+  implicit def convertToTraversable[A] = new CanSafelyTranslate[Traversable[A], Traversable[A]] {
+     override def apply[T](from : ManagedResource[T],  converter : T => Traversable[A]) : Traversable[A] = new ManagedTraversable[A,Traversable[A]] {
+        override val resource : ManagedResource[Traversable[A]] = from.map(converter)(stayManaged)
+        override protected def internalForeach[U](r: Traversable[A], f : A => U) : Unit = r.foreach(f)
      }
   }
 
