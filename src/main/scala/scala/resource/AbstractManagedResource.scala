@@ -43,23 +43,19 @@ private[resource] class DeferredExtractableManagedResource[+A,R](val resource : 
 /**
  * Abstract class implementing most of the managed resource features.
  */
-trait AbstractManagedResource[+R,H] extends ManagedResource[R] with ManagedResourceOperations[R] { self =>
+trait AbstractManagedResource[R] extends ManagedResource[R] with ManagedResourceOperations[R] {
 
   /** 
    * Opens a given resource, returning a handle to execute against during the "session" of the resource being open.
    */
-  protected def open : H
+  protected def open : R
 
   /**
    * Closes a resource using the handle.  This method will throw any exceptions normally occuring during the close of
    * a resource.
    */
-  protected def unsafeClose(handle : H) : Unit
+  protected def unsafeClose(handle : R) : Unit
 
-  /** 
-   * Returns the resource that we are managing.
-   */
-  protected def translate(handle : H) : R
   /**
    * The list of exceptions that get caught during ARM and will not prevent a call to close.
    */
@@ -68,7 +64,7 @@ trait AbstractManagedResource[+R,H] extends ManagedResource[R] with ManagedResou
   override def acquireFor[B](f : R => B) : Either[List[Throwable], B] = {
     import Exception._
     val handle = open
-    val result  = catching(caughtException : _*) either (f(translate(handle)))
+    val result  = catching(caughtException : _*) either (f(handle))
     val close = catching(caughtException : _*) either unsafeClose(handle)
     //Combine resulting exceptions as necessary     
     result.left.map[List[Throwable]]( _ :: close.left.toOption.toList)
@@ -78,8 +74,33 @@ trait AbstractManagedResource[+R,H] extends ManagedResource[R] with ManagedResou
 
 
 /**
- * This class is used when a resource is its own handle.
+ * This is the default implementation of a ManagedResource that makes use of the Resource type trait.
  */
-trait AbstractUntranslatedManagedResource[R] extends AbstractManagedResource[R,R] { self =>
-  override protected def translate(handle : R) : R = handle
+final class DefaultManagedResource[R : Resource : Manifest](r : => R) extends AbstractManagedResource[R] { self =>
+  /** Stable reference to the Resource type trait.*/
+  protected val typeTrait = implicitly[Resource[R]]
+  /**
+   * Opens a given resource, returning a handle to execute against during the "session" of the resource being open.
+   */
+  override protected def open : R = {
+    val resource = r
+    typeTrait.open(resource)
+    resource
+  }
+
+  /**
+   * Closes a resource using the handle.  This method will throw any exceptions normally occuring during the close of
+   * a resource.
+   */
+  override protected def unsafeClose(r : R) : Unit = typeTrait.close(r)
+
+  /**
+   * The list of exceptions that get caught during ARM and will not prevent a call to close.
+   */
+  override protected def caughtException : Seq[Class[_]] = typeTrait.possibleExceptions
+  /* You cannot serialize resource and send them, so referential equality should be sufficient. */
+  /** Add the type trait to help disperse resources */
+  override def hashCode() : Int = (typeTrait.hashCode << 7) + super.hashCode + 13
+
+  override def toString = "Default[" + implicitly[Manifest[R]] + " : " + typeTrait + "](...)"
 }

@@ -1,60 +1,54 @@
 package scala
 
-import resource.{ManagedResourceOperations, AbstractManagedResource, AbstractUntranslatedManagedResource, ManagedResource}
+import resource._
 
+/**
+ * Package related methods for maanged resources.
+ */
 package object resource {
 
   type ErrorHolder[A] = Either[List[Throwable],A]
-	  /**
-	   * Creates a ManagedResource for any type with a close method. Note that the opener argument is evaluated on demand,
-	   * possibly more than once, so it must contain the code that actually acquires the resource. Clients are encouraged
-	   * to write specialized methods to instantiate ManagedResources rather than relying on ad-hoc usage of this method.
-	   */
-	  def managed[A <: { def close() : Unit }](opener : => A) : ManagedResource[A] =
-      new AbstractUntranslatedManagedResource[A] {
-        override protected def open = opener
-			  override def unsafeClose(r : A) = r.close()
-	    }
+  /**
+   * Creates a ManagedResource for any type with a Resource type class implementation.   This includes all
+   * java.io.Closeable subclasses, and any types that have a close or dispose method.  You can also provide your own
+   * resource type class implementations in your own scope.
+   */
+  def managed[A : Resource : Manifest](opener : => A) : ManagedResource[A] = new DefaultManagedResource(opener)
 
-    def makeUntranslatedManagedResource[R](opener :  => R)(closer : R => Unit)(nonFatalExceptions : List[Class[_<:Throwable]] = List(classOf[Throwable])) : ManagedResource[R] =
-      new AbstractUntranslatedManagedResource[R] {
-        override protected def open = opener
-        override protected def unsafeClose(handle : R) : Unit = closer(handle)
-        override protected val caughtException = nonFatalExceptions
-      }
-    /**
-     * Creates a new ManagedResource with the given open/close methods
-     */
-    def makeManagedResource[H, R](opener :  => H)(closer : H => Unit)(translater : H => R, nonFatalExceptions : List[Class[_<:Throwable]] = List(classOf[Throwable])) : ManagedResource[R] =
-      new AbstractManagedResource[R,H] {
-        override protected def open = opener
-        override protected def translate(handle : H) = translater(handle)
-        override protected def unsafeClose(handle : H) : Unit = closer(handle)
-        override protected val caughtException = nonFatalExceptions
+  def makeUntranslatedManagedResource[R : Manifest](opener :  => R)(closer : R => Unit)(nonFatalExceptions : List[Class[_<:Throwable]]) = {
+    implicit val typeTrait = new Resource[R] {
+      override def close(r : R) = closer(r)
+      override val possibleExceptions = nonFatalExceptions
     }
+    new DefaultManagedResource(opener)
+  }
 
-    /**
-     * "ands" two managed resources together.
-     */
-    def and[A,B](r1 : ManagedResource[A], r2 : ManagedResource[B]) : ManagedResource[(A,B)] = new ManagedResource[(A,B)] with ManagedResourceOperations[(A,B)] {
-      import scala.util.continuations._
-      override def acquireFor[C](f : ((A,B)) => C) : Either[List[Throwable], C] = {
-        val result = reset {
-          val resource1 = r1.reflect[ErrorHolder[C]]
-          val resource2 = r2.reflect[C]
-          f((resource1,resource2))
-        }
-        result.fold(x => Left(x), y => y)
-      }
-    }
+  /** @see CanSafelyTranslate.extractUnManaged */
+  def extractUnManaged[T] = CanSafelyMap.extractUnManaged[T]
+  /** @see CanSafelyTranslate.extractOption */
+  def extractOption[T] = CanSafelyMap.extractOption[T]
+
+
   import scala.util.continuations._
+
+  /**
+   * Starts  block that will use continuation-based resource handling.   This is where you can nest resources directly
+   * without having to worry about closing the block.   Example:
+   * 
+   */
   def withResources[C](f : => C @cps[Either[List[Throwable],C]]) = reset { Right(f) }
 
-  def and2[A,B](r1 : ManagedResource[A], r2 : ManagedResource[B]) = new ManagedResource[(A,B)] with ManagedResourceOperations[(A,B)] {
+  /**
+   * Combined two resources such that they are both opened/closed together.   The first resource is opened before
+   * the second resource and closed after the second resource, however the resulting ManagedResource acts like
+   * both are opened/closed together.
+   * @return A ManagedResource of a tuple containing the initial two resources.
+   */
+  def and[A,B](r1 : ManagedResource[A], r2 : ManagedResource[B]) = new ManagedResource[(A,B)] with ManagedResourceOperations[(A,B)] {
 
     override def acquireFor[C](f : ((A,B)) => C) = withResources {
-      val resource1 = r1.reflect2[C]
-      val resource2 = r2.reflect2[C]
+      val resource1 = r1.reflect[C]
+      val resource2 = r2.reflect[C]
       f((resource1, resource2))
     }
   }
@@ -65,5 +59,36 @@ package object resource {
       f(rs)
     }
   } */
+
+  /**
+   * Takes a sequence of ManagedResource objects and traits them as a ManagedResource of a Sequence of Objects.
+   *
+   * This is useful for dealing with many resources within the same scope.
+   *
+   * @param resource   A collection of ManageResources of the same type
+   * @return  A ManagedResoruce of a collection of types
+   */
+  def join[A, MR , CC ](resources : CC)(implicit ev0 : CC <:< Seq[ MR ], ev1 : MR <:< ManagedResource[A]) : ManagedResource[Seq[A]] = {
+    //TODO - Use foldLeft
+    //TODO - Don't use such a sucky algorithm...
+    //We currently assume 1 resource
+    //TODO - See if we can provide Hlist implementation as well...
+    val itr = (resources.reverseIterator : Iterator[MR])
+    val first : ManagedResource[A] = itr.next
+    var toReturn : ManagedResource[Seq[A]] = first.map( x => Seq(x))
+    while(itr.hasNext) {
+      val r1 = toReturn
+      val r2 : ManagedResource[A] = itr.next
+      toReturn = new ManagedResource[Seq[A]] with ManagedResourceOperations[Seq[A]] {
+        override def acquireFor[B](f : Seq[A] => B) : Either[List[Throwable], B] = r1.acquireFor {
+            r1seq =>
+               r2.acquireAndGet { r2item =>
+                  f( r2item :: r1seq.toList)
+               }
+        }
+      }
+    }
+    toReturn
+  }
 }
 

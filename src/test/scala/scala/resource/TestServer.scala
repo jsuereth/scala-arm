@@ -5,8 +5,6 @@ import scala.resource._
 import org.junit._
 import Assert._
 
-import ManagedResource._
-
 class EchoServer {
 
   @volatile private[EchoServer] var running = true
@@ -29,9 +27,9 @@ class EchoServer {
       import resource._
       val server = new ServerSocket(8007);
       while(running) {
-        for { connection <- ManagedResource(server.accept)
-          outStream <- ManagedResource(new PrintWriter(new BufferedWriter(new OutputStreamWriter(connection.getOutputStream))))
-          input <- ManagedResource(new BufferedReader(new InputStreamReader(connection.getInputStream)))
+        for { connection <- managed(server.accept)
+          outStream <- managed(new PrintWriter(new BufferedWriter(new OutputStreamWriter(connection.getOutputStream))))
+          input <- managed(new BufferedReader(new InputStreamReader(connection.getInputStream)))
           line <- new JavaBufferedReaderLineIterator(input)
         } {
           println("Server returning: " + line)
@@ -47,9 +45,9 @@ class EchoClient {
   def sendAndCheckString(arg : String) : Boolean = { 
     import resource._
 
-    val result = for { connection <- ManagedResource(new Socket("localhost", 8007))
-      out <- ManagedResource(new PrintWriter(new BufferedWriter(new OutputStreamWriter(connection.getOutputStream))))
-      in <- ManagedResource(new BufferedReader(new InputStreamReader(connection.getInputStream)))
+    val result = for { connection <- managed(new Socket("localhost", 8007))
+      out <- managed(new PrintWriter(new BufferedWriter(new OutputStreamWriter(connection.getOutputStream))))
+      in <- managed(new BufferedReader(new InputStreamReader(connection.getInputStream)))
     } yield {         
       out.println(arg)
       out.flush()

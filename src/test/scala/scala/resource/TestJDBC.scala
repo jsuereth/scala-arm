@@ -37,9 +37,9 @@ class TestJDBC {
   @Test
   def test() : Unit = {
 
-    val connFactory : ManagedResource[Connection] = ManagedResource(DriverManager.getConnection("jdbc:derby:derbyDB;create=true","",""))
-    val results = connFactory.flatMap( c => ManagedResource(c.prepareStatement("foo!"))).flatMap(s => ManagedResource(s.getResultSet)).toTraversable(r => new ResultSetIterator(r)).view
-    val ids = for { row <- results } yield row.getInt(1)            
+    val connFactory = managed(DriverManager.getConnection("jdbc:derby:derbyDB;create=true","",""))
+    //val results = connFactory.flatMap(_.prepareStatement("foo!")).flatMap(_.getResultSet).toTraversable(r => new ResultSetIterator(r)).view
+    //val ids = for { row <- results } yield row.getInt(1)            
 
     ()
   }

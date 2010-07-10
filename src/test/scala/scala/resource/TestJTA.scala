@@ -4,7 +4,7 @@ import scala.resource._
 /**
  * This class will use the usertransaction object to "join" transactions or start new ones.
  */
-class ManagedUserTransaction(val tx : UserTransaction) extends AbstractUntranslatedManagedResource[UserTransaction]() {
+class ManagedUserTransaction(val tx : UserTransaction) extends AbstractManagedResource[UserTransaction]() {
 
   private var wasStarted = false
 
@@ -25,7 +25,6 @@ class ManagedUserTransaction(val tx : UserTransaction) extends AbstractUntransla
 
 /** Mini-DSL to open/close transactions for nested calls */
 trait JTAHelper {
-   implicit def userTransaction : UserTransaction
-
+   implicit def userTransaction : UserTransaction 
    def transactional[A](f : => A)(implicit tx : UserTransaction) : A = (new ManagedUserTransaction(tx)).acquireAndGet(ignore => f)
 }

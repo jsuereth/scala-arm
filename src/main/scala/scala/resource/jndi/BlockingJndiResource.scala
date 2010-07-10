@@ -48,6 +48,6 @@ class BlockingJndiResource[+R : Manifest](ctx : => Context, name : String, maxTr
 }
 
 
-object BlockingJndiResource extends HighPriorityManagedResourceImplicits {
+object BlockingJndiResource {
   def make[A : Manifest](name : String, context : => Context = new InitialContext) = new BlockingJndiResource[A](context, name)
 }

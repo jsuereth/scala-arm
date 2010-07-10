@@ -27,7 +27,7 @@ trait ManagedResource[+R] {
   /**
    * This method is used to perform operations on a resource while the resource is open.
    */
-  def map[B, To](f : R => B)(implicit translator : CanSafelyTranslate[B,To]) : To
+  def map[B, To](f : R => B)(implicit translator : CanSafelyMap[B,To]) : To
   //def map[B](f : R => B) : ExtractableManagedResource[B]
 
   /**
@@ -35,7 +35,7 @@ trait ManagedResource[+R] {
    * closed before returning.
    */
   //def flatMap[B](f : R => ManagedResource[B]) : ManagedResource[B]    
-  def flatMap[B, To](f : R => B)(implicit translator : CanSafelyTranslate[B,To]) : To
+  def flatMap[B, To](f : R => B)(implicit translator : CanSafelyFlatMap[B,To]) : To
 
   /**
    * This method is used to immediately perform operations on a resource while it is open, ensuring the resource is
@@ -79,90 +79,13 @@ trait ManagedResource[+R] {
   /**
    * Reflects the resource for use in a continuation.
    */
-  def reflect[B] :  R @cpsParam[B,Either[List[Throwable], B]]
-  
-  def reflect2[B] : R @cps[Either[List[Throwable], B]]
+  def reflect[B] : R @cps[Either[List[Throwable], B]]
 
   /**
    * Reflects the resource for use in a continuation.  Exceptions will not be stored in an Either, but thrown after
    * resource management is complete
    */
   def reflectUnsafe[B] : R @cps[B]
-}
-
-/**
- * TODO - Place real usage stuff here!
- */
-object ManagedResource {
-
-  /** 
-   * This method can be used to extract from a ManagedResource some value while mapping/flatMapping.
-   *  e.g. <pre> val x : ManagedResource[Foo]
-   *   val someValue = x.flatMap( foo : Foo => foo.getSomeValue )(extractUnManaged)
-   * </pre>
-   */
-  def extractUnManaged[T] = new CanSafelyTranslate[T, T] {
-     def apply[A](from : ManagedResource[A], converter : A => T) : T = from.acquireAndGet(converter)     
-  }
-  /** 
-   * This method can be used to extract from a ManagedResource some value while mapping/flatMapping.
-   *  e.g. <pre> val x : ManagedResource[Foo]
-   *   val someValue : Option[SomeValue] = x.flatMap( foo : Foo => foo.getSomeValue )(extractOption)
-   * </pre>
-   */
-  def extractOption[T] = new CanSafelyTranslate[T, Option[T]] {
-     def apply[A](from : ManagedResource[A], converter : A => T) : Option[T] = (new DeferredExtractableManagedResource(from, converter)).opt
-  }
-	/**
-	 * Creates a ManagedResource for any type with a close method. Note that the opener argument is evaluated on demand,
-	 * possibly more than once, so it must contain the code that actually acquires the resource. Clients are encouraged
-	 * to write specialized methods to instantiate ManagedResources rather than relying on ad-hoc usage of this method.
-	 */
-	def apply[A <: { def close() : Unit }](opener : => A) : ManagedResource[A] =
-    new AbstractUntranslatedManagedResource[A] {
-      override protected def open = opener
-			override def unsafeClose(r : A) = r.close()
-	  }
-
-  /**
-   * Takes a sequence of ManagedResource objects and traits them as a ManagedResource of a Sequence of Objects.
-   *
-   * This is useful for dealing with many resources within the same scope.
-   *
-   * @param resource   A collection of ManageResources of the same type
-   * @return  A ManagedResoruce of a collection of types
-   */
-  def join[A, MR <: ManagedResource[A], CC <: Seq[ MR ] ](resources : CC) : ManagedResource[Seq[A]] = {
-    //TODO - Use foldLeft
-    //TODO - Don't use such a sucky algorithm...
-    //We currently assume 1 resource
-    //TODO - See if we can provide Hlist implementation as well...
-    val itr = (resources.reverseIterator : Iterator[ManagedResource[A]])
-    val first : ManagedResource[A] = itr.next
-    var toReturn : ManagedResource[Seq[A]] = first.map( x => Seq(x))
-    while(itr.hasNext) {
-      val r1 = toReturn
-      val r2 : ManagedResource[A] = itr.next
-      toReturn = new ManagedResource[Seq[A]] with ManagedResourceOperations[Seq[A]] {
-        override def acquireFor[B](f : Seq[A] => B) : Either[List[Throwable], B] = r1.acquireFor {
-            r1seq =>
-               r2.acquireAndGet { r2item =>
-                  f( r2item :: r1seq.toList)
-               }
-        }
-      }
-    }
-    toReturn
-  }
-
-//We really wish continuations worked this way...
-//  def join2[A, MR <: ManagedResource[A], CC <: Seq[MR]](resources : CC) : ManagedResource[Seq[A]] = {
-//    val x = new ManagedResource[Seq[A]] with ManagedResourceOperations[Seq[A]] {
-//      override def acquireFor[B](f : Seq[A] => B) : Either[List[Throwable],B] = f(resources.map(_.reflect[B]))
-//    }
-//
-//  }
-
 }
 
 

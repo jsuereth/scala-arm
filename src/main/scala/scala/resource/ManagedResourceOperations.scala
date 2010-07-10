@@ -21,8 +21,6 @@ import _root_.scala.util.continuations.{cps,cpsParam,shift}
  */
 trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
   //We need our helper methods
-  import ManagedResource._
-  
   //TODO - Will the exception list always have size 1?
   override def acquireAndGet[B](f : R => B) : B = acquireFor(f).fold( liste => throw liste.head, x => x)
 
@@ -31,23 +29,18 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
     override protected def internalForeach[U](resource: R, g : B => U) : Unit = f(resource).foreach(g) 
   }
 
-  override def map[B, To](f : R => B)(implicit translator : CanSafelyTranslate[B,To]) : To = translator(self,f)
+  override def map[B, To](f : R => B)(implicit translator : CanSafelyMap[B,To]) : To = translator(self,f)
 
-  override def flatMap[B, To](f : R => B)(implicit translator : CanSafelyTranslate[B,To]) : To = translator(self,f)
+  override def flatMap[B, To](f : R => B)(implicit translator : CanSafelyFlatMap[B,To]) : To = translator(self,f)
   
   override def foreach(f : R => Unit) : Unit = acquireAndGet(f)
 
   override def and[B](that : ManagedResource[B]) : ManagedResource[(R,B)] = resource.and(self,that)
 
-
-  override def reflect2[B] : R @cps[Either[List[Throwable], B]] = shift {
+  override def reflect[B] : R @cps[Either[List[Throwable], B]] = shift {
     k : (R => Either[List[Throwable],B]) =>
-
-            //Either[List[Throwable],Either[List[Throwable],B]]
       acquireFor(k).fold(list => Left(list), identity)
   }
-
-  override def reflect[B] : R @cpsParam[B,Either[List[Throwable], B]] = shift(acquireFor)
 
   override def reflectUnsafe[B] : R @cps[B] = shift(acquireAndGet)
 }

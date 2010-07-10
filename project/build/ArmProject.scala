@@ -1,6 +1,9 @@
 import sbt._
 
 class ArmProject(info: ProjectInfo) extends DefaultProject(info) with AutoCompilerPlugins {
+
+
+
   val scalaToolsSnapshots = "Scala-Tools Maven2 Snapshots Repository" at "http://scala-tools.org/repo-snapshots"
   val jta = "javax.transaction" % "jta" % "1.1" % "provided"
 
@@ -8,7 +11,7 @@ class ArmProject(info: ProjectInfo) extends DefaultProject(info) with AutoCompil
   override def packageDocsJar = defaultJarPath("-javadoc.jar")
   override def packageSrcJar= defaultJarPath("-sources.jar")
 
-  val cont = compilerPlugin("org.scala-lang.plugins" % "continuations" % "2.8.0-SNAPSHOT")
+  val cont = compilerPlugin("org.scala-lang.plugins" % "continuations" % buildScalaVersion)
   override def compileOptions = CompileOption("-P:continuations:enable") :: super.compileOptions
 
 

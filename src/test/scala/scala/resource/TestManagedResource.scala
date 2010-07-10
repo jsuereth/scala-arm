@@ -31,7 +31,9 @@ class JavaBufferedReaderLineIterator(br : jio.BufferedReader) extends FetchItera
   }
 }
 
-
+/**
+ * This is a fake resource type we can utilize.
+ */
 class FakeResource {
    import java.util.concurrent.atomic.AtomicBoolean
 
@@ -53,22 +55,28 @@ class FakeResource {
    def isOpened = opened.get
 }
 
-class ManagedFakeResource(r : FakeResource) extends AbstractManagedResource[FakeResource,FakeResource] {
-        override protected def open = { r.open(); r}
-        override protected def translate(handle : FakeResource) = handle
-        override protected def unsafeClose(handle : FakeResource) : Unit = handle.close()
-        override protected val caughtException = List(classOf[Throwable])
-}
-
 import org.junit._
 import Assert._
 
 class TestManagedResource {
+  /**
+   * This type trait is used to override the default type trait and  give us
+   * the use of the managed function for slightly nicer API.   We create this implicit
+   * to allow subclasses of FakeResource because otherwise subclasses would *not* use this type trait
+   * due to the invariant nature of Resource.
+   *
+   * TODO - Can we make Resource be contravariant or covariant?
+   */
+  implicit def fakeResourceTypeTrait[A <: FakeResource] = new Resource[A] {
+    override def open(r : A) = r.open()
+    override def close(r : A) = r.close()
+  }
+
    @Test
    def mustOpenAndClose() {     
      val r = new FakeResource();
      assertFalse("Failed to begin closed!", r.isOpened)
-     val mr = new ManagedFakeResource(r)
+     val mr = managed(r)
       assertFalse("Creating managed resource opens the resource!", r.isOpened)
       for(r <- mr ) {
           assertTrue("Failed to open resource", r.isOpened)
@@ -79,7 +87,7 @@ class TestManagedResource {
    @Test
    def mustExtractValue() {
      val r = new FakeResource();
-     val mr = new ManagedFakeResource(r)
+     val mr = managed(r)
       assertFalse("Failed to begin closed!", r.isOpened)
       val monad = for(r <- mr ) yield {
           assertTrue("Failed to open resource", r.isOpened)
@@ -93,9 +101,9 @@ class TestManagedResource {
    @Test
    def mustNest() {
      val r = new FakeResource();
-     val mr = new ManagedFakeResource(r)
+     val mr = managed(r)
      val r2 = new FakeResource();
-     val mr2 = new ManagedFakeResource(r2)
+     val mr2 = managed(r2)
  
       assertFalse("Failed to begin closed!", r.isOpened)
       assertFalse("Failed to begin closed!", r2.isOpened)
@@ -111,15 +119,15 @@ class TestManagedResource {
    @Test
    def mustNestForYield() {
      val r = new FakeResource();
-     val mr = new ManagedFakeResource(r)
+     val mr = managed(r)
      val r2 = new FakeResource();
-     val mr2 = new ManagedFakeResource(r2)
+     val mr2 = managed(r2)
      val monad = for { r <- mr
                        r2 <- mr2 
                      } yield r.generateData + r2.generateData      
      //This can't compile as the monad is not an extractable resource!!!
      //assertTrue("Failed to extract a result", monad.opt.isDefined)      
-      assertTrue("Failed to extract a result", monad.map(identity[Double]).opt.isDefined)            
+     assertTrue("Failed to extract a result", monad.map(identity[Double]).opt.isDefined)            
      assertFalse("Failed to close resource", r.isOpened)
      assertFalse("Failed to close resource", r2.isOpened)
    }  
@@ -127,9 +135,9 @@ class TestManagedResource {
    @Test
    def mustSupportValInFor() {
      val r = new FakeResource();
-     val mr = new ManagedFakeResource(r)
+     val mr = managed(r)
      val r2 = new FakeResource();
-     val mr2 = new ManagedFakeResource(r2)
+     val mr2 = managed(r2)
       val monad = for { r <- mr
           val x = r.generateData
           r2 <- mr2 
@@ -147,7 +155,7 @@ class TestManagedResource {
    @Test
    def mustAcquireFor() {
      val r = new FakeResource();
-     val mr = new ManagedFakeResource(r)
+     val mr = managed(r)
       assertFalse("Failed to begin closed!", r.isOpened)
       val result = mr.acquireFor { r =>
           assertTrue("Failed to open resource", r.isOpened)
@@ -159,7 +167,7 @@ class TestManagedResource {
   @Test
    def mustCloseOnException() {
      val r = new FakeResource();
-     val mr = new ManagedFakeResource(r)
+     val mr = managed(r)
       assertFalse("Failed to begin closed!", r.isOpened)
       val result = mr.acquireFor { r =>
           assertTrue("Failed to open resource", r.isOpened)
@@ -172,7 +180,7 @@ class TestManagedResource {
    @Test
    def mustAcquireAndGet() {
      val r = new FakeResource();
-     val mr = new ManagedFakeResource(r)
+     val mr = managed(r)
       assertFalse("Failed to begin closed!", r.isOpened)
       val result = mr.acquireAndGet { r =>
           assertTrue("Failed to open resource", r.isOpened)
@@ -185,8 +193,8 @@ class TestManagedResource {
   @Test
   def mustJoinSequence() {
     val resources =  (1 to 10).map(i => new FakeResource()).toSeq
-    val managedResources = resources.map(r => new ManagedFakeResource(r))
-    val unified = ManagedResource.join[FakeResource,ManagedFakeResource,Seq[ManagedFakeResource]](managedResources)
+    val managedResources = resources.map(managed(_))
+    val unified = join(managedResources)
 
     for(all <- unified) {
       assertTrue("Failed to open resources!", all.forall(_.isOpened))
@@ -202,10 +210,10 @@ class TestManagedResource {
 
   @Test
   def mustCreateTraversable() {
-    val resource : ManagedResource[FakeResource] = new ManagedFakeResource(new FakeResource {
+    val resource : ManagedResource[FakeResource] = managed(new FakeResource {
       override protected def makeData = 1.0
     })
-    val traversable : Traversable[Double] = resource.map(_.generateData).map( x => List(x))
+    val traversable : Traversable[Double] = resource.map(_.generateData).map(List(_))
     traversable.foreach { x =>
       assertTrue("Failed to traverse correct data!", math.abs(1.0 - x) < 0.0001)
     }
@@ -215,7 +223,7 @@ class TestManagedResource {
   def mustErrorOnTraversal() {
     var caught = false
     try {
-      val resource = new ManagedFakeResource(new FakeResource {
+      val resource = managed(new FakeResource {
         override protected def makeData = 1.0
       })
       val traversable : Traversable[Any] = resource.map(ignore => (new Traversable[Any] {
