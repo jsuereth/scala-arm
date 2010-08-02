@@ -17,11 +17,11 @@ import _root_.scala.collection.Traversable
 import _root_.scala.collection.Iterator
 import _root_.scala.util.continuations.{cps,cpsParam,shift}
 /**
- * This class implements ManagedResource methods in terms of acquireFor
+ * This class implements all ManagedResource methods except acquireFor.   This allows all new ManagedResource
+ * implementations to be defined in terms of the acquireFor method.
  */
 trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
-  //We need our helper methods
-  //TODO - Will the exception list always have size 1?
+  //TODO - Can we always grab the top exception?
   override def acquireAndGet[B](f : R => B) : B = acquireFor(f).fold( liste => throw liste.head, x => x)
 
   override def toTraversable[B](f : R => Iterator[B]) : Traversable[B] = new ManagedTraversable[B,R] {
@@ -42,7 +42,7 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
       acquireFor(k).fold(list => Left(list), identity)
   }
 
-  override def reflectUnsafe[B] : R @cps[B] = shift(acquireAndGet)
+  //override def reflectUnsafe[B] : R @cps[B] = shift(acquireAndGet)
 }
 
 

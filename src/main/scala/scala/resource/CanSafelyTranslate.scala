@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //
 //  scala.arm - The Scala Incubator Project
-//  Copyright (c) 2009 The Scala Incubator Project. All rights reserved.
+//  Copyright (c) 2009 and onwards The Scala Incubator Project. All rights reserved.
 //
 //  The primary distribution site is http://jsuereth.github.com/scala-arm
 //
@@ -10,29 +10,30 @@
 //
 // -----------------------------------------------------------------------------
 
-
 package scala.resource
 
 /**
- * This trait's existence signifies that a ManagedResource can be converted into a another type safely or needs to
- * remain inside the monad.
+ * This trait's existence signifies that a ManagedResource can be "flatMap"ed into a another type safely or needs to
+ * remain inside the monad.  This type class applies to all flatMap calls.
  *
  * This applies to all "map" calls.
  */
 trait CanSafelyFlatMap[-MappedElem, +To] {
   /**
-   * This method takes a managed resource and a mapping function and returns a new result (inside/outside the managed resource).
+   * This method takes a managed resource and a mapping function and returns a new result
+   * (inside/outside the managed resource).
    */
   def apply[T](from : ManagedResource[T],  converter : T => MappedElem) : To
 }
 
 /**
- * This trait's existence signifies that a ManagedResource can be converted and flattened to some type safely, or needs
- * to remain inside the monad.   This type class applies to all flatMap calls.
+ * This trait's existence signifies that a ManagedResource can be converted to some type safely, or needs
+ * to remain inside the monad.   This type class applies to all map calls.
  */
 trait CanSafelyMap[-MappedElem, +To] {
   /**
-   * This method takes a managed resource and a mapping function and returns a new result (inside/outside the managed resource).
+   * This method takes a managed resource and a mapping function and returns a new result
+   * (inside/outside the managed resource).
    */
   def apply[T](from : ManagedResource[T],  converter : T => MappedElem) : To
 }
@@ -101,13 +102,6 @@ trait LowPrioritCanSafelyFlatMapImplicits {
         override def toString = "AutoFlattenedManagedResource[" + implicitly[Manifest[B]] + "](...)"
       }
   }
-
-/**
- * We really wish this didn't kill the type system... unfortunately, implicit
- * lookup rules are not quite what we want.   Even implicit defs in
- * a type hierarchy that all have a context bound constraint will
- * conflict, so we are stuck...
- */
 }
 
 /** This companion object contains implicits used on ManagedResource.flatMap calls. */

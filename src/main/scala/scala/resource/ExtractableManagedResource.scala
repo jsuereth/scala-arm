@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------
 //
 //  scala.arm - The Scala Incubator Project
-//  Copyright (c) 2009 The Scala Incubator Project. All rights reserved.
+//  Copyright (c) 2009 and onwards The Scala Incubator Project. All rights reserved.
 //
 //  The primary distribution site is http://jsuereth.github.com/scala-arm
 //
@@ -17,7 +17,10 @@ import collection.Seq
 
 /**
  * This trait represents a resource that has been modified (or will be modified) inside an ARM block in such
- * a way that the resulting value can be extracted outside of the "ManagedResource" monad.
+ * a way that the resulting value can be extracted outside of the "ManagedResource" monad.  There are two mechanisms
+ * for extracting resources.  One which returns an optional value, where None is returned if any error occurs during
+ * extraction.   The other returns an Either where the left side contains any error that occured during extraction
+ * and the right side contains the extracted value.
  */
 trait ExtractableManagedResource[+A] extends ManagedResource[A] {
 

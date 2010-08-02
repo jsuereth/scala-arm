@@ -41,7 +41,9 @@ private[resource] class DeferredExtractableManagedResource[+A,R](val resource : 
 
 
 /**
- * Abstract class implementing most of the managed resource features.
+ * Abstract class implementing most of the managed resource features in terms of an open and close method.   This
+ * is a refinement over ManagedResourceOperations as it defines the acquireForMethod generically using the
+ * scala.util.control.Exception API.
  */
 trait AbstractManagedResource[R] extends ManagedResource[R] with ManagedResourceOperations[R] {
 
@@ -71,8 +73,6 @@ trait AbstractManagedResource[R] extends ManagedResource[R] with ManagedResource
   }
 }
 
-
-
 /**
  * This is the default implementation of a ManagedResource that makes use of the Resource type trait.
  */
@@ -89,7 +89,7 @@ final class DefaultManagedResource[R : Resource : Manifest](r : => R) extends Ab
   }
 
   /**
-   * Closes a resource using the handle.  This method will throw any exceptions normally occuring during the close of
+   * Closes a resource using the handle.  This method will throw any exceptions normally occurring during the close of
    * a resource.
    */
   override protected def unsafeClose(r : R) : Unit = typeTrait.close(r)
@@ -101,6 +101,6 @@ final class DefaultManagedResource[R : Resource : Manifest](r : => R) extends Ab
   /* You cannot serialize resource and send them, so referential equality should be sufficient. */
   /** Add the type trait to help disperse resources */
   override def hashCode() : Int = (typeTrait.hashCode << 7) + super.hashCode + 13
-
+  // That's right, we use manifest solely for nicer toStrings!
   override def toString = "Default[" + implicitly[Manifest[R]] + " : " + typeTrait + "](...)"
 }

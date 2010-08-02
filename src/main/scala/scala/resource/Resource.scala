@@ -12,7 +12,7 @@ trait Resource[R] {
   def open(r : R) : Unit = ()
 
   /**
-   *  Closes a resource.
+   *  Closes a resource.  This method is allowed to throw exceptions.
    */
   def close(r : R) : Unit
 
@@ -56,14 +56,17 @@ sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicit
   import _root_.java.io.IOException
   implicit def closeableResource[A <: Closeable] = new Resource[A] {
     override def close(r : A) = r.close()
-    override val possibleExceptions = List(classOf[IOException])
+    // TODO - Should we actually catch less?   What if there is a user exception not under IOException during
+    // processing of a resource.   We should still close it.
+    //override val possibleExceptions = List(classOf[IOException])
     override def toString = "Resource[java.io.Closeable]"
   }
+  
   //TODO - Add All JDBC related handlers.
 
 }
 
 /**
- * Companion object to the Resource type trait.   This contains all the default implicits in appropraite priority order.
+ * Companion object to the Resource type trait.   This contains all the default implicits in appropriate priority order.
  */
 object Resource extends MediumPriorityResourceImplicits

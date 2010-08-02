@@ -7,6 +7,7 @@ import resource._
  */
 package object resource {
 
+  /** The type used to hold errors and results in the same return value. */
   type ErrorHolder[A] = Either[List[Throwable],A]
   /**
    * Creates a ManagedResource for any type with a Resource type class implementation.   This includes all
@@ -15,7 +16,14 @@ package object resource {
    */
   def managed[A : Resource : Manifest](opener : => A) : ManagedResource[A] = new DefaultManagedResource(opener)
 
-  def makeUntranslatedManagedResource[R : Manifest](opener :  => R)(closer : R => Unit)(nonFatalExceptions : List[Class[_<:Throwable]]) = {
+  /**
+   * Constructs a managed resource using function objects for each abstract method.
+   *
+   * @param opener  The by-name parameter that will open the resource.
+   * @param closer  A closure that will close the resource.
+   * @param nonFatalExceptions  A list of exception classes we can temporarily ignore when operating on a resource.
+   */
+  def makeManagedResource[R : Manifest](opener :  => R)(closer : R => Unit)(nonFatalExceptions : List[Class[_<:Throwable]]) = {
     implicit val typeTrait = new Resource[R] {
       override def close(r : R) = closer(r)
       override val possibleExceptions = nonFatalExceptions

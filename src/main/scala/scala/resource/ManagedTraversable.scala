@@ -17,7 +17,9 @@ import scala.util.continuations._
 
 /** 
  * This trait provides a means to ensure traversable access to items inside a resource, while ensuring that the
- * resource is opened/closed appropriately before/after the traversal.
+ * resource is opened/closed appropriately before/after the traversal.  This class can be dangerous because it
+ * always tries to open and close the resource for every call to foreach.   This is practically ever method
+ * call on a Traversable besides the "view" method.
  */
 trait ManagedTraversable[+B, A] extends Traversable[B] {
   /**
@@ -31,14 +33,15 @@ trait ManagedTraversable[+B, A] extends Traversable[B] {
   def ignoreError(error : Exception) : Boolean = false
 
   /**
-   * This method is called if an exception happens during traversal of the collection
+   * This method is called if an exception happens during traversal of the collection.   We allow subclasses to
+   * override this to change the default behavior of resource related errors on traversal.
    */
   def handleErrorsDuringTraversal(ex : List[Throwable]) : Unit = {
     ex.headOption.foreach(throw _)
   }
 
   /**
-   * This method gives us an iterator over items in a resource.                               
+   * This method gives us an iterator over items in a resource.
    */
   protected def internalForeach[U](resource: A, f : B => U) : Unit
 
@@ -58,18 +61,4 @@ trait ManagedTraversable[+B, A] extends Traversable[B] {
     result.left.foreach(handleErrorsDuringTraversal)
 
   }
-
-  /**
-   * This is a continuation-based implementation of a fold over the resource-traversable
-   *
-   * @param initialState The initial state for the fold
-   * @return The continuation context for operating the fold. 
-   */
-  def reflectiveFold[U](initialState : U) : Tuple2[U, B] @cps[U] = {
-       //TODO - Figure out how people can end iteration early....
-       shift {
-         k : ( Tuple2[U,B] => U ) =>
-           foldLeft(initialState) { (state,value) => k((state,value)) }
-       }
-   }
 }

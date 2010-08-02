@@ -31,27 +31,33 @@ class JavaBufferedReaderLineIterator(br : jio.BufferedReader) extends FetchItera
   }
 }
 
+object FakeResource {
+  val GEN_DATA_ERROR =  "Attempted to generate data when resource is not opened!"
+  val CLOSE_ERROR = "Attempting to close unopened resource!"
+  val OPEN_ERROR = "Attempting to open already opened resource!"
+}
+
 /**
  * This is a fake resource type we can utilize.
  */
 class FakeResource {
    import java.util.concurrent.atomic.AtomicBoolean
-
+   import FakeResource._
    private val opened = new AtomicBoolean(false)
 
    def open() : Unit = {
       if(!opened.compareAndSet(false,true)) {
-         error("Attempting to open already opened resource!")
+         error(OPEN_ERROR)
       }
    }
 
    def close() : Unit = {
      if(!opened.compareAndSet(true, false)) {
-        error("Attempting to close unopened resource!")
+        error(CLOSE_ERROR)
      }
    }
-   protected def makeData = Math.random
-   def generateData = if(opened.get) makeData else error("Attempted to generate data when resource is not opened!")
+   protected def makeData = math.random
+   def generateData = if(opened.get) makeData else error(GEN_DATA_ERROR)
    def isOpened = opened.get
 }
 
@@ -177,19 +183,33 @@ class TestManagedResource {
       assertTrue("Failed to catch exception", result.isLeft)
    }  
 
-   @Test
-   def mustAcquireAndGet() {
-     val r = new FakeResource();
-     val mr = managed(r)
-      assertFalse("Failed to begin closed!", r.isOpened)
-      val result = mr.acquireAndGet { r =>
-          assertTrue("Failed to open resource", r.isOpened)
+  @Test
+  def mustAcquireAndGet() {
+   val r = new FakeResource();
+   val mr = managed(r)
+    assertFalse("Failed to begin closed!", r.isOpened)
+    val result = mr.acquireAndGet { r =>
+        assertTrue("Failed to open resource", r.isOpened)
 
-          r.generateData
-      }      
-      assertTrue("Failed to extract a result", result != null)
-      assertFalse("Failed to close resource", r.isOpened)
-   }
+        r.generateData
+    }
+    assertNotNull("Failed to extract a result", result)
+    assertFalse("Failed to close resource", r.isOpened)
+  }
+
+  @Test
+  def mustReturnFirstExceptionInAcquireAndGet() {
+    val r = new FakeResource()
+    val mr = managed(r)(Resource.reflectiveCloseableResource, implicitly[Manifest[FakeResource]])
+    try {
+      val result = mr.acquireAndGet { r => r.generateData }
+      fail("SHould not make it here, due to previous error!")
+    } catch {
+      case e =>
+          assertEquals("Failed to order exceptions appropriately", FakeResource.GEN_DATA_ERROR, e.getMessage)
+    }
+  }
+
   @Test
   def mustJoinSequence() {
     val resources =  (1 to 10).map(i => new FakeResource()).toSeq
@@ -220,6 +240,17 @@ class TestManagedResource {
   }
 
   @Test
+  def mustCreateTraversableFlatMap() {
+    val resource : ManagedResource[FakeResource] = managed(new FakeResource {
+      override protected def makeData = 1.0
+    })
+    val traversable : Traversable[Double] = resource.map(_.generateData).flatMap(List(_))
+    traversable.foreach { x =>
+      assertTrue("Failed to traverse correct data!", math.abs(1.0 - x) < 0.0001)
+    }
+  }
+
+  @Test
   def mustErrorOnTraversal() {
     var caught = false
     try {
@@ -237,5 +268,24 @@ class TestManagedResource {
     }
     assertTrue("Exceptions during traversale are propogated by default!",caught)
 
+  }
+
+  @Test
+  def withResourceMustBeAwesome() {
+    val outer = new FakeResource
+    val inners = List(new FakeResource, new FakeResource, new FakeResource)
+    val all = outer :: inners
+
+    val results = withResources {
+      val mo = managed(outer).reflect[Double]
+      //TODO - Figure out the stink here!
+      //for(r <- inners; val mi = managed(r).reflect[List[Double]]) yield mi.generateData + mo.generateData
+      mo.generateData
+    }
+    // If we have no exceptions, we were mostly awesome!
+
+    for( r <- all) {
+      assertFalse("Failed to close a resource!", r.isOpened)
+    }
   }
 }
