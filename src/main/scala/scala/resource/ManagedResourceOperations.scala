@@ -14,8 +14,8 @@
 package scala.resource
 
 import _root_.scala.collection.Traversable
-import _root_.scala.collection.Iterator
-import _root_.scala.util.continuations.{cps,cpsParam,shift}
+import _root_.scala.collection.TraversableOnce
+import _root_.scala.util.continuations.{cps,shift, suspendable}
 /**
  * This class implements all ManagedResource methods except acquireFor.   This allows all new ManagedResource
  * implementations to be defined in terms of the acquireFor method.
@@ -24,7 +24,7 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
   //TODO - Can we always grab the top exception?
   override def acquireAndGet[B](f : R => B) : B = acquireFor(f).fold( liste => throw liste.head, x => x)
 
-  override def toTraversable[B](f : R => Iterator[B]) : Traversable[B] = new ManagedTraversable[B,R] {
+  override def toTraversable[B](f : R => TraversableOnce[B]) : Traversable[B] = new ManagedTraversable[B,R] {
     val resource = self
     override protected def internalForeach[U](resource: R, g : B => U) : Unit = f(resource).foreach(g) 
   }
@@ -41,8 +41,7 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
     k : (R => Either[List[Throwable],B]) =>
       acquireFor(k).fold(list => Left(list), identity)
   }
-
-  //override def reflectUnsafe[B] : R @cps[B] = shift(acquireAndGet)
+  override def ! : R @suspendable = shift(acquireAndGet) 
 }
 
 

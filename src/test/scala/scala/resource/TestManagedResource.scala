@@ -269,6 +269,17 @@ class TestManagedResource {
     assertTrue("Exceptions during traversale are propogated by default!",caught)
 
   }
+  @Test
+  def mustAllowApplyUsage() {
+    val r = new FakeResource();
+
+    assertFalse("Failed to begin closed!", r.isOpened)
+    val result = managed(r) acquireAndGet { r =>
+        assertTrue("Failed to open resource", r.isOpened)
+        r.generateData
+    }
+    assertFalse("Failed to close resource", r.isOpened)
+  }
 
   @Test
   def withResourceMustBeAwesome() {

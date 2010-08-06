@@ -5,14 +5,15 @@ import scala.resource._
 import org.junit._
 import Assert._
 
-class EchoServer {
-
-  @volatile private[EchoServer] var running = true
+trait StopableThread {
+  @volatile protected var running = true
 
   var thread : Option[Thread] = None
 
   def stop() : Unit = {
      running = false
+    // TODO (joshuasuereth) - Figure out how to shut this thing down!
+     thread.foreach(_.interrupt())
      thread.foreach(_.join()) //TODO - Is this ok...
   }
 
@@ -21,8 +22,13 @@ class EchoServer {
         t.start
         thread = Some(t)
   }
+  def runnable : Runnable
+}
 
-  val runnable = new Runnable {
+
+class EchoServer extends StopableThread {
+
+  override val runnable = new Runnable {
     override def run() : Unit = {
       import resource._
       val server = new ServerSocket(8007);
@@ -37,6 +43,39 @@ class EchoServer {
           outStream.flush()
         }
       }
+    }
+  }
+}
+
+
+class EchoServer2 extends StopableThread {
+
+  import scala.util.continuations._
+  def each_line_from(r : BufferedReader) : String @suspendable = shift {
+    k =>
+      var line = r.readLine
+      while(line != null) {
+        k(line)
+        line = r.readLine
+      }
+  }
+
+  override val runnable = new Runnable {
+    override def run() : Unit = {
+      import resource._
+      val server = new ServerSocket(8007)
+      while(running) {
+        reset {
+          val connection = managed(server.accept) !
+          val output = managed(connection.getOutputStream) !
+          val input = managed(connection.getInputStream) !
+          val writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))
+          val reader = new BufferedReader(new InputStreamReader(input))
+          writer.println(each_line_from(reader))
+          writer.flush()
+        }
+      }
+
     }
   }
 }
@@ -58,12 +97,13 @@ class EchoClient {
 }
 
 
+
 class TestSocketServer {
   @Test
   def dummy() {}
   //@Test
   def testSocket() {
-     val server = new EchoServer
+     val server = new EchoServer2
      val client = new EchoClient
      server.start
      Thread.sleep(500)

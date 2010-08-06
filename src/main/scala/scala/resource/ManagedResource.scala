@@ -16,7 +16,7 @@ package scala.resource
 import _root_.scala.collection.Traversable
 import _root_.scala.collection.Iterator
 import _root_.scala.Either
-import util.continuations.{cpsParam, cps}
+import util.continuations.{suspendable, cps}
 
 /**
  * This class encapsulates a method of ensuring a resource is opened/closed during critical stages of its lifecycle.
@@ -101,7 +101,7 @@ trait ManagedResource[+R] {
    *
    * @return A Traversable of elements of type B. 
    */
-  def toTraversable[B](f : R => Iterator[B]) : Traversable[B]
+  def toTraversable[B](f : R => TraversableOnce[B]) : Traversable[B]
 
   /**
    * Creates a new resource that is the aggregation of this resource and another.
@@ -133,6 +133,10 @@ trait ManagedResource[+R] {
    * @return The raw resource, with appropriate continuation-context annotations.
    */
   def reflect[B] : R @cps[Either[List[Throwable], B]]
+  /**
+   * Accesses this resource inside a suspendable CPS block
+   */
+  def ! : R @suspendable
 }
 
 

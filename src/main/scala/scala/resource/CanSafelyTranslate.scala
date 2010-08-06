@@ -61,11 +61,11 @@ trait LowPriorityCanSafelyMapImplicits {
  */
 trait HighPrioritCanSafelyMapImplicits extends LowPriorityCanSafelyMapImplicits {
   /** Assumes any mapping function to an iterator type creates a "traversable" */
-  implicit def convertToTraversable[A : Manifest] = new CanSafelyMap[Traversable[A], Traversable[A]] {
-     override def apply[T](from : ManagedResource[T],  converter : T => Traversable[A]) : Traversable[A] =
-       new ManagedTraversable[A,Traversable[A]] {
-         override val resource : ManagedResource[Traversable[A]] = from.map(converter)(stayManaged)
-         override protected def internalForeach[U](r: Traversable[A], f : A => U) : Unit = r.foreach(f)
+  implicit def convertToTraversable[A : Manifest] = new CanSafelyMap[TraversableOnce[A], Traversable[A]] {
+     override def apply[T](from : ManagedResource[T],  converter : T => TraversableOnce[A]) : Traversable[A] =
+       new ManagedTraversable[A,TraversableOnce[A]] {
+         override val resource : ManagedResource[TraversableOnce[A]] = from.map(converter)(stayManaged)
+         override protected def internalForeach[U](r: TraversableOnce[A], f : A => U) : Unit = r.foreach(f)
          override def toString = "ManagedTraversable["+implicitly[Manifest[A]]+"](...)"
        }
   }
@@ -107,11 +107,11 @@ trait LowPrioritCanSafelyFlatMapImplicits {
 /** This companion object contains implicits used on ManagedResource.flatMap calls. */
 object CanSafelyFlatMap extends LowPrioritCanSafelyFlatMapImplicits {
     /** Assumes any mapping function to an iterator type creates a "traversable" */
-  implicit def convertToTraversable[A : Manifest] = new CanSafelyFlatMap[Traversable[A], Traversable[A]] {
-     override def apply[T](from : ManagedResource[T],  converter : T => Traversable[A]) : Traversable[A] =
-       new ManagedTraversable[A,Traversable[A]] {
-         override val resource : ManagedResource[Traversable[A]] = from.map(converter)
-         override protected def internalForeach[U](r: Traversable[A], f : A => U) : Unit = r.foreach(f)
+  implicit def convertToTraversable[A : Manifest] = new CanSafelyFlatMap[TraversableOnce[A], Traversable[A]] {
+     override def apply[T](from : ManagedResource[T],  converter : T => TraversableOnce[A]) : Traversable[A] =
+       new ManagedTraversable[A,TraversableOnce[A]] {
+         override val resource : ManagedResource[TraversableOnce[A]] = from.map(converter)
+         override protected def internalForeach[U](r: TraversableOnce[A], f : A => U) : Unit = r.foreach(f)
          override def toString = "ManagedTraversable["+implicitly[Manifest[A]]+"](...)"
        }
   }
