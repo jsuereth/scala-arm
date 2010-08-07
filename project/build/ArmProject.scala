@@ -11,9 +11,13 @@ class ArmProject(info: ProjectInfo) extends DefaultProject(info) with AutoCompil
   override def packageDocsJar = defaultJarPath("-javadoc.jar")
   override def packageSrcJar= defaultJarPath("-sources.jar")
 
+  // Compiler plugins we're using
   val cont = compilerPlugin("org.scala-lang.plugins" % "continuations" % buildScalaVersion)
-  override def compileOptions = CompileOption("-P:continuations:enable") :: Unchecked :: super.compileOptions
-
+  val sxr = compilerPlugin("org.scala-tools.sxr" %% "sxr" % "0.2.6")
+  override def compileOptions =
+          CompileOption("-P:continuations:enable") ::
+          CompileOption("-P:sxr:base-directory:" + mainScalaSourcePath.absolutePath) ::
+          Unchecked :: super.compileOptions
 
   val bryanjswift = "Bryan J Swift Repository" at "http://repos.bryanjswift.com/maven2/"
   val junitInterface = "com.novocode" % "junit-interface" % "0.4.0" % "test"

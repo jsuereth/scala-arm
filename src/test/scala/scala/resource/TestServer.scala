@@ -17,7 +17,6 @@ class EchoServer extends Thread {
       input <- managed(new BufferedReader(new InputStreamReader(connection.getInputStream)))
       line <- new JavaBufferedReaderLineIterator(input)
     } {
-      println("Server returning: " + line)
       outStream.println(line)
       outStream.flush()
     }
@@ -25,7 +24,7 @@ class EchoServer extends Thread {
 }
 
 // Another server that echoes what is sent to it on a socket and then dies.
-class EchoServer2 extends Thread {
+class EchoServerCPS extends Thread {
 
   import scala.util.continuations._
   def each_line_from(r : BufferedReader) : String @suspendable = shift {
@@ -73,13 +72,13 @@ class EchoClient {
 class TestSocketServer {
   @Test
   def checkNormalARM() {
-    testSocket(new EchoServer)
+    socketTestHelper(new EchoServer)
   }
   @Test
   def checkCPSARM() {
-    testSocket(new EchoServer2)
+    socketTestHelper(new EchoServerCPS)
   }
-  def testSocket(server : Thread) {
+  def socketTestHelper(server : Thread) {
      val client = new EchoClient
      server.start
      Thread.sleep(500)
