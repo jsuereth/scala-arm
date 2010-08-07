@@ -45,9 +45,30 @@ class TestJDBC {
     reset {
       val conn = makeConnection
       val statement = managed(conn.createStatement) !
-      // This would throw an exception if there were some issue...
 
+      // This would throw an exception if there were some issue...
       statement.executeUpdate("CREATE TABLE josh (fun integer)")
+
+      val ps = managed(conn.prepareStatement("INSERT INTO josh (fun) VALUES (?)")) !
+      
+      ps.setInt(1, 2)
+      ps.addBatch()
+      ps.setInt(1, 2)
+      ps.addBatch
+      assertTrue("Failed to insert second piece of data", ps.executeBatch.forall(_ >= 0))
+
+      val rs = managed(statement.executeQuery("SELECT * from josh")).toTraversable(new ResultSetIterator(_))
+
+      for(result <- rs) {
+        assertEquals(2, result.getInt(1))
+      }
+
+      // Execute query again, looping through results
+      assertEquals("Failed to pull head of result set.",2, rs.head.getInt(1))
+
+      // Execute the query one more time for good measure ;)
+      assertEquals(2, rs.size)
+
       statement.executeUpdate("DROP TABLE josh")
       ()
     }
