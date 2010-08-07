@@ -3,6 +3,8 @@ package scala.resource
 import java.sql._
 import org.junit._
 import Assert._
+
+import scala.util.continuations._
 /**
  * This class is just to make sure we compile...
  */
@@ -34,13 +36,21 @@ class TestJDBC {
   
   val tmp = initDriver  //Hack to init the JDBC driver...
 
+  def makeConnection : Connection @suspendable =
+      managed(DriverManager.getConnection("jdbc:derby:derbyDB;create=true","","")) !
+
   @Test
-  def test() : Unit = {
+  def testInsertWithStatement() : Unit = {
 
-    val connFactory = managed(DriverManager.getConnection("jdbc:derby:derbyDB;create=true","",""))
-    //val results = connFactory.flatMap(_.prepareStatement("foo!")).flatMap(_.getResultSet).toTraversable(r => new ResultSetIterator(r)).view
-    //val ids = for { row <- results } yield row.getInt(1)            
+    reset {
+      val conn = makeConnection
+      val statement = managed(conn.createStatement) !
+      // This would throw an exception if there were some issue...
 
+      statement.executeUpdate("CREATE TABLE josh (fun integer)")
+      statement.executeUpdate("DROP TABLE josh")
+      ()
+    }
     ()
   }
 }
