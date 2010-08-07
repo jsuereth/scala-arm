@@ -251,6 +251,32 @@ class TestManagedResource {
   }
 
   @Test
+  def mustCreateTraversableForExpression() {
+    val resource : ManagedResource[FakeResource] = managed(new FakeResource {
+      override protected def makeData = 1.0
+    })
+    val traversable = for( r <- resource ) yield List(r.generateData)
+    traversable.foreach { x =>
+      assertTrue("Failed to traverse correct data!", math.abs(1.0 - x) < 0.0001)
+    }
+  }
+
+  @Test
+  def mustCreateTraversableMultiLevelForExpression() {
+    def resource : ManagedResource[FakeResource] = managed(new FakeResource {
+      override protected def makeData = 1.0
+    })
+    val traversable = for {
+      r1 <- resource
+      r2 <- resource
+      r3 <- resource
+    } yield List(r1.generateData, r2.generateData, r3.generateData)
+    traversable.foreach { x =>
+      assertTrue("Failed to traverse correct data!", math.abs(1.0 - x) < 0.0001)
+    }
+  }
+
+  @Test
   def mustErrorOnTraversal() {
     var caught = false
     try {
