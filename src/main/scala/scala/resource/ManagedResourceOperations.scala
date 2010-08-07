@@ -41,7 +41,11 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
     k : (R => Either[List[Throwable],B]) =>
       acquireFor(k).fold(list => Left(list), identity)
   }
-  override def ! : R @suspendable = shift(acquireAndGet) 
+  // Some wierd intersection of scaladoc2 + continuations plugin forces us to be explicit about types here!
+  override def ! : R @suspendable = shift { (k : R => Unit) =>
+    acquireAndGet(k)
+    ()
+  } 
 }
 
 
