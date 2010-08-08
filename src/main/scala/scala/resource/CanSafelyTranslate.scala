@@ -10,7 +10,7 @@
 //
 // -----------------------------------------------------------------------------
 
-package scala.resource
+package resource
 
 /**
  * This trait's existence signifies that a ManagedResource can be "flatMap"ed into a another type safely or needs to

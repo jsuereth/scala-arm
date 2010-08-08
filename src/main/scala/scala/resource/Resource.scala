@@ -1,4 +1,4 @@
-package scala.resource
+package resource
 
 /**
  * This is a type trait for types that are considered 'resources'.   These types must be opened (potentially) and

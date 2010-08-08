@@ -72,7 +72,7 @@ class ArmProject(info: ProjectInfo) extends DefaultProject(info) with AutoCompil
 
   // Publishing rules
   override def managedStyle = ManagedStyle.Maven
-  val publishTo = "nexus.scala-tools.org" at "http://nexus.scala-tools.org/content/repositories/snapshots/"
+  val publishTo = "nexus.scala-tools.org" at "http://nexus.scala-tools.org/content/repositories/releases/"
   override def packageDocsJar = defaultJarPath("-javadoc.jar")
   override def packageSrcJar= defaultJarPath("-sources.jar")
   val sourceArtifact = Artifact.sources(artifactID)

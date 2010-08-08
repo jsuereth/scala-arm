@@ -1,4 +1,4 @@
-package scala.resource
+package resource
 
 import _root_.java.{io => jio}
 

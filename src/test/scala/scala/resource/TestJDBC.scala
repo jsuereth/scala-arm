@@ -1,4 +1,4 @@
-package scala.resource
+package resource
 
 import java.sql._
 import org.junit._

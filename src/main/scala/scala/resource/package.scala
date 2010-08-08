@@ -1,5 +1,3 @@
-package scala
-
 import resource._
 
 /**

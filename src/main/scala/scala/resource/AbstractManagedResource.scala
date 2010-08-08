@@ -11,7 +11,7 @@
 // -----------------------------------------------------------------------------
 
 
-package scala.resource
+package resource
 
 import _root_.scala.collection.Seq
 import _root_.scala.util.control.Exception

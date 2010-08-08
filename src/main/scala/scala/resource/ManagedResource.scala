@@ -11,7 +11,7 @@
 // -----------------------------------------------------------------------------
 
 
-package scala.resource
+package resource
 
 import _root_.scala.collection.Traversable
 import _root_.scala.collection.Iterator

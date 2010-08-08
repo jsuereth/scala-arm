@@ -11,7 +11,7 @@
 // -----------------------------------------------------------------------------
 
 
-package scala.resource
+package resource
 
 import collection.Seq
 

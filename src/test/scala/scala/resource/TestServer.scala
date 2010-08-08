@@ -1,6 +1,6 @@
 import java.net.{ServerSocket, Socket}
 import java.io._
-import scala.resource._
+import resource._
 
 import org.junit._
 import Assert._
