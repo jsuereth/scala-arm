@@ -121,6 +121,8 @@ object CanSafelyFlatMap extends LowPrioritCanSafelyFlatMapImplicits {
  * This companion object contains implicits used on ManagedResource map calls.
  */
 object CanSafelyMap extends HighPrioritCanSafelyMapImplicits {
+  // Special handling for xml.NodeSeq because XML is such an odd beast
+  implicit def nodeSeqHandler : CanSafelyMap[xml.NodeSeq, ExtractableManagedResource[xml.NodeSeq]] = stayManaged
   /** 
    * This method can be used to extract from a ManagedResource some value while mapping/flatMapping.
    *  e.g. <pre> val x : ManagedResource[Foo]
