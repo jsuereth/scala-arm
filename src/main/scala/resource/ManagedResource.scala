@@ -55,9 +55,9 @@ trait ManagedResource[+R] {
    *
    * @return A new ManagedResource with the translated type or some other type if an appropriate translator was found.
    *
-   * @usecase def flatMap(f: R => B): ManagedResource[B]
-   * @usecase def flatMap(f : R => Traversable[B]) : Traversable[B]
-   * @usecase def flatMap(f : R => ManagedResource[B]) : ManagedResource[B]
+   * @usecase def flatMap[B](f: R => B): ManagedResource[B]
+   * @usecase def flatMap[B](f : R => Traversable[B]) : Traversable[B]
+   * @usecase def flatMap[B](f : R => ManagedResource[B]) : ManagedResource[B]
    */ 
   def flatMap[B, To](f : R => B)(implicit translator : CanSafelyFlatMap[B,To]) : To
 
