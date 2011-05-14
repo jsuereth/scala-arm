@@ -59,17 +59,27 @@ trait AbstractManagedResource[R] extends ManagedResource[R] with ManagedResource
   protected def unsafeClose(handle : R) : Unit
 
   /**
-   * The list of exceptions that get caught during ARM and will not prevent a call to close.
+   * The list of exceptions that get caught during ARM and will always be rethrown (considered 'fatal')
    */
-  protected def caughtException : Seq[Class[_]] = List(classOf[Throwable])
+  protected def rethrownExceptions : Seq[Class[_]] = List(classOf[java.lang.VirtualMachineError],
+                                                          classOf[java.lang.InterruptedException],
+                                                          classOf[scala.util.control.ControlThrowable])
+  /** Throws an exception if it is the rethrow list. */
+  private def rethrowIfBad(t : Throwable)  : Throwable =
+    if (rethrownExceptions.exists(_.isInstance(t))) {
+      throw t
+    } else t
 
   override def acquireFor[B](f : R => B) : Either[List[Throwable], B] = {
     import Exception._
     val handle = open
-    val result  = catching(caughtException : _*) either (f(handle))
-    val close = catching(caughtException : _*) either unsafeClose(handle)
-    //Combine resulting exceptions as necessary     
-    result.left.map[List[Throwable]]( _ :: close.left.toOption.toList)
+    val result  = catching(classOf[java.lang.Throwable]) either (f(handle))
+    val close = catching(classOf[java.lang.Throwable]) either unsafeClose(handle)
+    // Combine resulting exceptions as necessary.   Finally, throw any exceptions
+    // That we can't hold onto (like ControlThrowable).
+    result.left.map[List[Throwable]]( _ :: close.left.toOption.toList).left.map {
+      exceptions => exceptions.map(rethrowIfBad)
+    }
   }
 }
 
@@ -97,7 +107,7 @@ final class DefaultManagedResource[R : Resource : Manifest](r : => R) extends Ab
   /**
    * The list of exceptions that get caught during ARM and will not prevent a call to close.
    */
-  override protected def caughtException : Seq[Class[_]] = typeTrait.possibleExceptions
+  override protected def rethrownExceptions : Seq[Class[_]] = typeTrait.fatalExceptions
   /* You cannot serialize resource and send them, so referential equality should be sufficient. */
   /** Add the type trait to help disperse resources */
   override def hashCode() : Int = (typeTrait.hashCode << 7) + super.hashCode + 13

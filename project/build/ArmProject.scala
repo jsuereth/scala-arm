@@ -78,7 +78,7 @@ class ArmProject(info: ProjectInfo) extends DefaultProject(info) with AutoCompil
   } else {
     "nexus.scala-tools.org" at "http://nexus.scala-tools.org/content/repositories/releases/"
   }
-  override def packageDocsJar = defaultJarPath("-javadoc.jar")
+  override def packageDocsJar = defaultJarPath("-scaladoc.jar")
   override def packageSrcJar= defaultJarPath("-sources.jar")
   val sourceArtifact = Artifact.sources(artifactID)
   val docsArtifact = Artifact.javadoc(artifactID)

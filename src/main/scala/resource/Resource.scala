@@ -21,7 +21,9 @@ trait Resource[R] {
    * exceptions in ARM blocks.  This defaults to be any Exception (but not runtime exceptions, which are
    * assumed to be fatal. 
    */
-  def possibleExceptions : Seq[Class[_]] = List(classOf[Exception])
+  def fatalExceptions : Seq[Class[_]] = List(classOf[java.lang.VirtualMachineError],
+                                             classOf[java.lang.InterruptedException],
+                                             classOf[scala.util.control.ControlThrowable])
 }
 
 /**

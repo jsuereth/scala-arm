@@ -19,12 +19,12 @@ package object resource {
    *
    * @param opener  The by-name parameter that will open the resource.
    * @param closer  A closure that will close the resource.
-   * @param nonFatalExceptions  A list of exception classes we can temporarily ignore when operating on a resource.
+   * @param exceptions  A list of exception classes that cannot be ignored to close a resource.
    */
-  def makeManagedResource[R : Manifest](opener :  => R)(closer : R => Unit)(nonFatalExceptions : List[Class[_<:Throwable]]) = {
+  def makeManagedResource[R : Manifest](opener :  => R)(closer : R => Unit)(exceptions : List[Class[_<:Throwable]]) = {
     implicit val typeTrait = new Resource[R] {
       override def close(r : R) = closer(r)
-      override val possibleExceptions = nonFatalExceptions
+      override val fatalExceptions = exceptions
     }
     new DefaultManagedResource(opener)
   }
