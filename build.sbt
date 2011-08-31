@@ -16,7 +16,7 @@ libraryDependencies <<= (scalaVersion, libraryDependencies) { (ver, deps) =>
 
 scalacOptions += "-P:continuations:enable"
 
-crossScalaVersions := Seq("2.9.1.RC3", "2.9.0-1", "2.9.0", "2.8.1", "2.8.0")
+crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.8.1", "2.8.0")
 
 libraryDependencies += "junit" % "junit" % "4.5" % "test"
 
