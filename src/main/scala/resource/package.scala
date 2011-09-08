@@ -29,11 +29,6 @@ package object resource {
     new DefaultManagedResource(opener)
   }
 
-  /** @see CanSafelyTranslate.extractUnManaged */
-  def extractUnManaged[T] = CanSafelyMap.extractUnManaged[T]
-  /** @see CanSafelyTranslate.extractOption */
-  def extractOption[T] = CanSafelyMap.extractOption[T]
-
 
   import scala.util.continuations._
 
@@ -51,12 +46,7 @@ package object resource {
    * @return A ManagedResource of a tuple containing the initial two resources.
    */
   def and[A,B](r1 : ManagedResource[A], r2 : ManagedResource[B]) = new ManagedResource[(A,B)] with ManagedResourceOperations[(A,B)] {
-
-    override def acquireFor[C](f : ((A,B)) => C) = withResources {
-      val resource1 = r1.reflect[C]
-      val resource2 = r2.reflect[C]
-      f((resource1, resource2))
-    }
+    override def acquireFor[C](f : ((A,B)) => C) = withResources { f(Tuple2(r1.reflect[C], r2.reflect[C])) }
   }
 
   /*def joinResources[A](resources : Seq[ManagedResource[A]]) : ManagedResource[Seq[A]] = new ManagedResource[Seq[A]] with ManagedResourceOperations[Seq[A]] {
@@ -74,7 +64,7 @@ package object resource {
    * @param resource   A collection of ManageResources of the same type
    * @return  A ManagedResoruce of a collection of types
    */
-  def join[A, MR , CC ](resources : CC)(implicit ev0 : CC <:< Seq[ MR ], ev1 : MR <:< ManagedResource[A]) : ManagedResource[Seq[A]] = {
+  def join[A, MR, CC ](resources: CC)(implicit ev0: CC <:< Seq[ MR ], ev1: MR <:< ManagedResource[A]) : ManagedResource[Seq[A]] = {
     //TODO - Use foldLeft
     //TODO - Don't use such a sucky algorithm...
     //We currently assume 1 resource

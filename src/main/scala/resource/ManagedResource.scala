@@ -36,15 +36,10 @@ trait ManagedResource[+R] {
    * This method is used to perform operations on a resource while the resource is open.
    *
    * @param f The transformation function to apply against the raw resource.
-   * @param translator  The translation implementation used to determine if we can extract from the ManagedResource. 
    *
    * @return A new ManagedResource with the translated type or some other type if an appropriate translator was found.
-   *
-   * @usecase def map[B](f: R => B): ManagedResource[B]
-   * @usecase def map[B](f : R => Traversable[B]) : Traversable[B]
-   * @usecase def map[B](f : R => ManagedResource[B]) : ManagedResource[B]
    */
-  def map[B, To](f : R => B)(implicit translator : CanSafelyMap[B,To]) : To
+  def map[B](f: R => B): ExtractableManagedResource[B]
 
   /**
    * This method is used to immediately perform operations on a resource while it is open, ensuring the resource is
@@ -59,7 +54,7 @@ trait ManagedResource[+R] {
    * @usecase def flatMap[B](f : R => Traversable[B]) : Traversable[B]
    * @usecase def flatMap[B](f : R => ManagedResource[B]) : ManagedResource[B]
    */ 
-  def flatMap[B, To](f : R => B)(implicit translator : CanSafelyFlatMap[B,To]) : To
+  def flatMap[B](f: R => ManagedResource[B]): ManagedResource[B]
 
   /**
    * This method is used to immediately perform operations on a resource while it is open, ensuring the resource is
@@ -68,7 +63,7 @@ trait ManagedResource[+R] {
    *
    * @param f The function to apply against the raw resource.
    */
-  def foreach(f : R => Unit) : Unit
+  def foreach(f: R => Unit) : Unit
 
   /**
    * Acquires the resource for the Duration of a given function, The resource will automatically be opened and closed.
@@ -80,7 +75,7 @@ trait ManagedResource[+R] {
    * @param f   A function to execute against the handle returned by the resource
    * @return    The result of the passed in function
    */
-  def acquireAndGet[B](f : R => B) : B
+  def acquireAndGet[B](f: R => B): B
 
   /**
    * Aquires the resource for the Duration of a given function, The resource will automatically be opened and closed.
@@ -91,7 +86,7 @@ trait ManagedResource[+R] {
    * @return    The result of the function (right) or the list of exceptions seen during the processing of the
    *            resource (left).
    */
-  def acquireFor[B](f : R => B) : Either[List[Throwable], B]
+  def acquireFor[B](f: R => B): Either[List[Throwable], B]
 
   /**
    * This method creates a Traversable in which all performed methods are done within the context of an "open"
@@ -101,7 +96,7 @@ trait ManagedResource[+R] {
    *
    * @return A Traversable of elements of type B. 
    */
-  def toTraversable[B](f : R => TraversableOnce[B]) : Traversable[B]
+  def toTraversable[B](implicit ev: R <:< TraversableOnce[B]): Traversable[B]
 
   /**
    * Creates a new resource that is the aggregation of this resource and another.
@@ -112,7 +107,7 @@ trait ManagedResource[+R] {
    * @return
    *          A resource that is a tupled combination of this and that.
    */
-  def and[B](that : ManagedResource[B]) : ManagedResource[(R,B)]
+  def and[B](that: ManagedResource[B]): ManagedResource[(R,B)]
 
   /**
    * Reflects the resource for use in a continuation.   This method is designed to be used inside a
@@ -132,7 +127,7 @@ trait ManagedResource[+R] {
    * </pre>
    * @return The raw resource, with appropriate continuation-context annotations.
    */
-  def reflect[B] : R @cps[Either[List[Throwable], B]]
+  def reflect[B]: R @cps[Either[List[Throwable], B]]
   /**
    * Accesses this resource inside a suspendable CPS block
    */

@@ -24,15 +24,24 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
   //TODO - Can we always grab the top exception?
   override def acquireAndGet[B](f : R => B) : B = acquireFor(f).fold( liste => throw liste.head, x => x)
 
-  override def toTraversable[B](f : R => TraversableOnce[B]) : Traversable[B] = new ManagedTraversable[B,R] {
-    val resource = self
-    override protected def internalForeach[U](resource: R, g : B => U) : Unit = f(resource).foreach(g) 
-  }
+  def toTraversable[B](implicit ev: R <:< TraversableOnce[B]): Traversable[B] = 
+    new ManagedTraversable[B,R] {
+      val resource = self
+      override protected def internalForeach[U](resource: R, g : B => U) : Unit = 
+        ev(resource).foreach(g) 
+    }
 
-  override def map[B, To](f : R => B)(implicit translator : CanSafelyMap[B,To]) : To = translator(self,f)
-
-  override def flatMap[B, To](f : R => B)(implicit translator : CanSafelyFlatMap[B,To]) : To = translator(self,f)
+  override def map[B](f : R => B): ExtractableManagedResource[B] =
+    new DeferredExtractableManagedResource(self, f)
   
+  override def flatMap[B](f : R => ManagedResource[B]): ManagedResource[B] = 
+    new ManagedResourceOperations[B] {
+      override def acquireFor[C](f2 : B => C) : Either[List[Throwable], C] = {
+	    self.acquireFor(r => f(r).acquireFor(f2)).fold(x => Left(x), x => x)
+	  }
+	  override def toString = "FlattenedManagedResource[?](...)"
+    }
+	  
   override def foreach(f : R => Unit) : Unit = acquireAndGet(f)
 
   override def and[B](that : ManagedResource[B]) : ManagedResource[(R,B)] = resource.and(self,that)
