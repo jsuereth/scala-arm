@@ -1,0 +1,5 @@
+The scala-arm 1.0 release makes a few stabilizing changes to the API:
+
+* Removed the CanSafelyTranslate implicit hook for map/flatMap methods.   ManagedResource objects are now properly Monadic.
+* The toTraversable method now takes implicit evidence that the resource is traversable.  This can also take a function from the reosurce to a traversable.
+* The Resource type trait now specifies which exceptions cannot be ignored vs. which ones can safely be captured temporarily to close a resource.
