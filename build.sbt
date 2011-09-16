@@ -4,7 +4,7 @@ organization := "com.github.jsuereth.scala-arm"
 
 name := "scala-arm"
 
-version := "1.0-SNAPSHOT"
+version := "1.0"
 
 scalaVersion := "2.9.1"
 
