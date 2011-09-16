@@ -13,11 +13,11 @@ In Maven:
     <dependency>
        <groupId>com.github.jsuereth.scala-arm</groupId>
        <artifactId>scala-arm_${scala.version}</artifactId>
-       <version>0.3</version>
+       <version>1.0</version>
     </dependency>
 
 In Others:
-  Download from here: http://www.scala-tools.org/repo-releases/com/github/jsuereth/scala-arm/scala-arm_2.9.1/0.3/scala-arm_2.9.1-0.3.jar
+  Download from here: http://www.scala-tools.org/repo-releases/com/github/jsuereth/scala-arm/scala-arm_2.9.1/0.3/scala-arm_2.9.1-1.0.jar
 
 
 ## Basic Usage
