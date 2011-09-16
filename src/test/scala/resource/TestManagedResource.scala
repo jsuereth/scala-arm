@@ -233,18 +233,7 @@ class TestManagedResource {
     val resource : ManagedResource[FakeResource] = managed(new FakeResource {
       override protected def makeData = 1.0
     })
-    val traversable : Traversable[Double] = resource.map(_.generateData).map(List(_))
-    traversable.foreach { x =>
-      assertTrue("Failed to traverse correct data!", math.abs(1.0 - x) < 0.0001)
-    }
-  }
-
-  @Test
-  def mustCreateTraversableFlatMap() {
-    val resource : ManagedResource[FakeResource] = managed(new FakeResource {
-      override protected def makeData = 1.0
-    })
-    val traversable : Traversable[Double] = resource.map(_.generateData).flatMap(List(_))
+    val traversable : Traversable[Double] = resource.map(_.generateData).map(List(_)).toTraversable
     traversable.foreach { x =>
       assertTrue("Failed to traverse correct data!", math.abs(1.0 - x) < 0.0001)
     }
@@ -256,7 +245,7 @@ class TestManagedResource {
       override protected def makeData = 1.0
     })
     val traversable = for( r <- resource ) yield List(r.generateData)
-    traversable.foreach { x =>
+    traversable.toTraversable.foreach { x =>
       assertTrue("Failed to traverse correct data!", math.abs(1.0 - x) < 0.0001)
     }
   }
@@ -271,7 +260,7 @@ class TestManagedResource {
       r2 <- resource
       r3 <- resource
     } yield List(r1.generateData, r2.generateData, r3.generateData)
-    traversable.foreach { x =>
+    traversable.toTraversable.foreach { x =>
       assertTrue("Failed to traverse correct data!", math.abs(1.0 - x) < 0.0001)
     }
   }
@@ -285,7 +274,7 @@ class TestManagedResource {
       })
       val traversable : Traversable[Any] = resource.map(ignore => (new Traversable[Any] {
         def foreach[U](f : Any => U) : Unit = error("Do not continue!")
-      } : Traversable[Any]))
+      } : Traversable[Any])).toTraversable
 
       traversable.foreach( x => ())
     } catch {

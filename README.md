@@ -85,17 +85,17 @@ The <tt>ManagedResource</tt> class also defines mechanisms for extracting data o
 
 The <tt>flatMap</tt> method can be used to ensure that applying a transformation of an embedded resource to another <tt>ManagedResource</tt> will create a <tt>ManagedResource[T]</tt> instead of a <tt>ManagedResource[ManagedResource[T]]</tt>.
 
-The handy mechanism of <tt>ManagedResource</tt> is when flatMap is called with a conversion to a <tt>TraversableOnce</tt>.  For those who don't know, in Scala 2.8.0 <tt>TraversableOnce</tt> is the common parent of <tt>Iterator</tt> and <tt>Traversable</tt> and hence captures most collections.   When such a <tt>flatMap</tt> is made, the scala-arm library determines that it can return a type <tt>ManagedTraversable</tt> rather than <tt>ManagedResource</tt>.   The <tt>ManagedTraversable</tt> trait acts as a collection that will open a resource, convert it to a <tt>TraversableOnce</tt>, iterator over necessary elements and then close the resource.   This process is performed on *almost every* operation, so it is recommended to convert this to a view or copy the data into another collection if you plan to perform many operations against it.  The <tt>ManagedResource</tt> class also provides a <tt>toTraversable</tt> method that can be used directly instead of relying on the flatMap hook.   Let's look at an example that will print all lines in the file "test.txt":
+The <tt>ManagedResource</tt> class also supports a <tt>toTraversable</tt> method.  Let's look at an example that will print all lines in the file "test.txt":
 
     import scala.resource._
     import java.io._
-    val lines = for { input <- managed(new FileInputStream("test.txt"))
-                      val bufferedReader = new BufferedReader(new InputStreamReader(input))
-                      line <- makeBufferedReaderLineIterator(bufferedReader)
-                    } yield line.trim()
-    lines foreach println
+    val reader: ManagedResource[BufferedReader] = managed(new FileInputStream("test.txt")) map (new BufferedReader(new InputStreamReader(_))) 
+    val lines: ManagedTraversable[String] = reader map makeBufferedReaderLineIterator toTraversable
+    lines.view map (_.trim) foreach println
 
-Much of the noise in the example is dealing with the java.io API.   The important piece is how we have a managed resource, convert it into a traversable and make some minor modification in the yield.   This produces a traversable that will eventually read the file.   This allows us to pre-construct I/O related portions of our program to re-use over and over.   For example,  One could construct a <tt>ManagedResource</tt> that will read and parse configuration information.   Then you can use a listener that detects when the file's modification date changes, and re-extract the configuration information from the <tt>ManagedResource</tt>.
+Much of the noise in the example is dealing with the java.io API.   The important piece is how we have a managed resource, convert it into a traversable and make some minor modification before printing.   This produces a traversable that will eventually read the file.   This allows us to pre-construct I/O related portions of our program to re-use over and over.   For example,  One could construct a <tt>ManagedResource</tt> that will read and parse configuration information.   Then you can use a listener that detects when the file's modification date changes, and re-extract the configuration information from the <tt>ManagedResource</tt>.
+
+The <tt>ManagedTraversable</tt> collection type is strict.   If you wish to do several map/filter/etc. operations before aquiring the resource and traversing the collection, you should immediately change to a <tt>view</tt> as shown in the example.
 
 ### Delimited continuation style
 
