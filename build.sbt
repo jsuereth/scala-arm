@@ -34,3 +34,15 @@ publishTo <<= version { (v: String) =>
 publishMavenStyle := true
 
 publishArtifact in Test := false
+
+seq(org.clapper.sbt.lwm.LWM.lwmSettings: _*)
+
+LWM.sourceFiles in LWM.Config <++= baseDirectory(d => (d / "src" / "site" ** "*.md").get)
+
+LWM.targetDirectory in LWM.Config <<= target(_ / "site")
+
+seq(ghpages.settings:_*)
+
+ghpages.gitRemoteRepo := "git@github.com:jsuereth/scala-arm.git"
+
+ghpages.genSite <<= (ghpages.genSite, LWM.translate in LWM.Config) map ((_,_) => ())
