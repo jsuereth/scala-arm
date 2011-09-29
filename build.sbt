@@ -37,7 +37,7 @@ publishArtifact in Test := false
 
 seq(org.clapper.sbt.lwm.LWM.lwmSettings: _*)
 
-LWM.sourceFiles in LWM.Config <++= baseDirectory(d => (d / "src" / "site" ** "*.md").get)
+LWM.sources in LWM.Config <++= baseDirectory(d => (d / "src" / "site" ** "*.md").get)
 
 LWM.targetDirectory in LWM.Config <<= target(_ / "site")
 
@@ -51,3 +51,4 @@ SiteKeys.siteMappings <<= (SiteKeys.siteMappings, LWM.translate in LWM.Config, L
 seq(ghpages.settings:_*)
 
 GitKeys.gitRemoteRepo := "git@github.com:jsuereth/scala-arm.git"
+
