@@ -124,7 +124,7 @@ compare that with the previous "imperative style" <tt>and</tt> method:
       }
     }
 
-The mechanism for using Delimted Continuations is outlines in more detail on the [[Delimited Continuations and ARM]] page.
+The mechanism for using Delimted Continuations is outlines in more detail on the [Delimited Continuations and ARM](http://github.com/jsuereth/scala-arm/wiki/Delimited-Continuations-and-ARM) page.
 
 ## SCALA LICENSE
 

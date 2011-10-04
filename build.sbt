@@ -37,12 +37,18 @@ publishArtifact in Test := false
 
 seq(org.clapper.sbt.lwm.LWM.lwmSettings: _*)
 
-LWM.sourceFiles in LWM.Config <++= baseDirectory(d => (d / "src" / "site" ** "*.md").get)
+LWM.sources in LWM.Config <++= baseDirectory(d => (d / "src" / "site" ** "*.md").get)
 
 LWM.targetDirectory in LWM.Config <<= target(_ / "site")
 
+seq(SitePlugin.site.settings:_*)
+
+SiteKeys.siteMappings <<= (SiteKeys.siteMappings, LWM.translate in LWM.Config, LWM.targetDirectory in LWM.Config) map { (mappings, _, dir) => 
+  // TODO - less hacky solution!
+  mappings ++ (dir ** "*.html" x relativeTo(dir))
+}
+
 seq(ghpages.settings:_*)
 
-ghpages.gitRemoteRepo := "git@github.com:jsuereth/scala-arm.git"
+GitKeys.gitRemoteRepo := "git@github.com:jsuereth/scala-arm.git"
 
-ghpages.genSite <<= (ghpages.genSite, LWM.translate in LWM.Config) map ((_,_) => ())
