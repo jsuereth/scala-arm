@@ -41,7 +41,7 @@ publishArtifact in Test := false
 
 //LWM.targetDirectory in LWM.Config <<= target(_ / "site")
 
-seq(SitePlugin.site.settings:_*)
+seq(com.jsuereth.sbtsite.SitePlugin.site.settings:_*)
 
 //SiteKeys.siteMappings <<= (SiteKeys.siteMappings, LWM.translate in LWM.Config, LWM.targetDirectory in LWM.Config) map { (mappings, _, dir) => 
 //  // TODO - less hacky solution!
@@ -50,5 +50,5 @@ seq(SitePlugin.site.settings:_*)
 
 seq(ghpages.settings:_*)
 
-GitKeys.gitRemoteRepo := "git@github.com:jsuereth/scala-arm.git"
+git.remoteRepo := "git@github.com:jsuereth/scala-arm.git"
 
