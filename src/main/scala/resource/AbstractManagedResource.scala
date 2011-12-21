@@ -61,11 +61,12 @@ trait AbstractManagedResource[R] extends ManagedResource[R] with ManagedResource
   /**
    * The list of exceptions that get caught during ARM and will always be rethrown (considered 'fatal')
    */
-  protected def rethrownExceptions : Seq[Class[_]] = List(classOf[java.lang.VirtualMachineError],
+  protected def rethrownExceptions : Seq[Class[_]] = List(classOf[java.lang.RuntimeException],
+                                                          classOf[java.lang.VirtualMachineError],
                                                           classOf[java.lang.InterruptedException],
                                                           classOf[scala.util.control.ControlThrowable])
-  /** Throws an exception if it is the rethrow list. */
-  private def rethrowIfBad(t : Throwable)  : Throwable =
+  /** Throws an exception if it is in the rethrow list. */
+  private def rethrowIfBad(t: Throwable)  : Throwable =
     if (rethrownExceptions.exists(_.isInstance(t))) {
       throw t
     } else t
@@ -73,8 +74,8 @@ trait AbstractManagedResource[R] extends ManagedResource[R] with ManagedResource
   override def acquireFor[B](f : R => B) : Either[List[Throwable], B] = {
     import Exception._
     val handle = open
-    val result  = catching(classOf[java.lang.Throwable]) either (f(handle))
-    val close = catching(classOf[java.lang.Throwable]) either unsafeClose(handle)
+    val result  = catchingPromiscuously(classOf[java.lang.Throwable]) either (f(handle))
+    val close = catchingPromiscuously(classOf[java.lang.Throwable]) either unsafeClose(handle)
     // Combine resulting exceptions as necessary.   Finally, throw any exceptions
     // That we can't hold onto (like ControlThrowable).
     result.left.map[List[Throwable]]( _ :: close.left.toOption.toList).left.map {
