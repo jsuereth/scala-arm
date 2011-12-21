@@ -67,21 +67,21 @@ sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicit
   //Add All JDBC related handlers.
   implicit def connectionResource[A <: java.sql.Connection] = new Resource[A] {
     override def close(r : A) = r.close()
-    override def toString = "Resoruce[java.sql.Connection]"
+    override def toString = "Resource[java.sql.Connection]"
   }
   // This will work for Statements, PreparedStatements and CallableStatements.
   implicit def statementResource[A <: java.sql.Statement] = new Resource[A] {
     override def close(r : A) = r.close()
-    override def toString = "Resoruce[java.sql.Statement]"
+    override def toString = "Resource[java.sql.Statement]"
   }
   // Also handles RowSet
   implicit def resultSetResource[A <: java.sql.ResultSet] = new Resource[A] {
     override def close(r : A) = r.close()
-    override def toString = "Resoruce[java.sql.ResultSet]"
+    override def toString = "Resource[java.sql.ResultSet]"
   }
   implicit def pooledConnectionResource[A <: javax.sql.PooledConnection] = new Resource[A] {
     override def close(r : A) = r.close()
-    override def toString = "Resource[javax.sql.PooledConnection"
+    override def toString = "Resource[javax.sql.PooledConnection]"
   }
 
 }
