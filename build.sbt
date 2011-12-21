@@ -4,7 +4,7 @@ organization := "com.github.jsuereth.scala-arm"
 
 name := "scala-arm"
 
-version := "1.1"
+version := "1.2-SNAPSHOT"
 
 scalaVersion := "2.9.1"
 
@@ -16,7 +16,7 @@ libraryDependencies <<= (scalaVersion, libraryDependencies) { (ver, deps) =>
 
 scalacOptions += "-P:continuations:enable"
 
-crossScalaVersions := Seq("2.9.1", "2.8.1", "2.8.0")
+crossScalaVersions := Seq("2.9.1")
 
 libraryDependencies += "junit" % "junit" % "4.5" % "test"
 
