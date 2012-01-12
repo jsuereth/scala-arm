@@ -15,6 +15,12 @@ trait Resource[R] {
    *  Closes a resource.  This method is allowed to throw exceptions.
    */
   def close(r : R) : Unit
+  
+  /**
+   * This is called if the resource should be closed *after* an exception was thrown.  The
+   * default implementation is to call close itself.
+   */
+  def closeAfterException(r: R, t: Throwable): Unit = close(r)
 
   /**
    * Returns the possible exceptions that a resource could throw.   This list is used to catch only relevant
@@ -66,24 +72,28 @@ sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicit
   
   //Add All JDBC related handlers.
   implicit def connectionResource[A <: java.sql.Connection] = new Resource[A] {
-    override def close(r : A) = r.close()
+    override def close(r: A) = r.close()
     override def toString = "Resource[java.sql.Connection]"
   }
   // This will work for Statements, PreparedStatements and CallableStatements.
   implicit def statementResource[A <: java.sql.Statement] = new Resource[A] {
-    override def close(r : A) = r.close()
+    override def close(r: A) = r.close()
     override def toString = "Resource[java.sql.Statement]"
   }
   // Also handles RowSet
   implicit def resultSetResource[A <: java.sql.ResultSet] = new Resource[A] {
-    override def close(r : A) = r.close()
+    override def close(r: A) = r.close()
     override def toString = "Resource[java.sql.ResultSet]"
   }
   implicit def pooledConnectionResource[A <: javax.sql.PooledConnection] = new Resource[A] {
-    override def close(r : A) = r.close()
+    override def close(r: A) = r.close()
     override def toString = "Resource[javax.sql.PooledConnection]"
   }
-
+  // This will ensure
+  implicit def rollbackTransactionResource[A <: javax.transaction.Transaction] = new Resource[A] {
+    override def close(r: A) = r.commit()
+    override def closeAfterException(r: A, t: Throwable) = r.rollback()
+  }
 }
 
 /**

@@ -56,7 +56,7 @@ trait AbstractManagedResource[R] extends ManagedResource[R] with ManagedResource
    * Closes a resource using the handle.  This method will throw any exceptions normally occuring during the close of
    * a resource.
    */
-  protected def unsafeClose(handle : R) : Unit
+  protected def unsafeClose(handle : R, errors: Option[Throwable]) : Unit
 
   /**
    * The list of exceptions that get caught during ARM and will always be rethrown (considered 'fatal')
@@ -75,7 +75,7 @@ trait AbstractManagedResource[R] extends ManagedResource[R] with ManagedResource
     import Exception._
     val handle = open
     val result  = catchingPromiscuously(classOf[java.lang.Throwable]) either (f(handle))
-    val close = catchingPromiscuously(classOf[java.lang.Throwable]) either unsafeClose(handle)
+    val close = catchingPromiscuously(classOf[java.lang.Throwable]) either unsafeClose(handle, result.left.toOption)
     // Combine resulting exceptions as necessary.   Finally, throw any exceptions
     // That we can't hold onto (like ControlThrowable).
     result.left.map[List[Throwable]]( _ :: close.left.toOption.toList).left.map {
@@ -93,7 +93,7 @@ final class DefaultManagedResource[R : Resource : Manifest](r : => R) extends Ab
   /**
    * Opens a given resource, returning a handle to execute against during the "session" of the resource being open.
    */
-  override protected def open : R = {
+  override protected def open: R = {
     val resource = r
     typeTrait.open(resource)
     resource
@@ -103,15 +103,18 @@ final class DefaultManagedResource[R : Resource : Manifest](r : => R) extends Ab
    * Closes a resource using the handle.  This method will throw any exceptions normally occurring during the close of
    * a resource.
    */
-  override protected def unsafeClose(r : R) : Unit = typeTrait.close(r)
+  override protected def unsafeClose(r: R, error: Option[Throwable]): Unit = error match {
+    case None    => typeTrait.close(r)
+    case Some(t) => typeTrait.closeAfterException(r, t)
+  }
 
   /**
    * The list of exceptions that get caught during ARM and will not prevent a call to close.
    */
-  override protected def rethrownExceptions : Seq[Class[_]] = typeTrait.fatalExceptions
+  override protected def rethrownExceptions: Seq[Class[_]] = typeTrait.fatalExceptions
   /* You cannot serialize resource and send them, so referential equality should be sufficient. */
   /** Add the type trait to help disperse resources */
-  override def hashCode() : Int = (typeTrait.hashCode << 7) + super.hashCode + 13
+  override def hashCode(): Int = (typeTrait.hashCode << 7) + super.hashCode + 13
   // That's right, we use manifest solely for nicer toStrings!
   override def toString = "Default[" + implicitly[Manifest[R]] + " : " + typeTrait + "](...)"
 }

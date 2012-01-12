@@ -1,5 +1,7 @@
 resolvers += "junit interface repo" at "https://repository.jboss.org/nexus/content/repositories/scala-tools-releases"
 
+resolvers += "java.net repo" at "http://download.java.net/maven/2/"
+
 organization := "com.github.jsuereth.scala-arm"
 
 name := "scala-arm"
@@ -23,6 +25,8 @@ libraryDependencies += "junit" % "junit" % "4.5" % "test"
 libraryDependencies += "com.novocode" % "junit-interface" % "0.7" % "test->default"
 
 libraryDependencies += "org.apache.derby" % "derby" % "10.5.3.0_1" % "test"
+
+libraryDependencies += "javax.transaction" % "jta" % "1.0.1B" % "provided"
 
 // Publish to scala-tools Nexus
 publishTo <<= version { (v: String) =>
