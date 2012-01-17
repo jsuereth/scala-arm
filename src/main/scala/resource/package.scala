@@ -1,7 +1,7 @@
 import resource._
 
 /**
- * Package related methods for maanged resources.
+ * Package related methods for managed resources.
  */
 package object resource {
 
