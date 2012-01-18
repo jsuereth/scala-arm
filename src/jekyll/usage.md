@@ -4,9 +4,10 @@ title: Basic Usage
 ---
 
 The Scala ARM library provides three "modes" of operations:
-  * Imperative style resource management functions.
-  * A monadic style resource management class.
-  * A delimited continuation style API.
+
+* Imperative style resource management functions.
+* A monadic style resource management class.
+* A delimited continuation style API.
 
 ## Imperative Style ##
 
