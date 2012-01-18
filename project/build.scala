@@ -22,13 +22,38 @@ object PluginDef extends Build {
   ) settings(publishSettings:_*) settings(websiteSettings:_*))
 
   def publishSettings: Seq[Setting[_]] = Seq(
+    // If we want on maven central, we need to be in maven style.
     publishMavenStyle := true,
     publishArtifact in Test := false,
+    // The Nexus repo we're publishing to.
     publishTo <<= version { (v: String) =>
       val nexus = "http://nexus.scala-tools.org/content/repositories/"
       if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "snapshots/") 
       else                             Some("releases"  at nexus + "releases/")
-    }
+    },
+    // Maven central cannot allow other repos.  We're ok here because the artifacts we
+    // we use externally are *optional* dependencies.
+    pomIncludeRepository := { x => false },
+    // Maven central wants some extra metadata to keep things 'clean'.
+    pomExtra := (
+	    <licenses>
+		    <license>
+			    <name>BSD-style</name>
+			    <url>http://www.opensource.org/licenses/bsd-license.php</url>
+			    <distribution>repo</distribution>
+		    </license>
+	    </licenses>
+      <scm>
+        <url>https://jsuereth@github.com/jsuereth/scala-arm.git</url>
+        <connection>scm:git:https://jsuereth@github.com/jsuereth/scala-arm.git</connection>
+      </scm>
+      <developers>
+        <developer>
+          <id>jsuereth</id>
+          <name>Josh Suereth</name>
+          <url>http://jsuereth.com</url>
+        </developer>
+      </developers>)
   )
 
   def websiteSettings: Seq[Setting[_]] = site.settings ++ ghpages.settings ++ Seq(
