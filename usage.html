@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Basic Usage - </title>
+   <meta name="author" content="Josh Suereth" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="css/bootstrap.css" type="text/css" />
+   <link rel="stylesheet" href="css/syntax.css" type="text/css" />
+   <link rel="stylesheet" href="css/colors.css" type="text/css" />
+   <link rel="stylesheet" href="css/custom.css" type="text/css" />
+
+</head>
+<body>
+
+
+    <!-- Topbar
+    ================================================== -->
+    <div class="topbar" >
+      <div class="topbar-inner">
+        <div class="container">
+          <a class="brand" href="index.html">Scala ARM</a>
+          <ul class="nav">
+           <li><a target="_blank" href="latest/api/index.html">Scaladoc</a></li>
+           <li><a href="usage.html">Usage</a></li>
+           <li><a href="resource.html">Resource Typeclasss</a></li>
+           <li><a href="continuations.html">Continuations</a></li>
+           <li><a href="https://github.com/jsuereth/scala-arm/wiki">Wiki</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+<div class="row">
+  <div class="span2 columns"><p>&nbsp;</p></div>
+  <div class="span10 columns content">
+    <p>The Scala ARM library provides three &#8220;modes&#8221; of operations:</p>
+
+<ul>
+<li>Imperative style resource management functions.</li>
+
+<li>A monadic style resource management class.</li>
+
+<li>A delimited continuation style API.</li>
+</ul>
+
+<h2 id='imperative_style'>Imperative Style</h2>
+
+<p>The Scala ARM library allows users to ensure opening closing of resources within blocks of code using the <code>managed</code> method. This is easiest to accomplish with a for expression and the managed method defined on <tt>scala.resource</tt>:</p>
+<div class='highlight'><pre><code class='scala'><span class='k'>import</span> <span class='nn'>resource._</span>
+<span class='k'>for</span><span class='o'>(</span><span class='n'>input</span> <span class='k'>&lt;-</span> <span class='n'>managed</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>FileInputStream</span><span class='o'>(</span><span class='s'>&quot;test.txt&quot;</span><span class='o'>))</span> <span class='o'>{</span>
+  <span class='c1'>// Code that uses the input as a FileInputStream</span>
+<span class='o'>}</span>
+</code></pre>
+</div>
+<p>The <code>managed</code> method essentially takes an argument of &#8220;anything that has a close or dispose method&#8221; and constructs a new <code>ManagedResource</code> object. This object has a <code>foreach</code> method which can be used inside of the for expression. The scala-arm library provides a very flexible mechanism for customising the treatment of resource types, using a type class trait. Please read the section on the <a href='resource.html'>Resource Type Class</a> for more information.</p>
+
+<p>This style of usage will ensure that the file input stream is closed at the end of the for expression. In the event of an exception, the originating exception (from inside the for block) will be thrown and any exceptions thrown while closing the resource will be suppressed. The benefits of using for expressions is that multiple resources can be managed together. For example, one can do the following:</p>
+<div class='highlight'><pre><code class='scala'><span class='k'>import</span> <span class='nn'>resource._</span>
+<span class='c1'>// Copy input into output.</span>
+<span class='k'>for</span><span class='o'>(</span><span class='n'>input</span> <span class='k'>&lt;-</span> <span class='n'>managed</span><span class='o'>(</span><span class='k'>new</span> <span class='n'>java</span><span class='o'>.</span><span class='n'>io</span><span class='o'>.</span><span class='nc'>FileInputStream</span><span class='o'>(</span><span class='s'>&quot;test.txt&quot;</span><span class='o'>);</span> 
+     <span class='n'>output</span> <span class='k'>&lt;-</span> <span class='n'>managed</span><span class='o'>(</span><span class='k'>new</span> <span class='n'>java</span><span class='o'>.</span><span class='n'>io</span><span class='o'>.</span><span class='nc'>FileOutputStream</span><span class='o'>(</span><span class='s'>&quot;test2.txt&quot;</span><span class='o'>))</span> <span class='o'>{</span>
+  <span class='k'>val</span> <span class='n'>buffer</span> <span class='k'>=</span> <span class='k'>new</span> <span class='nc'>Array</span><span class='o'>[</span><span class='kt'>Byte</span><span class='o'>](</span><span class='mi'>512</span><span class='o'>)</span>
+  <span class='k'>while</span><span class='o'>(</span><span class='n'>input</span><span class='o'>.</span><span class='n'>read</span><span class='o'>(</span><span class='n'>buffer</span><span class='o'>)</span> <span class='o'>!=</span> <span class='o'>-</span><span class='mi'>1</span><span class='o'>)</span> <span class='o'>{</span>
+    <span class='n'>output</span><span class='o'>.</span><span class='n'>write</span><span class='o'>(</span><span class='n'>buffer</span><span class='o'>);</span>
+  <span class='o'>}</span>
+<span class='o'>}</span>
+</code></pre>
+</div>
+<p>There is a convenience notation for those who don&#8217;t like using for comprehensions:</p>
+<div class='highlight'><pre><code class='scala'><span class='k'>import</span> <span class='nn'>resource._</span>
+<span class='n'>managed</span><span class='o'>(</span><span class='nc'>DriverManager</span><span class='o'>.</span><span class='n'>getConnection</span><span class='o'>(</span><span class='n'>url</span><span class='o'>,</span> <span class='n'>username</span><span class='o'>,</span> <span class='n'>password</span><span class='o'>))</span> <span class='n'>acquireAndGet</span> <span class='o'>{</span>
+  <span class='n'>connection</span> <span class='k'>=&gt;</span>
+   <span class='c1'>// Something that uses connection</span>
+<span class='o'>}</span>
+</code></pre>
+</div>
+<h2 id='monadic_style'>Monadic style</h2>
+
+<p>The scala-arm library defined a monadic like container <code>ManagedResource</code>. This container defines <code>map</code> and <code>flatMap</code> interfaces. It can be constructed using the <code>managed</code> method defined on <code>scala.resource</code>. The <code>map</code> and <code>flatMap</code> methods are defined to allow monadic workflows.</p>
+
+<p>The <code>map</code> method will take a transformation of the raw resource type and return a new managed resource object of the transformed type. Let&#8217;s see an example:</p>
+<div class='highlight'><pre><code class='scala'><span class='k'>import</span> <span class='nn'>resource._</span>
+<span class='k'>val</span> <span class='n'>first_ten_bytes</span> <span class='k'>=</span> <span class='n'>managed</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>FileInputStream</span><span class='o'>(</span><span class='s'>&quot;test.txt&quot;</span><span class='o'>))</span> <span class='n'>map</span> <span class='o'>{</span> 
+  <span class='n'>input</span> <span class='k'>=&gt;</span>
+     <span class='k'>val</span> <span class='n'>buffer</span> <span class='k'>=</span> <span class='k'>new</span> <span class='nc'>Array</span><span class='o'>[</span><span class='kt'>Byte</span><span class='o'>](</span><span class='mi'>10</span><span class='o'>)</span>
+     <span class='n'>input</span><span class='o'>.</span><span class='n'>read</span><span class='o'>(</span><span class='n'>buffer</span><span class='o'>)</span>
+     <span class='n'>buffer</span>
+<span class='o'>}</span>
+</code></pre>
+</div>
+<p>The <code>ManagedResource</code> class also defines mechanisms for extracting data outside of the monadic container after the container has been mapped or flatMapped. This is done through the opt or either methods. Both methods attempt to acquire the resource and run all transformations on the resource. They then close the resource and return a result. In the case of an error, the opt method will return an empty option. The either method will return an Either where the right side is defined and left contains the exceptions seen during the execution of the transformations or closing the resource.</p>
+
+<pre><code>scala&gt; first_ten_bytes.opt.get
+res1: Array[Byte] = Array(72, 65, 73, 32, 10, 85, 10, 87, 85, 82)
+
+scala&gt; first_ten_bytes.either.right.get
+res2: Array[Byte] = Array(72, 65, 73, 32, 10, 85, 10, 87, 85, 82)&lt;/code&gt;&lt;/pre&gt;</code></pre>
+
+<p>The <code>flatMap</code> method can be used to ensure that applying a transformation of an embedded resource to another <code>ManagedResource</code> will create a <code>ManagedResource[T]</code> instead of a <code>ManagedResource[ManagedResource[T]]</code>.</p>
+
+<p>The handy mechanism of <code>ManagedResource</code> is the ability to create a collection out of a <code>ManagedResource[Traversable[T]]</code>. This can be used to construct a workflow that will open a resource, iterate over its contents, and close it when finished. Let&#8217;s look at an example that will print all lines in the file &#8220;test.txt&#8221;:</p>
+<div class='highlight'><pre><code class='scala'><span class='k'>import</span> <span class='nn'>scala.resource._</span>
+<span class='k'>import</span> <span class='nn'>java.io._</span>
+<span class='k'>val</span> <span class='n'>stream</span> <span class='k'>=</span> <span class='n'>managed</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>FileInputStream</span><span class='o'>(</span><span class='s'>&quot;text.txt&quot;</span><span class='o'>))</span>
+<span class='k'>val</span> <span class='n'>reader</span> <span class='k'>=</span> <span class='n'>stream</span> <span class='n'>map</span> <span class='o'>(</span><span class='k'>new</span> <span class='nc'>BufferedReader</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>InputStreamReader</span><span class='o'>(</span><span class='n'>_</span><span class='o'>)))</span>
+<span class='k'>val</span> <span class='n'>lines</span> <span class='k'>=</span> <span class='n'>stream</span> <span class='n'>map</span> <span class='n'>makeBufferedReaderLineIterator</span> <span class='n'>toTraversable</span>
+<span class='n'>lines</span><span class='o'>.</span><span class='n'>view</span> <span class='n'>map</span> <span class='o'>(</span><span class='n'>_</span><span class='o'>.</span><span class='n'>trim</span><span class='o'>)</span> <span class='n'>foreach</span> <span class='n'>println</span>
+</code></pre>
+</div>
+<p>Much of the noise in the example is dealing with the java.io API. The important piece is how we have a managed resource, convert it into a traversable and make some minor modification before aquiring. This produces a traversable that will eventually read the file. This allows us to pre-construct I/O related portions of our program to re-use over and over. For example, One could construct a <code>ManagedResource</code> that will read and parse configuration information. Then you can use a listener that detects when the file&#8217;s modification date changes, and re-extract the configuration information from the <code>ManagedResource</code>.</p>
+
+<h2 id='delimited_continuation_style'>Delimited continuation style</h2>
+
+<p>The scala-arm library also supports using delimited continuations. This is done via the <code>reflect</code> method on <code>ManagedResource</code>. This can be used to &#8220;flatten&#8221; the nested blocks required to use resources. The best example is the <code>and</code> method defined on <code>scala.resource</code>. This method can be used to combine two resources into a single <code>ManagedResource</code> class containing a tuple of the two resources. It will jointly open and close both resources. The code is below:</p>
+<div class='highlight'><pre><code class='scala'><span class='k'>import</span> <span class='nn'>resource._</span>
+<span class='k'>def</span> <span class='n'>and</span><span class='o'>[</span><span class='kt'>A</span>,<span class='kt'>B</span><span class='o'>](</span><span class='n'>r1</span> <span class='k'>:</span> <span class='kt'>ManagedResource</span><span class='o'>[</span><span class='kt'>A</span><span class='o'>],</span> <span class='n'>r2</span> <span class='k'>:</span> <span class='kt'>ManagedResource</span><span class='o'>[</span><span class='kt'>B</span><span class='o'>])</span> <span class='k'>=</span> 
+    <span class='k'>new</span> <span class='nc'>ManagedResource</span><span class='o'>[(</span><span class='kt'>A</span>,<span class='kt'>B</span><span class='o'>)]</span> <span class='k'>with</span> <span class='nc'>ManagedResourceOperations</span><span class='o'>[(</span><span class='kt'>A</span>,<span class='kt'>B</span><span class='o'>)]</span> <span class='o'>{</span>
+      <span class='k'>override</span> <span class='k'>def</span> <span class='n'>acquireFor</span><span class='o'>[</span><span class='kt'>C</span><span class='o'>](</span><span class='n'>f</span> <span class='k'>:</span> <span class='o'>((</span><span class='kt'>A</span><span class='o'>,</span><span class='kt'>B</span><span class='o'>))</span> <span class='k'>=&gt;</span> <span class='n'>C</span><span class='o'>)</span> <span class='k'>=</span> <span class='n'>withResources</span> <span class='o'>{</span>
+        <span class='n'>f</span><span class='o'>(</span> <span class='o'>(</span><span class='n'>r1</span><span class='o'>.</span><span class='n'>reflect</span><span class='o'>[</span><span class='kt'>C</span><span class='o'>],</span> <span class='n'>r2</span><span class='o'>.</span><span class='n'>reflect</span><span class='o'>[</span><span class='kt'>C</span><span class='o'>])</span> <span class='o'>)</span>
+      <span class='o'>}</span>
+  <span class='o'>}</span>
+</code></pre>
+</div>
+<p>compare that with the previous &#8220;imperative style&#8221; <code>and</code> method:</p>
+<div class='highlight'><pre><code class='scala'><span class='k'>def</span> <span class='n'>and</span><span class='o'>[</span><span class='kt'>A</span>,<span class='kt'>B</span><span class='o'>](</span><span class='n'>r1</span> <span class='k'>:</span> <span class='kt'>ManagedResource</span><span class='o'>[</span><span class='kt'>A</span><span class='o'>],</span> <span class='n'>r2</span> <span class='k'>:</span> <span class='kt'>ManagedResource</span><span class='o'>[</span><span class='kt'>B</span><span class='o'>])</span> <span class='k'>:</span> <span class='kt'>ManagedResource</span><span class='o'>[(</span><span class='kt'>A</span>,<span class='kt'>B</span><span class='o'>)]</span> <span class='k'>=</span> 
+  <span class='k'>new</span> <span class='nc'>ManagedResource</span><span class='o'>[(</span><span class='kt'>A</span>,<span class='kt'>B</span><span class='o'>)]</span> <span class='k'>with</span> <span class='nc'>ManagedResourceOperations</span><span class='o'>[(</span><span class='kt'>A</span>,<span class='kt'>B</span><span class='o'>)]</span> <span class='o'>{</span>
+    <span class='k'>override</span> <span class='k'>def</span> <span class='n'>acquireFor</span><span class='o'>[</span><span class='kt'>C</span><span class='o'>](</span><span class='n'>f</span> <span class='k'>:</span> <span class='o'>((</span><span class='kt'>A</span><span class='o'>,</span><span class='kt'>B</span><span class='o'>))</span> <span class='k'>=&gt;</span> <span class='n'>C</span><span class='o'>)</span> <span class='k'>:</span> <span class='kt'>Either</span><span class='o'>[</span><span class='kt'>List</span><span class='o'>[</span><span class='kt'>Throwable</span><span class='o'>]</span>, <span class='kt'>C</span><span class='o'>]</span> <span class='k'>=</span> <span class='o'>{</span>
+      <span class='k'>val</span> <span class='n'>result</span> <span class='k'>=</span> <span class='n'>r1</span><span class='o'>.</span><span class='n'>acquireFor</span><span class='o'>({</span> <span class='n'>opened1</span> <span class='k'>=&gt;</span>
+        <span class='n'>r2</span><span class='o'>.</span><span class='n'>acquireFor</span><span class='o'>({</span> <span class='n'>opened2</span> <span class='k'>=&gt;</span>
+          <span class='n'>f</span><span class='o'>((</span><span class='n'>opened1</span><span class='o'>,</span> <span class='n'>opened2</span><span class='o'>))</span>
+        <span class='o'>})</span>
+       <span class='o'>})</span>
+      <span class='n'>result</span><span class='o'>.</span><span class='n'>fold</span><span class='o'>(</span> <span class='n'>errors</span> <span class='k'>=&gt;</span> <span class='nc'>Left</span><span class='o'>(</span><span class='n'>errors</span><span class='o'>),</span> <span class='n'>y</span> <span class='k'>=&gt;</span> <span class='n'>y</span><span class='o'>)</span>      
+      <span class='o'>}</span>
+    <span class='o'>}</span>
+<span class='o'>}</span>
+</code></pre>
+</div>
+<p>The mechanism for using Delimted Continuations is outlines in more detail on the <a href='continuations.html'>Delimited Continuations and ARM</a> page.</p>   
+  </div>
+  <div class="span6 columns blogroll">
+    <!-- TODO - links here -->
+  </div>
+</div>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try{
+var pageTracker = _gat._getTracker("UA-5651872-1");
+pageTracker._trackPageview();
+} catch(err) {}
+</script>
+</body>
+</html>
+

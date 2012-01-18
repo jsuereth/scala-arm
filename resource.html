@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Resource Typeclass - </title>
+   <meta name="author" content="Josh Suereth" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="css/bootstrap.css" type="text/css" />
+   <link rel="stylesheet" href="css/syntax.css" type="text/css" />
+   <link rel="stylesheet" href="css/colors.css" type="text/css" />
+   <link rel="stylesheet" href="css/custom.css" type="text/css" />
+
+</head>
+<body>
+
+
+    <!-- Topbar
+    ================================================== -->
+    <div class="topbar" >
+      <div class="topbar-inner">
+        <div class="container">
+          <a class="brand" href="index.html">Scala ARM</a>
+          <ul class="nav">
+           <li><a target="_blank" href="latest/api/index.html">Scaladoc</a></li>
+           <li><a href="usage.html">Usage</a></li>
+           <li><a href="resource.html">Resource Typeclasss</a></li>
+           <li><a href="continuations.html">Continuations</a></li>
+           <li><a href="https://github.com/jsuereth/scala-arm/wiki">Wiki</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+<div class="row">
+  <div class="span2 columns"><p>&nbsp;</p></div>
+  <div class="span10 columns content">
+    <p>The scala-arm library uses a Resource type class trait, conveniently called <code>Resource</code> to control how resources are opened/closed within ARM blocks. The basic trait is shown below:</p>
+<div class='highlight'><pre><code class='scala'><span class='k'>package</span> <span class='nn'>scala.resource</span>
+<span class='k'>trait</span> <span class='nc'>Resource</span><span class='o'>[</span><span class='kt'>R</span><span class='o'>]</span> <span class='o'>{</span>
+  <span class='k'>def</span> <span class='n'>open</span><span class='o'>(</span><span class='n'>r</span> <span class='k'>:</span> <span class='kt'>R</span><span class='o'>)</span> <span class='k'>:</span> <span class='kt'>Unit</span> <span class='o'>=</span> <span class='o'>()</span>
+  <span class='k'>def</span> <span class='n'>close</span><span class='o'>(</span><span class='n'>r</span> <span class='k'>:</span> <span class='kt'>R</span><span class='o'>)</span> <span class='k'>:</span> <span class='kt'>Unit</span>
+  <span class='k'>def</span> <span class='n'>possibleExceptions</span> <span class='k'>:</span> <span class='kt'>Seq</span><span class='o'>[</span><span class='kt'>Class</span><span class='o'>[</span><span class='k'>_</span><span class='o'>]]</span> <span class='k'>=</span> <span class='nc'>List</span><span class='o'>(</span><span class='n'>classOf</span><span class='o'>[</span><span class='kt'>Exception</span><span class='o'>])</span>
+<span class='o'>}</span>
+</code></pre>
+</div>
+<p>The trait defines three methods, <code>open</code>, <code>close</code> and <code>possibleExceptions</code>. The <code>open</code> method only needs to be defined if the resource needs to be explicitly opened. The <code>possibleExceptions</code> method defines what exceptions can be caught and defferred while attempting to ensure the resource is closed. If an exception needs to be fatal, i.e. prevent the resource from attempting to close, then it should <em>not</em> be included in this list.</p>
+
+<p>Type classes in scala are encoded using implicit parameters. Due to the mechanisms of implicit lookup, the scala-arm library is able to provide default implicits that will be used if no user-defined implicit is available for a given type. To be flexible, scala-arm provides the following two implicits at the bottom of the lookup hierarchy, i.e. they will be the last ones Scala attempts to use before rejected a call to <code>managed</code>:</p>
+<div class='highlight'><pre><code class='scala'>  <span class='k'>type</span> <span class='kt'>ReflectiveCloseable</span> <span class='o'>=</span> <span class='o'>{</span> <span class='k'>def</span> <span class='n'>close</span><span class='o'>()</span> <span class='o'>}</span>
+  <span class='k'>implicit</span> <span class='k'>def</span> <span class='n'>reflectiveCloseableResource</span><span class='o'>[</span><span class='kt'>A</span> <span class='k'>&lt;:</span> <span class='kt'>ReflectiveCloseable</span><span class='o'>]</span> <span class='k'>=</span> <span class='k'>new</span> <span class='nc'>Resource</span><span class='o'>[</span><span class='kt'>A</span><span class='o'>]</span> <span class='o'>{</span>
+    <span class='k'>override</span> <span class='k'>def</span> <span class='n'>close</span><span class='o'>(</span><span class='n'>r</span> <span class='k'>:</span> <span class='kt'>A</span><span class='o'>)</span> <span class='k'>=</span> <span class='n'>r</span><span class='o'>.</span><span class='n'>close</span><span class='o'>()</span>
+    <span class='k'>override</span> <span class='k'>def</span> <span class='n'>toString</span> <span class='k'>=</span> <span class='s'>&quot;Resource[{ def close() : Unit }]&quot;</span>
+  <span class='o'>}</span>
+  <span class='k'>type</span> <span class='kt'>ReflectiveDisposable</span> <span class='o'>=</span> <span class='o'>{</span> <span class='k'>def</span> <span class='n'>dispose</span><span class='o'>()</span> <span class='o'>}</span>
+  <span class='k'>implicit</span> <span class='k'>def</span> <span class='n'>reflectiveDisposableResource</span><span class='o'>[</span><span class='kt'>A</span> <span class='k'>&lt;:</span> <span class='kt'>ReflectiveDisposable</span><span class='o'>]</span> <span class='k'>=</span> <span class='k'>new</span> <span class='nc'>Resource</span><span class='o'>[</span><span class='kt'>A</span><span class='o'>]</span> <span class='o'>{</span>
+    <span class='k'>override</span> <span class='k'>def</span> <span class='n'>close</span><span class='o'>(</span><span class='n'>r</span> <span class='k'>:</span> <span class='kt'>A</span><span class='o'>)</span> <span class='k'>=</span> <span class='n'>r</span><span class='o'>.</span><span class='n'>dispose</span><span class='o'>()</span>
+    <span class='k'>override</span> <span class='k'>def</span> <span class='n'>toString</span> <span class='k'>=</span> <span class='s'>&quot;Resource[{ def dispose() : Unit }]&quot;</span>
+  <span class='o'>}</span>
+</code></pre>
+</div>
+<p>These two implicits allow users of the library to make use of any resource class that defines a close or dispose method. The downside is that by using structural types, the close and dispose method will be invoked via reflection.</p>
+
+<p>The scala-arm library also provides default implicits for common resources used from the Scala library or the Java SDK. In particular, anything that extends <code>java.io.Closeable</code> will <em>not</em> use reflection when closing the resource. This type class is given slightly higher priority so it will be preferred to the reflective version when resolving implicits.</p>   
+  </div>
+  <div class="span6 columns blogroll">
+    <!-- TODO - links here -->
+  </div>
+</div>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try{
+var pageTracker = _gat._getTracker("UA-5651872-1");
+pageTracker._trackPageview();
+} catch(err) {}
+</script>
+</body>
+</html>
+

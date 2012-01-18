@@ -79,13 +79,13 @@ scala.util.control.Exception API.
       <p class="shortcomment cmt">Opens a given resource, returning a handle to execute against during the &quot;session&quot; of the resource being open.</p><div class="fullcomment"><div class="comment cmt"><p>Opens a given resource, returning a handle to execute against during the &quot;session&quot; of the resource being open.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected abstract </dd></dl></div>
     </li><li visbl="prt" name="resource.AbstractManagedResource#unsafeClose" data-isabs="true">
-      <a id="unsafeClose(R):Unit"></a>
+      <a id="unsafeClose(R,Option[Throwable]):Unit"></a>
       <h4 class="signature">
       <span class="kind">def</span>
       <span class="symbol"> 
         <span class="name">unsafeClose</span>
         
-        <span class="params">(<span name="handle">handle: R</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+        <span class="params">(<span name="handle">handle: R</span>, <span name="errors">errors: <span name="scala.Option" class="extype">Option</span>[Throwable]</span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Closes a resource using the handle.</p><div class="fullcomment"><div class="comment cmt"><p>Closes a resource using the handle.  This method will throw any exceptions normally occuring during the close of

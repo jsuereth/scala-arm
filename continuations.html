@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>ARM with Continuations - </title>
+   <meta name="author" content="Josh Suereth" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="css/bootstrap.css" type="text/css" />
+   <link rel="stylesheet" href="css/syntax.css" type="text/css" />
+   <link rel="stylesheet" href="css/colors.css" type="text/css" />
+   <link rel="stylesheet" href="css/custom.css" type="text/css" />
+
+</head>
+<body>
+
+
+    <!-- Topbar
+    ================================================== -->
+    <div class="topbar" >
+      <div class="topbar-inner">
+        <div class="container">
+          <a class="brand" href="index.html">Scala ARM</a>
+          <ul class="nav">
+           <li><a target="_blank" href="latest/api/index.html">Scaladoc</a></li>
+           <li><a href="usage.html">Usage</a></li>
+           <li><a href="resource.html">Resource Typeclasss</a></li>
+           <li><a href="continuations.html">Continuations</a></li>
+           <li><a href="https://github.com/jsuereth/scala-arm/wiki">Wiki</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+<div class="row">
+  <div class="span2 columns"><p>&nbsp;</p></div>
+  <div class="span10 columns content">
+    <p>Scala-arm can make use of delimited continuations to simplify code. A delimited continuation is a way of rewriting code to simplify continuation passing style. The essence of delmited continuations is contained Scala&#8217;s <code>ControlContext</code> class.</p>
+
+<p>Essentially, a ControlContext is a way of storing computation that has occured and computation that <em>will</em> occur later. Let&#8217;s look at an example:</p>
+
+<p><img src='https://docs.google.com/drawings/pub?id=1sEKDu_8Xku1W6ulF_kN5OAxrjMrUZIZg3yMVYh9quPY&amp;w=960&amp;h=720' alt='Drawing 1' /></p>
+
+<p>In this example, the code <code>val input = managed(new FileInputStream(&#39;test.txt&quot;)) !</code> makes a call to <code>scala.util.continuations.shift</code>. This places a portion of computation into a <code>ControlContext</code>. The beginning of this computation opens the file <code>input.txt</code> and the end of the computation closes the file <code>input.txt</code>. The middle portion is left empty to be filled in later via a continuations.</p>
+
+<p>The result type of the <code>!</code> operator on continuations is @suspendable which is shorthand for @cpsParam<span>Unit,Unit</span>. This captures the type of each portion of computation in the <code>ControlContext</code>. The type <code>InputStream @cpsParam[Unit,Unit]</code> denotes that the computation so far generates an <code>InputStream</code>, requires a continuation that takes the <code>InputStream</code> and returns a Unit and will eventually return a <code>Unit</code> when completed.</p>
+
+<p><code>ControlContext</code> is nestable. When constructing a <code>ControlContext</code> inside of another one, the ending computations must line up. Let&#8217;s look at an example with nested managed resources.</p>
+
+<p><img src='https://docs.google.com/drawings/pub?id=1t9s4ZeGcuIJraGgiCmdj8T61SCQBwoo_dY2eODfaLRQ&amp;w=960&amp;h=720' alt='Figure 2' /></p>
+
+<p>In this example, the <code>val output = managed(new FileOutputStream(&#39;test2.txt&quot;)) !</code> expression is nested inside the outer delimited continuation expression. This causes the opening of <code>test2.txt</code> to happen after the opening of <code>test.txt</code> and the closing of <code>test2.txt</code> to happen before the closing of <code>test.txt</code>.</p>
+
+<p>The expression also creates a new nested <code>ControlContext</code> with type <code>FileOutputStream @cpsParam[Unit,Unit]</code>. The last parameter of the computation <em>must</em> line up with the second parameter of the outer <code>ControlContext</code> so that the computations can be nested. There is still a &#8216;hole&#8217; left in the middle of the entire computation for the remaining block.</p>
+
+<h2 id='socket_example'>Socket Example</h2>
+
+<p>The below code implements an echo server that listens on a port and echos back every full line of text it receives.</p>
+<div class='highlight'><pre><code class='scala'>    <span class='k'>import</span> <span class='nn'>java.io._</span>
+    <span class='k'>import</span> <span class='nn'>util.continuations._</span>
+    <span class='k'>import</span> <span class='nn'>resource._</span>
+    <span class='k'>def</span> <span class='n'>each_line_from</span><span class='o'>(</span><span class='n'>r</span> <span class='k'>:</span> <span class='kt'>BufferedReader</span><span class='o'>)</span> <span class='k'>:</span> <span class='kt'>String</span> <span class='kt'>@suspendable</span> <span class='o'>=</span>
+      <span class='n'>shift</span> <span class='o'>{</span> <span class='n'>k</span> <span class='k'>=&gt;</span>
+        <span class='k'>var</span> <span class='n'>line</span> <span class='k'>=</span> <span class='n'>r</span><span class='o'>.</span><span class='n'>readLine</span>
+        <span class='k'>while</span><span class='o'>(</span><span class='n'>line</span> <span class='o'>!=</span> <span class='kc'>null</span><span class='o'>)</span> <span class='o'>{</span>
+          <span class='n'>k</span><span class='o'>(</span><span class='n'>line</span><span class='o'>)</span>
+          <span class='n'>line</span> <span class='k'>=</span> <span class='n'>r</span><span class='o'>.</span><span class='n'>readLine</span>
+        <span class='o'>}</span>
+      <span class='o'>}</span>
+    <span class='n'>reset</span> <span class='o'>{</span>
+      <span class='k'>val</span> <span class='n'>server</span> <span class='k'>=</span> <span class='n'>managed</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>ServerSocket</span><span class='o'>(</span><span class='mi'>8007</span><span class='o'>))</span> <span class='o'>!</span>
+      <span class='k'>while</span><span class='o'>(</span><span class='kc'>true</span><span class='o'>)</span> <span class='o'>{</span>
+        <span class='c1'>// This reset is not needed, however the  below denotes a &quot;flow&quot; of execution that can be deferred.</span>
+        <span class='c1'>// One can envision an asynchronous execuction model that would support the exact same semantics as     below.</span>
+        <span class='n'>reset</span> <span class='o'>{</span>
+          <span class='k'>val</span> <span class='n'>connection</span> <span class='k'>=</span> <span class='n'>managed</span><span class='o'>(</span><span class='n'>server</span><span class='o'>.</span><span class='n'>accept</span><span class='o'>)</span> <span class='o'>!</span>
+          <span class='k'>val</span> <span class='n'>output</span> <span class='k'>=</span> <span class='n'>managed</span><span class='o'>(</span><span class='n'>connection</span><span class='o'>.</span><span class='n'>getOutputStream</span><span class='o'>)</span> <span class='o'>!</span>
+          <span class='k'>val</span> <span class='n'>input</span> <span class='k'>=</span> <span class='n'>managed</span><span class='o'>(</span><span class='n'>connection</span><span class='o'>.</span><span class='n'>getInputStream</span><span class='o'>)</span> <span class='o'>!</span>
+          <span class='k'>val</span> <span class='n'>writer</span> <span class='k'>=</span> <span class='k'>new</span> <span class='nc'>PrintWriter</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>BufferedWriter</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>OutputStreamWriter</span><span class='o'>(</span><span class='n'>output</span><span class='o'>)))</span>
+          <span class='k'>val</span> <span class='n'>reader</span> <span class='k'>=</span> <span class='k'>new</span> <span class='nc'>BufferedReader</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>InputStreamReader</span><span class='o'>(</span><span class='n'>input</span><span class='o'>))</span>
+          <span class='n'>writer</span><span class='o'>.</span><span class='n'>println</span><span class='o'>(</span><span class='n'>each_line_from</span><span class='o'>(</span><span class='n'>reader</span><span class='o'>))</span>
+          <span class='n'>writer</span><span class='o'>.</span><span class='n'>flush</span><span class='o'>()</span>
+        <span class='o'>}</span>
+      <span class='o'>}</span>
+    <span class='o'>}</span>
+</code></pre>
+</div>
+<p>The final computation placed in the hole left over from all the nested <code>ControlContext</code>s is the simple:</p>
+<div class='highlight'><pre><code class='scala'>    <span class='n'>writer</span><span class='o'>.</span><span class='n'>println</span><span class='o'>(</span><span class='n'>_</span><span class='o'>)</span>
+    <span class='n'>writer</span><span class='o'>.</span><span class='n'>flush</span><span class='o'>()</span>
+</code></pre>
+</div>
+<p>You can see how each call to <code>shift</code> (either the <code>!</code> operator or the <code>each_line_from</code> method) causes additional computation before and after the &#8216;hole&#8217;. You can also see in <code>each_line_from</code> how that &#8216;hole&#8217; in the computation can be used more than once to complete the entire process.</p>
+
+<p>Delimited continuations provide a lot of power. This simple model of thinking about them helps understand the type signatures and how to use them effectively.</p>   
+  </div>
+  <div class="span6 columns blogroll">
+    <!-- TODO - links here -->
+  </div>
+</div>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try{
+var pageTracker = _gat._getTracker("UA-5651872-1");
+pageTracker._trackPageview();
+} catch(err) {}
+</script>
+</body>
+</html>
+

@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>Socket Example - </title>
+   <meta name="author" content="Josh Suereth" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="css/bootstrap.css" type="text/css" />
+   <link rel="stylesheet" href="css/syntax.css" type="text/css" />
+   <link rel="stylesheet" href="css/colors.css" type="text/css" />
+   <link rel="stylesheet" href="css/custom.css" type="text/css" />
+
+</head>
+<body>
+
+
+    <!-- Topbar
+    ================================================== -->
+    <div class="topbar" >
+      <div class="topbar-inner">
+        <div class="container">
+          <a class="brand" href="index.html">Scala ARM</a>
+          <ul class="nav">
+           <li><a target="_blank" href="latest/api/index.html">Scaladoc</a></li>
+           <li><a href="usage.html">Usage</a></li>
+           <li><a href="resource.html">Resource Typeclasss</a></li>
+           <li><a href="continuations.html">Continuations</a></li>
+           <li><a href="https://github.com/jsuereth/scala-arm/wiki">Wiki</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+<div class="row">
+  <div class="span2 columns"><p>&nbsp;</p></div>
+  <div class="span10 columns content">
+    <p>The Code:</p>
+<div class='highlight'><pre><code class='scala'><span class='k'>import</span> <span class='nn'>java.net.</span><span class='o'>{</span><span class='nc'>ServerSocket</span><span class='o'>,</span> <span class='nc'>Socket</span><span class='o'>}</span>
+<span class='k'>import</span> <span class='nn'>java.io._</span>
+<span class='k'>import</span> <span class='nn'>resource._</span>
+
+<span class='k'>class</span> <span class='nc'>EchoServer</span> <span class='k'>extends</span> <span class='nc'>Thread</span> <span class='o'>{</span>
+  <span class='k'>override</span> <span class='k'>def</span> <span class='n'>run</span><span class='o'>()</span> <span class='k'>:</span> <span class='kt'>Unit</span> <span class='o'>=</span> <span class='o'>{</span>
+    <span class='k'>import</span> <span class='nn'>resource._</span>
+    <span class='k'>for</span> <span class='o'>{</span>
+      <span class='n'>server</span> <span class='k'>&lt;-</span> <span class='n'>managed</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>ServerSocket</span><span class='o'>(</span><span class='mi'>8007</span><span class='o'>))</span>
+      <span class='n'>connection</span> <span class='k'>&lt;-</span> <span class='n'>managed</span><span class='o'>(</span><span class='n'>server</span><span class='o'>.</span><span class='n'>accept</span><span class='o'>)</span>
+      <span class='n'>outStream</span> <span class='k'>&lt;-</span> <span class='n'>managed</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>PrintWriter</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>BufferedWriter</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>OutputStreamWriter</span><span class='o'>(</span><span class='n'>connection</span><span class='o'>.</span><span class='n'>getOutputStream</span><span class='o'>))))</span>
+      <span class='n'>input</span> <span class='k'>&lt;-</span> <span class='n'>managed</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>BufferedReader</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>InputStreamReader</span><span class='o'>(</span><span class='n'>connection</span><span class='o'>.</span><span class='n'>getInputStream</span><span class='o'>)))</span>
+      <span class='n'>line</span> <span class='k'>&lt;-</span> <span class='k'>new</span> <span class='nc'>JavaBufferedReaderLineIterator</span><span class='o'>(</span><span class='n'>input</span><span class='o'>)</span>
+    <span class='o'>}</span> <span class='o'>{</span>
+      <span class='n'>outStream</span><span class='o'>.</span><span class='n'>println</span><span class='o'>(</span><span class='n'>line</span><span class='o'>)</span>
+      <span class='n'>outStream</span><span class='o'>.</span><span class='n'>flush</span><span class='o'>()</span>
+    <span class='o'>}</span>
+  <span class='o'>}</span>
+<span class='o'>}</span>
+
+<span class='k'>object</span> <span class='nc'>EchoClient</span> <span class='o'>{</span>
+  <span class='k'>def</span> <span class='n'>main</span><span class='o'>(</span><span class='n'>args</span> <span class='k'>:</span> <span class='kt'>Array</span><span class='o'>[</span><span class='kt'>String</span><span class='o'>])</span> <span class='k'>:</span> <span class='kt'>Unit</span> <span class='o'>=</span> <span class='o'>{</span>
+    <span class='k'>for</span> <span class='o'>{</span> <span class='n'>connection</span> <span class='k'>&lt;-</span> <span class='nc'>ManagedResource</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>Socket</span><span class='o'>(</span><span class='s'>&quot;localhost&quot;</span><span class='o'>,</span> <span class='mi'>8007</span><span class='o'>))</span>
+      <span class='n'>outStream</span> <span class='k'>&lt;-</span> <span class='nc'>ManagedResource</span><span class='o'>(</span><span class='n'>connection</span><span class='o'>.</span><span class='n'>getOutputStream</span><span class='o'>))</span>
+      <span class='k'>val</span> <span class='n'>out</span> <span class='k'>=</span> <span class='k'>new</span> <span class='nc'>PrintWriter</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>BufferedWriter</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>OutputStreamWriter</span><span class='o'>(</span><span class='n'>outStream</span><span class='o'>)))</span>
+      <span class='n'>inStream</span> <span class='k'>&lt;-</span> <span class='n'>managed</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>InputStreamReader</span><span class='o'>(</span><span class='n'>connection</span><span class='o'>.</span><span class='n'>getInputStream</span><span class='o'>))</span>
+      <span class='k'>val</span> <span class='n'>in</span> <span class='k'>=</span> <span class='k'>new</span> <span class='nc'>BufferedReader</span><span class='o'>(</span><span class='n'>inStream</span><span class='o'>)</span>
+    <span class='o'>}</span> <span class='o'>{</span>
+      <span class='n'>out</span><span class='o'>.</span><span class='n'>println</span><span class='o'>(</span><span class='s'>&quot;Test Echo Server!&quot;</span><span class='o'>)</span>
+      <span class='n'>out</span><span class='o'>.</span><span class='n'>flush</span><span class='o'>()</span>
+      <span class='n'>println</span><span class='o'>(</span><span class='s'>&quot;Client Received: &quot;</span> <span class='o'>+</span> <span class='n'>in</span><span class='o'>.</span><span class='n'>readLine</span><span class='o'>)</span>
+    <span class='o'>}</span>
+  <span class='o'>}</span>
+<span class='o'>}</span>
+</code></pre>
+</div>
+<p>The Result:</p>
+
+<pre><code>scala&gt; val thread = new EchoServer
+thread: java.lang.Thread = Thread[Thread-12,5,trap.exit]
+scala&gt; thread.start
+scala&gt; EchoClient.main(Array(&quot;&quot;))
+Server returning: Test Echo Server!
+Client Received: Test Echo Server!</code></pre>   
+  </div>
+  <div class="span6 columns blogroll">
+    <!-- TODO - links here -->
+  </div>
+</div>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try{
+var pageTracker = _gat._getTracker("UA-5651872-1");
+pageTracker._trackPageview();
+} catch(err) {}
+</script>
+</body>
+</html>
+
