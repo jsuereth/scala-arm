@@ -1,6 +1,7 @@
 import sbt._
 import Keys._
 import com.jsuereth.sbtsite.SitePlugin.site
+import com.jsuereth.sbtsite.SiteKeys._
 import com.jsuereth.ghpages.GhPages.ghpages
 import com.jsuereth.git.GitPlugin.git
 
@@ -31,7 +32,15 @@ object PluginDef extends Build {
   )
 
   def websiteSettings: Seq[Setting[_]] = site.settings ++ ghpages.settings ++ Seq(
-    git.remoteRepo := "git@github.com:jsuereth/scala-arm.git"
+    git.remoteRepo := "git@github.com:jsuereth/scala-arm.git",
+    siteMappings <++= (baseDirectory, target, streams) map { (dir, out, s) => 
+      val jekyllSrc = dir / "src" / "jekyll"
+      val jekyllOutput = out / "jekyll"
+      // Run Jekyll
+      sbt.Process(Seq("jekyll", jekyllOutput.getAbsolutePath), Some(jekyllSrc)).!;
+      // Figure out what was generated.
+      (jekyllOutput ** ("*.html" | "*.png" | "*.js" | "*.css" | "CNAME") x relativeTo(jekyllOutput))
+    }
   )
 
   def addContinuations = libraryDependencies <<= (scalaVersion, libraryDependencies) apply { (v, d) =>

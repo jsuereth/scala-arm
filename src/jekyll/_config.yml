@@ -1,0 +1,4 @@
+pygments: true
+name: Scala Automatic Resource Management
+description: A Scala library that brings first class support for automated resource management to Scala.
+url: http://jsuereth.com/scala-arm
