@@ -8,7 +8,7 @@ import com.jsuereth.git.GitPlugin.git
 object PluginDef extends Build {
 
   val arm = (Project("scala-arm", file(".")) settings(
-    organization := "com.github.jsuereth.scala-arm",
+    organization := "com.jsuereth",
     name := "scala-arm",
     version := "1.2-SNAPSHOT",
     scalaVersion := "2.9.1",
@@ -27,9 +27,9 @@ object PluginDef extends Build {
     publishArtifact in Test := false,
     // The Nexus repo we're publishing to.
     publishTo <<= version { (v: String) =>
-      val nexus = "http://nexus.scala-tools.org/content/repositories/"
-      if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "snapshots/") 
-      else                             Some("releases"  at nexus + "releases/")
+      val nexus = "https://oss.sonatype.org/"
+      if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots") 
+      else                             Some("releases"  at nexus + "service/local/staging/deploy/maven2")
     },
     // Maven central cannot allow other repos.  We're ok here because the artifacts we
     // we use externally are *optional* dependencies.

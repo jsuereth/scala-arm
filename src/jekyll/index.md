@@ -14,8 +14,13 @@ Links:
 * [Scaladoc API](latest/api/index.html)
 * Browsable Source
 
-You can find the library on the scala-tools.org maven repository.
+You can find the library on the maven central repository.
 
-    groupId: com.github.jsuereth.scala-arm
+    groupId: com.jsuereth
     artifactId:  scala-arm_${scala-version}
-    version: 1.1
+    version: 1.2
+
+
+Note: 
+* Release can be found on maven central, or for the impatient:  [Sonatype's OSSRH repository](https://oss.sonatype.org/content/groups/public/).
+* Snapshots can be found on [Sonatype's OSSRH snapshot repository](https://oss.sonatype.org/content/groups/public).
