@@ -107,12 +107,12 @@ compare that with the previous "imperative style" `and` method:
 def and[A,B](r1 : ManagedResource[A], r2 : ManagedResource[B]) : ManagedResource[(A,B)] = 
   new ManagedResource[(A,B)] with ManagedResourceOperations[(A,B)] {
     override def acquireFor[C](f : ((A,B)) => C) : Either[List[Throwable], C] = {
-      val result = r1.acquireFor({ opened1 =>
-        r2.acquireFor({ opened2 =>
+      val result = r1 acquireFor { opened1 =>
+        r2 acquireFor { opened2 =>
           f((opened1, opened2))
-        })
-       })
-      result.fold( errors => Left(errors), y => y)      
+        }
+       }
+      result.fold( errors => Left(errors), y => y)
       }
     }
 }
