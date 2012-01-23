@@ -10,7 +10,7 @@ object PluginDef extends Build {
   val arm = (Project("scala-arm", file(".")) settings(
     organization := "com.jsuereth",
     name := "scala-arm",
-    version := "1.2-SNAPSHOT",
+    version := "1.2",
     scalaVersion := "2.9.1",
     crossScalaVersions := Seq("2.9.1"),
     resolvers += "junit interface repo" at "https://repository.jboss.org/nexus/content/repositories/scala-tools-releases",
