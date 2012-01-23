@@ -1,0 +1,9 @@
+The scala-arm 1.2 release makes the following changes.
+
+* Now publishing to Sonatypes OSSRH
+* The `Resource` type trait now has a `closeAfterException` method.
+* Support for `javax.transaction.Transaction` that will close/rollback when used.
+
+Note: This is *not* binary comaptible with 1.0 due to change in `Resource` type trait.   Binary compatible bug releases will now occur *under* the minor revision.
+
+i.e. `1.2.x` releases will be binary compatible.
