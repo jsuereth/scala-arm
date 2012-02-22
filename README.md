@@ -40,14 +40,15 @@ This style of usage will ensure that the file input stream is closed at the end 
 
     import resource._
     // Copy input into output.
-    for(input <- managed(new java.io.FileInputStream("test.txt"); 
-        output <- managed(new java.io.FileOutputStream("test2.txt")) {
+    for(input <- managed(new java.io.FileInputStream("test.txt"));
+        output <- managed(new java.io.FileOutputStream("test2.txt"))) {
       val buffer = new Array[Byte](512)
-      while(input.read(buffer) != -1) {
-        output.write(buffer);
+      var size = input.read(buffer)
+      while(size != -1) {
+        output.write(buffer, 0, size)
+        size = input.read(buffer)
       }
     }
-
 
 There is a convenience notation for those who don't like using for comprehensions:
 
