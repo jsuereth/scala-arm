@@ -31,8 +31,9 @@ import resource._
 for(input <- managed(new java.io.FileInputStream("test.txt"); 
      output <- managed(new java.io.FileOutputStream("test2.txt")) {
   val buffer = new Array[Byte](512)
-  while(input.read(buffer) != -1) {
-    output.write(buffer);
+  def read(): Unit = input.read(buffer) match {
+    case -1 => ()
+    case  n => output.write(buffer,0,n); read()
   }
 }
 {% endhighlight %}
