@@ -55,7 +55,11 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
     acquireAndGet(k)
     ()
   } 
-  override def ! : R @suspendable = now
+  // You may be asking why now and ! have the same implementation?  Binary compatibility.... YIPIEE!!!
+  override def ! : R @suspendable = shift { (k : R => Unit) =>
+    acquireAndGet(k)
+    ()
+  } 
 }
 
 

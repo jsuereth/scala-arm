@@ -38,10 +38,10 @@ class EchoServerCPS extends Thread {
 
   override def run() : Unit = {
     reset {
-      val server = managed(new ServerSocket(8007)) !
-      val connection = managed(server.accept) !
-      val output = managed(connection.getOutputStream) !
-      val input = managed(connection.getInputStream) !
+      val server = managed(new ServerSocket(8007)).now
+      val connection = managed(server.accept).now
+      val output = managed(connection.getOutputStream).now
+      val input = managed(connection.getInputStream).now
       val writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))
       val reader = new BufferedReader(new InputStreamReader(input))
       writer.println(each_line_from(reader))
