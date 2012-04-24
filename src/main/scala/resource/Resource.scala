@@ -9,12 +9,12 @@ trait Resource[R] {
    * Opens a resource for manipulation.  Note:  If the resource is already open by definition of existence, then
    * this method should perform a no-op (the default implementation).
    */
-  def open(r : R) : Unit = ()
+  def open(r: R): Unit = ()
 
   /**
    *  Closes a resource.  This method is allowed to throw exceptions.
    */
-  def close(r : R) : Unit
+  def close(r: R): Unit
   
   /**
    * This is called if the resource should be closed *after* an exception was thrown.  The
@@ -27,9 +27,9 @@ trait Resource[R] {
    * exceptions in ARM blocks.  This defaults to be any Exception (but not runtime exceptions, which are
    * assumed to be fatal. 
    */
-  def fatalExceptions : Seq[Class[_]] = List(classOf[java.lang.VirtualMachineError],
-                                             classOf[java.lang.InterruptedException],
-                                             classOf[scala.util.control.ControlThrowable])
+  def fatalExceptions: Seq[Class[_]] = List(classOf[java.lang.VirtualMachineError],
+                                            classOf[java.lang.InterruptedException],
+                                            classOf[scala.util.control.ControlThrowable])
 }
 
 /**
@@ -44,7 +44,7 @@ sealed trait LowPriorityResourceImplicits {
    * a resource.
    */
   implicit def reflectiveCloseableResource[A <: ReflectiveCloseable] = new Resource[A] {
-    override def close(r : A) = r.close()
+    override def close(r: A) = r.close()
     override def toString = "Resource[{ def close() : Unit }]"
   }
   /** Structural type for disposable resources */
@@ -54,7 +54,7 @@ sealed trait LowPriorityResourceImplicits {
    * a resource.
    */
   implicit def reflectiveDisposableResource[A <: ReflectiveDisposable] = new Resource[A] {
-    override def close(r : A) = r.dispose()
+    override def close(r: A) = r.dispose()
     override def toString = "Resource[{ def dispose() : Unit }]"
   }
 }
@@ -63,7 +63,7 @@ sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicit
   import _root_.java.io.Closeable
   import _root_.java.io.IOException
   implicit def closeableResource[A <: Closeable] = new Resource[A] {
-    override def close(r : A) = r.close()
+    override def close(r: A) = r.close()
     // TODO - Should we actually catch less?   What if there is a user exception not under IOException during
     // processing of a resource.   We should still close it.
     //override val possibleExceptions = List(classOf[IOException])

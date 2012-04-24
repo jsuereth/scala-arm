@@ -34,7 +34,7 @@ trait ExtractableManagedResource[+A] extends ManagedResource[A] {
    * @returns
    *       Some(containedValue) if there have been no processing errors, None otherwise
    */
-  def opt : Option[A]
+  def opt: Option[A]
 
   /**
    * This method is used to extract the resource being managed.
@@ -46,5 +46,5 @@ trait ExtractableManagedResource[+A] extends ManagedResource[A] {
    *        An either where the left hand side is the currently contained resource unless exceptions, in which case
    *        the right hand side will contain the sequence of throwable encountered.
    */
-  def either : Either[Seq[Throwable], A]
+  def either: Either[Seq[Throwable], A]
 }

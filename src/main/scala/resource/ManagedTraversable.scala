@@ -25,25 +25,24 @@ trait ManagedTraversable[+B, A] extends Traversable[B] {
   /**
    * The resource we plan to traverse through  
    */
-  val resource : ManagedResource[A]
+  val resource: ManagedResource[A]
 
   /**
    * This method determines if the error can be ignored and traversable continues
    */
-  def ignoreError(error : Exception) : Boolean = false
+  def ignoreError(error: Exception): Boolean = false
 
   /**
    * This method is called if an exception happens during traversal of the collection.   We allow subclasses to
    * override this to change the default behavior of resource related errors on traversal.
    */
-  def handleErrorsDuringTraversal(ex : List[Throwable]) : Unit = {
-    ex.headOption.foreach(throw _)
-  }
+  def handleErrorsDuringTraversal(ex: List[Throwable]): Unit =
+    ex.headOption foreach (throw _)
 
   /**
    * This method gives us an iterator over items in a resource.
    */
-  protected def internalForeach[U](resource: A, f : B => U) : Unit
+  protected def internalForeach[U](resource: A, f: B => U): Unit
 
   /**
    * Executes a given function against all items in the resource.  The resource is opened/closed during the call
@@ -51,14 +50,12 @@ trait ManagedTraversable[+B, A] extends Traversable[B] {
    */
   def foreach[U](f: B => U): Unit = {
     val result = resource.acquireFor { r =>
-      try {
-        internalForeach(r, f)
-      } catch {
+      try internalForeach(r, f)
+      catch {
         case e : Exception if ignoreError(e) =>  //Ignore...
       }
     }
     //If there are errors -> Handle them appropriately
-    result.left.foreach(handleErrorsDuringTraversal)
-
+    result.left foreach handleErrorsDuringTraversal
   }
 }

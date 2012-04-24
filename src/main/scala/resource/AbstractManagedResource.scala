@@ -16,25 +16,24 @@ package resource
 import _root_.scala.collection.Seq
 import _root_.scala.util.control.Exception
 
-
 /**
  * An implementation of an ExtractableManagedResource that defers all processing until the user pulls out information using
  * either or opt functions.
  */
-private[resource] class DeferredExtractableManagedResource[+A,R](val resource : ManagedResource[R], val translate : R => A) extends 
-  ExtractableManagedResource[A] with ManagedResourceOperations[A] { self =>
+private[resource] class DeferredExtractableManagedResource[+A,R](val resource: ManagedResource[R], val translate: R => A)
+  extends ExtractableManagedResource[A] with ManagedResourceOperations[A] { self =>
 
-  override def acquireFor[B](f : A => B) : Either[List[Throwable], B] = resource acquireFor translate.andThen(f)
+  override def acquireFor[B](f: A => B) : Either[List[Throwable], B] = resource acquireFor translate.andThen(f)
 
   override def either = resource acquireFor translate
 
   override def opt = either.right.toOption
 
-  override def equals(that : Any) = that match {
+  override def equals(that: Any) = that match {
     case x : DeferredExtractableManagedResource[A,R] => (x.resource == resource) && (x.translate == translate)
     case _ => false
   }
-  override def hashCode() : Int = (resource.hashCode << 7) + translate.hashCode + 13
+  override def hashCode(): Int = (resource.hashCode << 7) + translate.hashCode + 13
 
   override def toString = "DeferredExtractableManagedResource(" + resource + ", " + translate + ")"
 }
@@ -50,21 +49,21 @@ trait AbstractManagedResource[R] extends ManagedResource[R] with ManagedResource
   /** 
    * Opens a given resource, returning a handle to execute against during the "session" of the resource being open.
    */
-  protected def open : R
+  protected def open: R
 
   /**
    * Closes a resource using the handle.  This method will throw any exceptions normally occuring during the close of
    * a resource.
    */
-  protected def unsafeClose(handle : R, errors: Option[Throwable]) : Unit
+  protected def unsafeClose(handle: R, errors: Option[Throwable]): Unit
 
   /**
    * The list of exceptions that get caught during ARM and will always be rethrown (considered 'fatal')
    */
-  protected def rethrownExceptions : Seq[Class[_]] = List(classOf[java.lang.RuntimeException],
-                                                          classOf[java.lang.VirtualMachineError],
-                                                          classOf[java.lang.InterruptedException],
-                                                          classOf[scala.util.control.ControlThrowable])
+  protected def rethrownExceptions: Seq[Class[_]] = List(classOf[java.lang.RuntimeException],
+                                                         classOf[java.lang.VirtualMachineError],
+                                                         classOf[java.lang.InterruptedException],
+                                                         classOf[scala.util.control.ControlThrowable])
   /** Throws an exception if it is in the rethrow list. */
   private def rethrowIfBad(t: Throwable)  : Throwable =
     if (rethrownExceptions.exists(_.isInstance(t))) {

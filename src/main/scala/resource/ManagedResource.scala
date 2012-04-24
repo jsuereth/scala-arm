@@ -131,7 +131,13 @@ trait ManagedResource[+R] {
   /**
    * Accesses this resource inside a suspendable CPS block
    */
+  @deprecated("Use now instead of !", "1.3")
   def ! : R @suspendable
+
+  /**
+   * Accesses this resource inside a suspendable CPS block
+   */
+  def now: R @suspendable
 }
 
 
