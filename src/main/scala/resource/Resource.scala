@@ -89,11 +89,6 @@ sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicit
     override def close(r: A) = r.close()
     override def toString = "Resource[javax.sql.PooledConnection]"
   }
-  // This will ensure
-  implicit def rollbackTransactionResource[A <: javax.transaction.Transaction] = new Resource[A] {
-    override def close(r: A) = r.commit()
-    override def closeAfterException(r: A, t: Throwable) = r.rollback()
-  }
 }
 
 /**
