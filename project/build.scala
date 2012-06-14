@@ -1,12 +1,11 @@
-import sbt._
-import Keys._
+/*import com.jsuereth.ghpages.GhPages.ghpages
 import com.jsuereth.sbtsite.SitePlugin.site
-import com.jsuereth.sbtsite.SiteKeys._
 import com.jsuereth.sbtsite.JekyllSupport.Jekyll
-import com.jsuereth.ghpages.GhPages.ghpages
 import com.jsuereth.git.GitPlugin.git
 import com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
-import com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact
+import com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact*/
+import sbt._
+import Keys._
 
 object ArmDef extends Build {
 
@@ -22,11 +21,11 @@ object ArmDef extends Build {
     autoCompilerPlugins := true,
     addContinuations,
     scalacOptions += "-P:continuations:enable"
-  ) settings(publishSettings:_*) settings(websiteSettings:_*)) settings(bcSettings:_*)
+  ) settings(publishSettings:_*)) //settings(websiteSettings:_*) settings(bcSettings:_*))
 
-  def bcSettings: Seq[Setting[_]] = mimaDefaultSettings ++ Seq(
+  /*def bcSettings: Seq[Setting[_]] = mimaDefaultSettings ++ Seq(
     previousArtifact := Some("com.jsuereth" % "scala-arm_2.9.1" % "1.2")
-  )
+  )*/
 
   def publishSettings: Seq[Setting[_]] = Seq(
     // If we want on maven central, we need to be in maven style.
@@ -62,7 +61,7 @@ object ArmDef extends Build {
         </developer>
       </developers>)
   )
-
+  /*
   def websiteSettings: Seq[Setting[_]] = (
     site.settings ++ 
     ghpages.settings ++ 
@@ -73,6 +72,7 @@ object ArmDef extends Build {
       includeFilter in Jekyll := ("*.html" | "*.png" | "*.js" | "*.css" | "CNAME")
     )
   )
+  */
 
   def addContinuations = libraryDependencies <<= (scalaVersion, libraryDependencies) apply { (v, d) =>
     d :+ compilerPlugin("org.scala-lang.plugins" % "continuations" % v)
