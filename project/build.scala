@@ -82,7 +82,7 @@ object ArmDef extends Build {
     "junit" % "junit" % "4.5" % "test",
     "com.novocode" % "junit-interface" % "0.7" % "test->default",
     "org.apache.derby" % "derby" % "10.5.3.0_1" % "test",
-    "javax.transaction" % "jta" % "1.0.1B" % "provided"
+    "javax.transaction" % "jta" % "1.1" % "provided"
   )
 
   
