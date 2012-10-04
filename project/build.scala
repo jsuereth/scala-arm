@@ -15,7 +15,7 @@ object ArmDef extends Build {
     name := "scala-arm",
     version := "1.3-SNAPSHOT",
     scalaVersion := "2.9.1",
-    crossScalaVersions := Seq("2.9.1"),
+    crossScalaVersions := Seq("2.9.1", "2.10.0-M7"),
     resolvers += "junit interface repo" at "https://repository.jboss.org/nexus/content/repositories/scala-tools-releases",
     resolvers += "java.net repo" at "http://download.java.net/maven/2/",
     libraryDependencies ++= dependencies,
