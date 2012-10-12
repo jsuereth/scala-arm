@@ -1,9 +1,9 @@
 import sbt._
 import Keys._
-import com.jsuereth.sbtsite.SitePlugin.site
-import com.jsuereth.sbtsite.SiteKeys._
-import com.jsuereth.ghpages.GhPages.ghpages
-import com.jsuereth.git.GitPlugin.git
+import com.typesafe.sbt.SbtSite._
+import SiteKeys._
+import com.typesafe.sbt.SbtGhPages.ghpages
+import com.typesafe.sbt.SbtGit.git
 
 object PluginDef extends Build {
 
