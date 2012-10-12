@@ -43,6 +43,7 @@ object PluginDef extends Build {
 			    <distribution>repo</distribution>
 		    </license>
 	    </licenses>
+      <url>http://jsuereth.com/scala-arm</url>
       <scm>
         <url>git@github.com:jsuereth/scala-arm.git</url>
         <connection>scm:git:git@github.com:jsuereth/scala-arm.git</connection>
