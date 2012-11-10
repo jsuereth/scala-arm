@@ -114,6 +114,17 @@ class TestManagedResource {
      assertFalse("Failed to close resource", r.isOpened)
    }
 
+   @Test(expected=classOf[IllegalStateException])
+   def mustThrowCloseException() {
+     val r = new ThrowingFakeResource()
+     assertFalse("Failed to begin closed!", r.isOpened)
+     val mr = managed(r)
+     assertFalse("Creating managed resource opens the resource!", r.isOpened)
+     for(r <- mr) {
+       assertTrue("Failed to open resource", r.isOpened)
+     }
+   }
+
    @Test
    def mustThrowClosureExceptionIfBothClosureAndCloseThrow() {
      val r = new ThrowingFakeResource()
