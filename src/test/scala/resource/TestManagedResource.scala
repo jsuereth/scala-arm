@@ -61,6 +61,12 @@ class FakeResource {
    def isOpened = opened.get
 }
 
+class ThrowingFakeResource extends FakeResource {
+  override def close(): Unit = {
+    throw new IllegalStateException
+  }
+}
+
 import org.junit._
 import Assert._
 
@@ -89,6 +95,53 @@ class TestManagedResource {
       }
       assertFalse("Failed to close resource", r.isOpened)
    }  
+
+   @Test
+   def mustCloseWhenClosureThrows() {
+     val r = new FakeResource()
+     assertFalse("Failed to begin closed!", r.isOpened)
+     val mr = managed(r)
+     assertFalse("Creating managed resource opens the resource!", r.isOpened)
+     try {
+       for(r <- mr) {
+         assertTrue("Failed to open resource", r.isOpened)
+         throw new RuntimeException
+       }
+     }
+     catch {
+       case _: RuntimeException =>
+     }
+     assertFalse("Failed to close resource", r.isOpened)
+   }
+
+   @Test(expected=classOf[IllegalStateException])
+   def mustThrowCloseException() {
+     val r = new ThrowingFakeResource()
+     assertFalse("Failed to begin closed!", r.isOpened)
+     val mr = managed(r)
+     assertFalse("Creating managed resource opens the resource!", r.isOpened)
+     for(r <- mr) {
+       assertTrue("Failed to open resource", r.isOpened)
+     }
+   }
+
+   @Test
+   def mustThrowClosureExceptionIfBothClosureAndCloseThrow() {
+     val r = new ThrowingFakeResource()
+     assertFalse("Failed to begin closed!", r.isOpened)
+     val mr = managed(r)
+     assertFalse("Creating managed resource opens the resource!", r.isOpened)
+     try {
+       for(r <- mr) {
+         assertTrue("Failed to open resource", r.isOpened)
+         throw new RuntimeException
+       }
+     }
+     catch {
+       case _: RuntimeException =>
+     }
+     assertTrue("Unexpectedly closed resource", r.isOpened)
+   }
 
    @Test
    def mustExtractValue() {

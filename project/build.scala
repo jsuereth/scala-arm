@@ -25,7 +25,10 @@ object ArmDef extends Build {
   ) settings(publishSettings:_*) settings(websiteSettings:_*)) settings(bcSettings:_*)
 
   def bcSettings: Seq[Setting[_]] = mimaDefaultSettings ++ Seq(
-    previousArtifact := Some("com.jsuereth" % "scala-arm_2.9.1" % "1.2")
+    previousArtifact <<= scalaVersion apply { sv =>
+      if(sv startsWith "2.9") Some("com.jsuereth" % "scala-arm_2.9.1" % "1.2")
+      else None
+    }
   )
 
   def publishSettings: Seq[Setting[_]] = Seq(
