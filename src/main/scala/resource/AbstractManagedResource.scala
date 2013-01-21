@@ -23,7 +23,7 @@ import _root_.scala.util.control.Exception
 private[resource] class DeferredExtractableManagedResource[+A,R](val resource: ManagedResource[R], val translate: R => A)
   extends ExtractableManagedResource[A] with ManagedResourceOperations[A] { self =>
 
-  override def acquireFor[B](f: A => B) : Either[List[Throwable], B] = resource acquireFor translate.andThen(f)
+  override def acquireFor[B](f: A => B) : Either[List[Throwable], B] = resource acquireFor (translate andThen f)
 
   override def either = resource acquireFor translate
 
@@ -75,10 +75,12 @@ trait AbstractManagedResource[R] extends ManagedResource[R] with ManagedResource
     val handle = open
     val result  = catchingPromiscuously(classOf[java.lang.Throwable]) either (f(handle))
     val close = catchingPromiscuously(classOf[java.lang.Throwable]) either unsafeClose(handle, result.left.toOption)
-    // Combine resulting exceptions as necessary.   Finally, throw any exceptions
-    // That we can't hold onto (like ControlThrowable).
-    result.left.map[List[Throwable]]( _ :: close.left.toOption.toList).left.map {
-      exceptions => exceptions.map(rethrowIfBad)
+    // Here we pattern match to make sure we get all the errors.
+    (result, close) match {
+      case (Left(t1), Left(t2)) => Left(t1 :: t2 :: Nil)
+      case (Left(t1), _)        => Left(t1 :: Nil)
+      case (_,Left(t2))         => Left(t2 :: Nil)
+      case (Right(result),_)    => Right(result)
     }
   }
 }
