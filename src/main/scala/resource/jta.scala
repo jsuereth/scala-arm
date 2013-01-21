@@ -1,6 +1,6 @@
 package resource
 
-/** Support for jta transactions. */
+/** Support for jta transactions. Just import this package to be able to use the `resource` method around JTA transactions. */
 package object jta {
   /** Support for using jta transactions as resources.
    * To use in code, simply write: `import resource.jta.transactionSupport`

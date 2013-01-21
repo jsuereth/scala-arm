@@ -15,6 +15,7 @@ package resource
 
 import _root_.scala.collection.Seq
 import _root_.scala.util.control.Exception
+import _root_.scala.util.control.ControlThrowable
 
 /**
  * An implementation of an ExtractableManagedResource that defers all processing until the user pulls out information using
@@ -44,7 +45,7 @@ private[resource] class DeferredExtractableManagedResource[+A,R](val resource: M
  * is a refinement over ManagedResourceOperations as it defines the acquireForMethod generically using the
  * scala.util.control.Exception API.
  */
-trait AbstractManagedResource[R] extends ManagedResource[R] with ManagedResourceOperations[R] {
+abstract class AbstractManagedResource[R] extends ManagedResource[R] with ManagedResourceOperations[R] {
 
   /** 
    * Opens a given resource, returning a handle to execute against during the "session" of the resource being open.
@@ -57,30 +58,40 @@ trait AbstractManagedResource[R] extends ManagedResource[R] with ManagedResource
    */
   protected def unsafeClose(handle: R, errors: Option[Throwable]): Unit
 
-  /**
-   * The list of exceptions that get caught during ARM and will always be rethrown (considered 'fatal')
+  /** These are a list of exceptions we *have* to rethrow, regardless of
+   *  a users desires to ensure that thread/return behavior in scala is accurate.
    */
-  protected def rethrownExceptions: Seq[Class[_]] = List(classOf[java.lang.RuntimeException],
-                                                         classOf[java.lang.VirtualMachineError],
-                                                         classOf[java.lang.InterruptedException],
-                                                         classOf[scala.util.control.ControlThrowable])
-  /** Throws an exception if it is in the rethrow list. */
-  private def rethrowIfBad(t: Throwable)  : Throwable =
-    if (rethrownExceptions.exists(_.isInstance(t))) {
-      throw t
-    } else t
+  protected def isRethrown(t: Throwable): Boolean = t match {
+    case _: ControlThrowable      => true
+    case _: InterruptedException  => true
+    case _                        => false    
+  }
+  
+  /** This checks to see if an exception should not be caught, under any circumstances.
+   * These usually denote fatal program flaws.
+   */
+  protected def isFatal(t: Throwable): Boolean = t match {
+    case _: java.lang.VirtualMachineError => true
+    // TODO - Others?
+    case _                                => false
+  }
+  /** A catcher of exceptions that will ignore those we consider fatal. */
+  private final val catchingNonFatal: Exception.Catch[Nothing] = 
+    (new Exception.Catch(Exception.mkThrowableCatcher(e => !isFatal(e), throw _), None, _ => false) 
+     withDesc "<non-fatal>")
 
   override def acquireFor[B](f : R => B) : Either[List[Throwable], B] = {
     import Exception._
     val handle = open
-    val result  = catchingPromiscuously(classOf[java.lang.Throwable]) either (f(handle))
-    val close = catchingPromiscuously(classOf[java.lang.Throwable]) either unsafeClose(handle, result.left.toOption)
+    val result = catchingNonFatal either (f(handle))
+    val close  = catchingNonFatal either unsafeClose(handle, result.left.toOption)
     // Here we pattern match to make sure we get all the errors.
     (result, close) match {
-      case (Left(t1), Left(t2)) => Left(t1 :: t2 :: Nil)
-      case (Left(t1), _)        => Left(t1 :: Nil)
-      case (_,Left(t2))         => Left(t2 :: Nil)
-      case (Right(result),_)    => Right(result)
+      case (Left(t1), _       ) if isRethrown(t1) => throw t1
+      case (Left(t1), Left(t2))                   => Left(t1 :: t2 :: Nil)
+      case (Left(t1), _       )                   => Left(t1 :: Nil)
+      case (_,        Left(t2))                   => Left(t2 :: Nil)
+      case (Right(r), _       )                   => Right(r)
     }
   }
 }
@@ -91,30 +102,21 @@ trait AbstractManagedResource[R] extends ManagedResource[R] with ManagedResource
 final class DefaultManagedResource[R : Resource : Manifest](r : => R) extends AbstractManagedResource[R] { self =>
   /** Stable reference to the Resource type trait.*/
   protected val typeTrait = implicitly[Resource[R]]
-  /**
-   * Opens a given resource, returning a handle to execute against during the "session" of the resource being open.
-   */
   override protected def open: R = {
     val resource = r
     typeTrait.open(resource)
     resource
   }
-
-  /**
-   * Closes a resource using the handle.  This method will throw any exceptions normally occurring during the close of
-   * a resource.
-   */
-  override protected def unsafeClose(r: R, error: Option[Throwable]): Unit = error match {
-    case None    => typeTrait.close(r)
-    case Some(t) => typeTrait.closeAfterException(r, t)
-  }
-
-  /**
-   * The list of exceptions that get caught during ARM and will not prevent a call to close.
-   */
-  override protected def rethrownExceptions: Seq[Class[_]] = typeTrait.fatalExceptions
+  override protected def unsafeClose(r: R, error: Option[Throwable]): Unit =
+    error match {
+      case None    => typeTrait.close(r)
+      case Some(t) => typeTrait.closeAfterException(r, t)
+    }
+  override protected def isFatal(t: Throwable): Boolean =
+    typeTrait isFatalException t
+  override protected def isRethrown(t: Throwable): Boolean =
+    typeTrait isRethrownException t
   /* You cannot serialize resource and send them, so referential equality should be sufficient. */
-  /** Add the type trait to help disperse resources */
   override def hashCode(): Int = (typeTrait.hashCode << 7) + super.hashCode + 13
   // That's right, we use manifest solely for nicer toStrings!
   override def toString = "Default[" + implicitly[Manifest[R]] + " : " + typeTrait + "](...)"

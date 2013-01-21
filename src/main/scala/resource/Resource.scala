@@ -1,5 +1,7 @@
 package resource
 
+import scala.util.control.ControlThrowable
+
 /**
  * This is a type trait for types that are considered 'resources'.   These types must be opened (potentially) and
  * closed at some point.
@@ -23,13 +25,30 @@ trait Resource[R] {
   def closeAfterException(r: R, t: Throwable): Unit = close(r)
 
   /**
+   * Lets us know if an exception is one that should be fatal, or rethrown *immediately*.
+   * 
+   * If this returns true, then the ARM block will not attmept to catch and hold the exception, but
+   * immediately throw it.
+   */
+  def isFatalException(t: Throwable): Boolean = 
+    fatalExceptions exists (c => c isAssignableFrom t.getClass)
+  
+  /**
+   * Lets us know if an exception should be rethrown *after* an arm block completes.
+   * These include exceptions used for early termination, like ControlThrowable.
+   */
+  def isRethrownException(t: Throwable): Boolean = t match {
+    case _: ControlThrowable      => true
+    case _: InterruptedException  => true
+    case _                        => false    
+  }
+  /**
    * Returns the possible exceptions that a resource could throw.   This list is used to catch only relevant
    * exceptions in ARM blocks.  This defaults to be any Exception (but not runtime exceptions, which are
-   * assumed to be fatal. 
+   * assumed to be fatal.
    */
-  def fatalExceptions: Seq[Class[_]] = List(classOf[java.lang.VirtualMachineError],
-                                            classOf[java.lang.InterruptedException],
-                                            classOf[scala.util.control.ControlThrowable])
+  @deprecated("Please use isFatalException instead", "1.3")
+  def fatalExceptions: Seq[Class[_]] = List(classOf[java.lang.VirtualMachineError])
 }
 
 /**

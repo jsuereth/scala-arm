@@ -235,21 +235,21 @@ class TestManagedResource {
       assertFalse("Failed to close resource", r.isOpened)
       assertTrue("Failed to catch exception", result.isLeft)
    }  
-   @Test
-   def mustCloseOnReturn() {
-     val r = new FakeResource();
-     def foo(): Boolean = {
-       val mr = managed(r)
-       assertFalse("Failed to begin closed!", r.isOpened)
-       mr foreach { r =>
-         assertTrue("Failed to open resource", r.isOpened)
-         return true
+  @Test
+  def mustCloseOnReturn() {
+    val r = new FakeResource();
+    def foo(): Boolean = {
+      val mr = managed(r)
+      assertFalse("Failed to begin closed!", r.isOpened)
+      mr foreach { r =>
+        assertTrue("Failed to open resource", r.isOpened)
+        return true
       }  
-      return false
+      false
     }    
     assertTrue("Failed to return from function", foo())
     assertFalse("Failed to close resource", r.isOpened)
-  }  
+   }  
 
   @Test
   def mustAcquireAndGet() {
