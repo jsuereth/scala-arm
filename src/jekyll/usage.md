@@ -119,4 +119,4 @@ def and[A,B](r1 : ManagedResource[A], r2 : ManagedResource[B]) : ManagedResource
 }
 {% endhighlight %}
 
-The mechanism for using Delimted Continuations is outlines in more detail on the [Delimited Continuations and ARM](continuations.html) page.
+The mechanism for using Delimited Continuations is outlines in more detail on the [Delimited Continuations and ARM](continuations.html) page.

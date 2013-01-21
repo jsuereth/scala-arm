@@ -10,7 +10,7 @@ Essentially, a ControlContext is a way of storing computation that has occured a
 
 In this example, the code `val input = managed(new FileInputStream('test.txt")) !` makes a call to `scala.util.continuations.shift`.  This places a portion of computation into a `ControlContext`.  The beginning of this computation opens the file `input.txt` and the end of the computation closes the file `input.txt`.   The middle portion is left empty to be filled in later via a continuations.
 
-The result type of the `!` operator on continuations is @suspendable which is shorthand for @cpsParam[Unit,Unit].   This captures the type of each portion of computation in the `ControlContext`.   The type `InputStream @cpsParam[Unit,Unit]` denotes that the computation so far generates an `InputStream`, requires a continuation that takes the `InputStream` and returns a Unit and will eventually return a `Unit` when completed.
+The result type of the `now` operator on continuations is @suspendable which is shorthand for @cpsParam[Unit,Unit].   This captures the type of each portion of computation in the `ControlContext`.   The type `InputStream @cpsParam[Unit,Unit]` denotes that the computation so far generates an `InputStream`, requires a continuation that takes the `InputStream` and returns a Unit and will eventually return a `Unit` when completed.
 
 `ControlContext` is nestable.   When constructing a `ControlContext` inside of another one, the ending computations must line up.   Let's look at an example with nested managed resources.
 
@@ -42,9 +42,9 @@ The below code implements an echo server that listens on a port and echos back e
         // This reset is not needed, however the  below denotes a "flow" of execution that can be deferred.
         // One can envision an asynchronous execuction model that would support the exact same semantics as     below.
         reset {
-          val connection = managed(server.accept) !
-          val output = managed(connection.getOutputStream) !
-          val input = managed(connection.getInputStream) !
+          val connection = managed(server.accept).now
+          val output = managed(connection.getOutputStream).now
+          val input = managed(connection.getInputStream).now
           val writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))
           val reader = new BufferedReader(new InputStreamReader(input))
           writer.println(each_line_from(reader))
@@ -61,6 +61,6 @@ The final computation placed in the hole left over from all the nested `ControlC
     writer.flush()
 {% endhighlight %}
 
-You can see how each call to `shift` (either the `!` operator or the `each_line_from` method) causes additional computation before and after the 'hole'.  You can also see in `each_line_from` how that 'hole' in the computation can be used more than once to complete the entire process.
+You can see how each call to `shift` (either the `now` operator or the `each_line_from` method) causes additional computation before and after the 'hole'.  You can also see in `each_line_from` how that 'hole' in the computation can be used more than once to complete the entire process.
 
 Delimited continuations provide a lot of power.   This simple model of thinking about them helps understand the type signatures and how to use them effectively.

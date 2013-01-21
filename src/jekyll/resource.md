@@ -11,7 +11,8 @@ trait Resource[R] {
   def open(r : R) : Unit = ()
   def close(r : R) : Unit
   def closeAfterException(r: R, t: Throwable): Unit = close(r)
-  def possibleExceptions : Seq[Class[_]] = List(classOf[Exception])
+  def isFatalException(t: Throwable): Boolean = ...
+  def isRethrownException(t: Throwable): Boolean = ...
 }
 {% endhighlight %}
 

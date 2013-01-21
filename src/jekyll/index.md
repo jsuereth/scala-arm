@@ -17,8 +17,8 @@ Links:
 You can find the library on the maven central repository.
 
     groupId: com.jsuereth
-    artifactId:  scala-arm_${scala-version}
-    version: 1.2
+    artifactId:  scala-arm_${scala-binary-version}
+    version: 1.3
 
 
 Note: 
