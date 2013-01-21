@@ -46,6 +46,7 @@ object ArmDef extends Build {
     pomIncludeRepository := { x => false },
     // Maven central wants some extra metadata to keep things 'clean'.
     pomExtra := (
+      <url>http://jsuereth.com/scala-arm</url>
 	    <licenses>
 		    <license>
 			    <name>BSD-style</name>
