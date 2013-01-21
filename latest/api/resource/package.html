@@ -12,7 +12,7 @@
       <script type="text/javascript" src="../lib/tools.tooltip.js"></script>
     
         </head>
-        <body class="value">
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="value">
       <div id="definition">
         <img src="../lib/package_big.png" />
         
@@ -20,30 +20,31 @@
       </div>
 
       <h4 class="signature" id="signature">
-      <span class="kind">package</span>
-      <span class="symbol"> 
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
         <span class="name">resource</span>
-        
-        
       </span>
       </h4>
       
-          <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Package related methods for managed resources.
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>Package related methods for managed resources.
 </p></div></div>
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
         
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
 
       <div id="template">
-
-        <div id="mbrsel">
-          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
-          
-          
-          <div id="visbl">
-              <span class="filtertype">Visibility</span>
-              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
-            </div>
-        </div>
-
+        <div id="allMembers">
         
 
         <div class="types members" id="types">
@@ -51,44 +52,48 @@
               <ol><li visbl="pub" name="resource.AbstractManagedResource" data-isabs="true">
       <a id="AbstractManagedResource:AbstractManagedResource[R]"></a>
       <h4 class="signature">
-      <span class="kind">trait</span>
-      <span class="symbol"> 
-        <a href="AbstractManagedResource.html"><span class="name">AbstractManagedResource</span></a>
-        <span class="tparams">[<span name="R">R</span>]</span>
-        <span class="result"> extends ManagedResource[R] with ManagedResourceOperations[R]</span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="AbstractManagedResource.html"><span class="name">AbstractManagedResource</span></a><span class="tparams">[<span name="R">R</span>]</span><span class="result"> extends ManagedResource[R] with ManagedResourceOperations[R]</span>
       </span>
       </h4>
       <p class="comment cmt">Abstract class implementing most of the managed resource features in terms of an open and close method.</p>
     </li><li visbl="pub" name="resource.DefaultManagedResource" data-isabs="false">
       <a id="DefaultManagedResource:DefaultManagedResource[R]"></a>
       <h4 class="signature">
-      <span class="kind">class</span>
-      <span class="symbol"> 
-        <a href="DefaultManagedResource.html"><span class="name">DefaultManagedResource</span></a>
-        <span class="tparams">[<span name="R">R</span>]</span>
-        <span class="result"> extends AbstractManagedResource[R]</span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DefaultManagedResource.html"><span class="name">DefaultManagedResource</span></a><span class="tparams">[<span name="R">R</span>]</span><span class="result"> extends AbstractManagedResource[R]</span>
       </span>
       </h4>
       <p class="comment cmt">This is the default implementation of a ManagedResource that makes use of the Resource type trait.</p>
     </li><li visbl="pub" name="resource.package#ErrorHolder" data-isabs="false">
       <a id="ErrorHolder:ErrorHolder[A]"></a>
       <h4 class="signature">
-      <span class="kind">type</span>
-      <span class="symbol"> 
-        <span class="name">ErrorHolder</span>
-        <span class="tparams">[<span name="A">A</span>]</span>
-        <span class="result"> = <span name="scala.Either" class="extype">Either</span>[List[Throwable], A]</span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ErrorHolder</span><span class="tparams">[<span name="A">A</span>]</span><span class="result"> = <span name="scala.Either" class="extype">Either</span>[List[Throwable], A]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">The type used to hold errors and results in the same return value.</p><div class="fullcomment"><div class="comment cmt"><p>The type used to hold errors and results in the same return value.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="resource.package" class="extype" href="package$.html">package</a></dd></dl></div>
     </li><li visbl="pub" name="resource.ExtractableManagedResource" data-isabs="true">
       <a id="ExtractableManagedResource:ExtractableManagedResource[A]"></a>
       <h4 class="signature">
-      <span class="kind">trait</span>
-      <span class="symbol"> 
-        <a href="ExtractableManagedResource.html"><span class="name">ExtractableManagedResource</span></a>
-        <span class="tparams">[<span name="A">+A</span>]</span>
-        <span class="result"> extends ManagedResource[A]</span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ExtractableManagedResource.html"><span class="name">ExtractableManagedResource</span></a><span class="tparams">[<span name="A">+A</span>]</span><span class="result"> extends ManagedResource[A]</span>
       </span>
       </h4>
       <p class="comment cmt">This trait represents a resource that has been modified (or will be modified) inside an ARM block in such
@@ -96,44 +101,48 @@ a way that the resulting value can be extracted outside of the &quot;ManagedReso
     </li><li visbl="pub" name="resource.LowPriorityResourceImplicits" data-isabs="true">
       <a id="LowPriorityResourceImplicits:LowPriorityResourceImplicits"></a>
       <h4 class="signature">
-      <span class="kind">trait</span>
-      <span class="symbol"> 
-        <a href="LowPriorityResourceImplicits.html"><span class="name">LowPriorityResourceImplicits</span></a>
-        
-        <span class="result"> extends AnyRef</span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="LowPriorityResourceImplicits.html"><span class="name">LowPriorityResourceImplicits</span></a><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       <p class="comment cmt">Trait holding type class implementations for Resource.</p>
     </li><li visbl="pub" name="resource.ManagedResource" data-isabs="true">
       <a id="ManagedResource:ManagedResource[R]"></a>
       <h4 class="signature">
-      <span class="kind">trait</span>
-      <span class="symbol"> 
-        <a href="ManagedResource.html"><span class="name">ManagedResource</span></a>
-        <span class="tparams">[<span name="R">+R</span>]</span>
-        <span class="result"> extends AnyRef</span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ManagedResource.html"><span class="name">ManagedResource</span></a><span class="tparams">[<span name="R">+R</span>]</span><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       <p class="comment cmt">This class encapsulates a method of ensuring a resource is opened/closed during critical stages of its lifecycle.</p>
     </li><li visbl="pub" name="resource.ManagedResourceOperations" data-isabs="true">
       <a id="ManagedResourceOperations:ManagedResourceOperations[R]"></a>
       <h4 class="signature">
-      <span class="kind">trait</span>
-      <span class="symbol"> 
-        <a href="ManagedResourceOperations.html"><span class="name">ManagedResourceOperations</span></a>
-        <span class="tparams">[<span name="R">+R</span>]</span>
-        <span class="result"> extends ManagedResource[R]</span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ManagedResourceOperations.html"><span class="name">ManagedResourceOperations</span></a><span class="tparams">[<span name="R">+R</span>]</span><span class="result"> extends ManagedResource[R]</span>
       </span>
       </h4>
       <p class="comment cmt">This class implements all ManagedResource methods except acquireFor.</p>
     </li><li visbl="pub" name="resource.ManagedTraversable" data-isabs="true">
       <a id="ManagedTraversable:ManagedTraversable[B, A]"></a>
       <h4 class="signature">
-      <span class="kind">trait</span>
-      <span class="symbol"> 
-        <a href="ManagedTraversable.html"><span class="name">ManagedTraversable</span></a>
-        <span class="tparams">[<span name="B">+B</span>, <span name="A">A</span>]</span>
-        <span class="result"> extends Traversable[B]</span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ManagedTraversable.html"><span class="name">ManagedTraversable</span></a><span class="tparams">[<span name="B">+B</span>, <span name="A">A</span>]</span><span class="result"> extends Traversable[B]</span>
       </span>
       </h4>
       <p class="comment cmt">This trait provides a means to ensure traversable access to items inside a resource, while ensuring that the
@@ -141,28 +150,30 @@ resource is opened/closed appropriately before/after the traversal.</p>
     </li><li visbl="pub" name="resource.MediumPriorityResourceImplicits" data-isabs="true">
       <a id="MediumPriorityResourceImplicits:MediumPriorityResourceImplicits"></a>
       <h4 class="signature">
-      <span class="kind">trait</span>
-      <span class="symbol"> 
-        <a href="MediumPriorityResourceImplicits.html"><span class="name">MediumPriorityResourceImplicits</span></a>
-        
-        <span class="result"> extends LowPriorityResourceImplicits</span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="MediumPriorityResourceImplicits.html"><span class="name">MediumPriorityResourceImplicits</span></a><span class="result"> extends LowPriorityResourceImplicits</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>sealed </dd></dl></div>
+      
     </li><li visbl="pub" name="resource.Resource" data-isabs="true">
       <a id="Resource:Resource[R]"></a>
       <h4 class="signature">
-      <span class="kind">trait</span>
-      <span class="symbol"> 
-        <a href="Resource.html"><span class="name">Resource</span></a>
-        <span class="tparams">[<span name="R">R</span>]</span>
-        <span class="result"> extends AnyRef</span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Resource.html"><span class="name">Resource</span></a><span class="tparams">[<span name="R">R</span>]</span><span class="result"> extends AnyRef</span>
       </span>
       </h4>
       <p class="comment cmt">This is a type trait for types that are considered 'resources'.</p>
     </li></ol>
             </div>
-        
+
         
 
         <div class="values members" id="values">
@@ -170,22 +181,24 @@ resource is opened/closed appropriately before/after the traversal.</p>
               <ol><li visbl="pub" name="resource.Resource" data-isabs="false">
       <a id="Resource:Resource"></a>
       <h4 class="signature">
-      <span class="kind">object</span>
-      <span class="symbol"> 
-        <a href="Resource$.html"><span class="name">Resource</span></a>
-        
-        <span class="result"> extends MediumPriorityResourceImplicits</span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Resource$.html"><span class="name">Resource</span></a><span class="result"> extends MediumPriorityResourceImplicits</span>
       </span>
       </h4>
       <p class="comment cmt">Companion object to the Resource type trait.</p>
     </li><li visbl="pub" name="resource.package#and" data-isabs="false">
       <a id="and[A, B](ManagedResource[A],ManagedResource[B]):ManagedResource[(A, B)] with ManagedResourceOperations[(A, B)]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">and</span>
-        <span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span>
-        <span class="params">(<span name="r1">r1: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[A]</span>, <span name="r2">r2: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[B]</span>)</span><span class="result">: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[(A, B)] with <a name="resource.ManagedResourceOperations" class="extype" href="ManagedResourceOperations.html">ManagedResourceOperations</a>[(A, B)]</span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">and</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="r1">r1: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[A]</span>, <span name="r2">r2: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[B]</span>)</span><span class="result">: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[(A, B)] with <a name="resource.ManagedResourceOperations" class="extype" href="ManagedResourceOperations.html">ManagedResourceOperations</a>[(A, B)]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Combined two resources such that they are both opened/closed together.</p><div class="fullcomment"><div class="comment cmt"><p>Combined two resources such that they are both opened/closed together.   The first resource is opened before
@@ -195,11 +208,12 @@ both are opened/closed together.</p></div><dl class="paramcmts block"><dt>return
     </li><li visbl="pub" name="resource.package#join" data-isabs="false">
       <a id="join[A, MR, CC](CC)(&lt;:&lt;[CC, Seq[MR]],&lt;:&lt;[MR, ManagedResource[A]]):ManagedResource[Seq[A]]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">join</span>
-        <span class="tparams">[<span name="A">A</span>, <span name="MR">MR</span>, <span name="CC">CC</span>]</span>
-        <span class="params">(<span name="resources">resources: CC</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev0">ev0: <span name="scala.Predef.&lt;:&lt;" class="extype">&lt;:&lt;</span>[CC, Seq[MR]]</span>, <span name="ev1">ev1: <span name="scala.Predef.&lt;:&lt;" class="extype">&lt;:&lt;</span>[MR, <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[A]]</span>)</span><span class="result">: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[Seq[A]]</span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">join</span><span class="tparams">[<span name="A">A</span>, <span name="MR">MR</span>, <span name="CC">CC</span>]</span><span class="params">(<span name="resources">resources: CC</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev0">ev0: <span name="scala.Predef.&lt;:&lt;" class="extype">&lt;:&lt;</span>[CC, Seq[MR]]</span>, <span name="ev1">ev1: <span name="scala.Predef.&lt;:&lt;" class="extype">&lt;:&lt;</span>[MR, <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[A]]</span>)</span><span class="result">: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[Seq[A]]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Takes a sequence of ManagedResource objects and traits them as a ManagedResource of a Sequence of Objects.</p><div class="fullcomment"><div class="comment cmt"><p>Takes a sequence of ManagedResource objects and traits them as a ManagedResource of a Sequence of Objects.</p><p>This is useful for dealing with many resources within the same scope.
@@ -208,11 +222,12 @@ both are opened/closed together.</p></div><dl class="paramcmts block"><dt>return
     </li><li visbl="pub" name="resource.package#makeManagedResource" data-isabs="false">
       <a id="makeManagedResource[R](⇒ R)((R) ⇒ Unit)(List[Class[_ &lt;: Throwable]])(Manifest[R]):DefaultManagedResource[R]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">makeManagedResource</span>
-        <span class="tparams">[<span name="R">R</span>]</span>
-        <span class="params">(<span name="opener">opener: ⇒ R</span>)</span><span class="params">(<span name="closer">closer: (R) ⇒ <span name="scala.Unit" class="extype">Unit</span></span>)</span><span class="params">(<span name="exceptions">exceptions: List[Class[_ &lt;: Throwable]]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: Manifest[R]</span>)</span><span class="result">: <a name="resource.DefaultManagedResource" class="extype" href="DefaultManagedResource.html">DefaultManagedResource</a>[R]</span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">makeManagedResource</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="opener">opener: ⇒ R</span>)</span><span class="params">(<span name="closer">closer: (R) ⇒ <span name="scala.Unit" class="extype">Unit</span></span>)</span><span class="params">(<span name="exceptions">exceptions: List[Class[_ &lt;: Throwable]]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: Manifest[R]</span>)</span><span class="result">: <a name="resource.DefaultManagedResource" class="extype" href="DefaultManagedResource.html">DefaultManagedResource</a>[R]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Constructs a managed resource using function objects for each abstract method.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a managed resource using function objects for each abstract method.
@@ -221,11 +236,12 @@ both are opened/closed together.</p></div><dl class="paramcmts block"><dt>return
     </li><li visbl="pub" name="resource.package#managed" data-isabs="false">
       <a id="managed[A](⇒ A)(Resource[A],Manifest[A]):ManagedResource[A]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">managed</span>
-        <span class="tparams">[<span name="A">A</span>]</span>
-        <span class="params">(<span name="opener">opener: ⇒ A</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a name="resource.Resource" class="extype" href="Resource.html">Resource</a>[A]</span>, <span name="arg1">arg1: Manifest[A]</span>)</span><span class="result">: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[A]</span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">managed</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="opener">opener: ⇒ A</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a name="resource.Resource" class="extype" href="Resource.html">Resource</a>[A]</span>, <span name="arg1">arg1: Manifest[A]</span>)</span><span class="result">: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[A]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Creates a ManagedResource for any type with a Resource type class implementation.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a ManagedResource for any type with a Resource type class implementation.   This includes all
@@ -235,11 +251,12 @@ resource type class implementations in your own scope.
     </li><li visbl="pub" name="resource.package#withResources" data-isabs="false">
       <a id="withResources[C](⇒ C @util.continuations.package.cps[Either[List[Throwable],C]]):Either[List[Throwable], C]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">withResources</span>
-        <span class="tparams">[<span name="C">C</span>]</span>
-        <span class="params">(<span name="f">f: ⇒ C @util.continuations.package.cps[Either[List[Throwable],C]]</span>)</span><span class="result">: <span name="scala.Either" class="extype">Either</span>[List[Throwable], C]</span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withResources</span><span class="tparams">[<span name="C">C</span>]</span><span class="params">(<span name="f">f: ⇒ C @util.continuations.package.cps[Either[List[Throwable],C]]</span>)</span><span class="result">: <span name="scala.Either" class="extype">Either</span>[List[Throwable], C]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Starts  block that will use continuation-based resource handling.</p><div class="fullcomment"><div class="comment cmt"><p>Starts  block that will use continuation-based resource handling.   This is where you can nest resources directly
@@ -248,12 +265,18 @@ without having to worry about closing the block.   Example:</p></div><dl class="
             </div>
 
         
+        </div>
 
+        <div id="inheritedMembers">
         
+        </div>
 
       </div>
-      
+
       <div id="tooltip"></div>
-      
+
+      <div id="footer">  </div>
+
+
     </body>
       </html>

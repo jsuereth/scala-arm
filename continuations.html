@@ -46,7 +46,7 @@
 
 <p>In this example, the code <code>val input = managed(new FileInputStream(&#39;test.txt&quot;)) !</code> makes a call to <code>scala.util.continuations.shift</code>. This places a portion of computation into a <code>ControlContext</code>. The beginning of this computation opens the file <code>input.txt</code> and the end of the computation closes the file <code>input.txt</code>. The middle portion is left empty to be filled in later via a continuations.</p>
 
-<p>The result type of the <code>!</code> operator on continuations is @suspendable which is shorthand for @cpsParam<span>Unit,Unit</span>. This captures the type of each portion of computation in the <code>ControlContext</code>. The type <code>InputStream @cpsParam[Unit,Unit]</code> denotes that the computation so far generates an <code>InputStream</code>, requires a continuation that takes the <code>InputStream</code> and returns a Unit and will eventually return a <code>Unit</code> when completed.</p>
+<p>The result type of the <code>now</code> operator on continuations is @suspendable which is shorthand for @cpsParam<span>Unit,Unit</span>. This captures the type of each portion of computation in the <code>ControlContext</code>. The type <code>InputStream @cpsParam[Unit,Unit]</code> denotes that the computation so far generates an <code>InputStream</code>, requires a continuation that takes the <code>InputStream</code> and returns a Unit and will eventually return a <code>Unit</code> when completed.</p>
 
 <p><code>ControlContext</code> is nestable. When constructing a <code>ControlContext</code> inside of another one, the ending computations must line up. Let&#8217;s look at an example with nested managed resources.</p>
 
@@ -76,9 +76,9 @@
         <span class='c1'>// This reset is not needed, however the  below denotes a &quot;flow&quot; of execution that can be deferred.</span>
         <span class='c1'>// One can envision an asynchronous execuction model that would support the exact same semantics as     below.</span>
         <span class='n'>reset</span> <span class='o'>{</span>
-          <span class='k'>val</span> <span class='n'>connection</span> <span class='k'>=</span> <span class='n'>managed</span><span class='o'>(</span><span class='n'>server</span><span class='o'>.</span><span class='n'>accept</span><span class='o'>)</span> <span class='o'>!</span>
-          <span class='k'>val</span> <span class='n'>output</span> <span class='k'>=</span> <span class='n'>managed</span><span class='o'>(</span><span class='n'>connection</span><span class='o'>.</span><span class='n'>getOutputStream</span><span class='o'>)</span> <span class='o'>!</span>
-          <span class='k'>val</span> <span class='n'>input</span> <span class='k'>=</span> <span class='n'>managed</span><span class='o'>(</span><span class='n'>connection</span><span class='o'>.</span><span class='n'>getInputStream</span><span class='o'>)</span> <span class='o'>!</span>
+          <span class='k'>val</span> <span class='n'>connection</span> <span class='k'>=</span> <span class='n'>managed</span><span class='o'>(</span><span class='n'>server</span><span class='o'>.</span><span class='n'>accept</span><span class='o'>).</span><span class='n'>now</span>
+          <span class='k'>val</span> <span class='n'>output</span> <span class='k'>=</span> <span class='n'>managed</span><span class='o'>(</span><span class='n'>connection</span><span class='o'>.</span><span class='n'>getOutputStream</span><span class='o'>).</span><span class='n'>now</span>
+          <span class='k'>val</span> <span class='n'>input</span> <span class='k'>=</span> <span class='n'>managed</span><span class='o'>(</span><span class='n'>connection</span><span class='o'>.</span><span class='n'>getInputStream</span><span class='o'>).</span><span class='n'>now</span>
           <span class='k'>val</span> <span class='n'>writer</span> <span class='k'>=</span> <span class='k'>new</span> <span class='nc'>PrintWriter</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>BufferedWriter</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>OutputStreamWriter</span><span class='o'>(</span><span class='n'>output</span><span class='o'>)))</span>
           <span class='k'>val</span> <span class='n'>reader</span> <span class='k'>=</span> <span class='k'>new</span> <span class='nc'>BufferedReader</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>InputStreamReader</span><span class='o'>(</span><span class='n'>input</span><span class='o'>))</span>
           <span class='n'>writer</span><span class='o'>.</span><span class='n'>println</span><span class='o'>(</span><span class='n'>each_line_from</span><span class='o'>(</span><span class='n'>reader</span><span class='o'>))</span>
@@ -89,11 +89,11 @@
 </code></pre>
 </div>
 <p>The final computation placed in the hole left over from all the nested <code>ControlContext</code>s is the simple:</p>
-<div class='highlight'><pre><code class='scala'>    <span class='n'>writer</span><span class='o'>.</span><span class='n'>println</span><span class='o'>(</span><span class='n'>_</span><span class='o'>)</span>
+<div class='highlight'><pre><code class='scala'>    <span class='n'>writer</span><span class='o'>.</span><span class='n'>println</span><span class='o'>(</span><span class='k'>_</span><span class='o'>)</span>
     <span class='n'>writer</span><span class='o'>.</span><span class='n'>flush</span><span class='o'>()</span>
 </code></pre>
 </div>
-<p>You can see how each call to <code>shift</code> (either the <code>!</code> operator or the <code>each_line_from</code> method) causes additional computation before and after the &#8216;hole&#8217;. You can also see in <code>each_line_from</code> how that &#8216;hole&#8217; in the computation can be used more than once to complete the entire process.</p>
+<p>You can see how each call to <code>shift</code> (either the <code>now</code> operator or the <code>each_line_from</code> method) causes additional computation before and after the &#8216;hole&#8217;. You can also see in <code>each_line_from</code> how that &#8216;hole&#8217; in the computation can be used more than once to complete the entire process.</p>
 
 <p>Delimited continuations provide a lot of power. This simple model of thinking about them helps understand the type signatures and how to use them effectively.</p>   
   </div>

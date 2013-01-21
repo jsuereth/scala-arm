@@ -108,9 +108,9 @@ res2: Array[Byte] = Array(72, 65, 73, 32, 10, 85, 10, 87, 85, 82)&lt;/code&gt;&l
 <div class='highlight'><pre><code class='scala'><span class='k'>import</span> <span class='nn'>scala.resource._</span>
 <span class='k'>import</span> <span class='nn'>java.io._</span>
 <span class='k'>val</span> <span class='n'>stream</span> <span class='k'>=</span> <span class='n'>managed</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>FileInputStream</span><span class='o'>(</span><span class='s'>&quot;text.txt&quot;</span><span class='o'>))</span>
-<span class='k'>val</span> <span class='n'>reader</span> <span class='k'>=</span> <span class='n'>stream</span> <span class='n'>map</span> <span class='o'>(</span><span class='k'>new</span> <span class='nc'>BufferedReader</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>InputStreamReader</span><span class='o'>(</span><span class='n'>_</span><span class='o'>)))</span>
+<span class='k'>val</span> <span class='n'>reader</span> <span class='k'>=</span> <span class='n'>stream</span> <span class='n'>map</span> <span class='o'>(</span><span class='k'>new</span> <span class='nc'>BufferedReader</span><span class='o'>(</span><span class='k'>new</span> <span class='nc'>InputStreamReader</span><span class='o'>(</span><span class='k'>_</span><span class='o'>)))</span>
 <span class='k'>val</span> <span class='n'>lines</span> <span class='k'>=</span> <span class='n'>stream</span> <span class='n'>map</span> <span class='n'>makeBufferedReaderLineIterator</span> <span class='n'>toTraversable</span>
-<span class='n'>lines</span><span class='o'>.</span><span class='n'>view</span> <span class='n'>map</span> <span class='o'>(</span><span class='n'>_</span><span class='o'>.</span><span class='n'>trim</span><span class='o'>)</span> <span class='n'>foreach</span> <span class='n'>println</span>
+<span class='n'>lines</span><span class='o'>.</span><span class='n'>view</span> <span class='n'>map</span> <span class='o'>(</span><span class='k'>_</span><span class='o'>.</span><span class='n'>trim</span><span class='o'>)</span> <span class='n'>foreach</span> <span class='n'>println</span>
 </code></pre>
 </div>
 <p>Much of the noise in the example is dealing with the java.io API. The important piece is how we have a managed resource, convert it into a traversable and make some minor modification before aquiring. This produces a traversable that will eventually read the file. This allows us to pre-construct I/O related portions of our program to re-use over and over. For example, One could construct a <code>ManagedResource</code> that will read and parse configuration information. Then you can use a listener that detects when the file&#8217;s modification date changes, and re-extract the configuration information from the <code>ManagedResource</code>.</p>
@@ -142,7 +142,7 @@ res2: Array[Byte] = Array(72, 65, 73, 32, 10, 85, 10, 87, 85, 82)&lt;/code&gt;&l
 <span class='o'>}</span>
 </code></pre>
 </div>
-<p>The mechanism for using Delimted Continuations is outlines in more detail on the <a href='continuations.html'>Delimited Continuations and ARM</a> page.</p>   
+<p>The mechanism for using Delimited Continuations is outlines in more detail on the <a href='continuations.html'>Delimited Continuations and ARM</a> page.</p>   
   </div>
   <div class="span6 columns blogroll">
     <!-- TODO - links here -->

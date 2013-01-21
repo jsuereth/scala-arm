@@ -12,7 +12,7 @@
       <script type="text/javascript" src="../lib/tools.tooltip.js"></script>
     
         </head>
-        <body class="type">
+        <body onload="sh_highlightDocument('../lib/', '.min.js');" class="type">
       <div id="definition">
         <img src="../lib/trait_big.png" />
         <p id="owner"><a name="resource" class="extype" href="package.html">resource</a></p>
@@ -20,15 +20,16 @@
       </div>
 
       <h4 class="signature" id="signature">
-      <span class="kind">trait</span>
-      <span class="symbol"> 
-        <span class="name">ExtractableManagedResource</span>
-        <span class="tparams">[<span name="A">+A</span>]</span>
-        <span class="result"> extends <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[A]</span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ExtractableManagedResource</span><span class="tparams">[<span name="A">+A</span>]</span><span class="result"> extends <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[A]</span>
       </span>
       </h4>
       
-          <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>This trait represents a resource that has been modified (or will be modified) inside an ARM block in such
+      <div class="fullcommenttop" id="comment"><div class="comment cmt"><p>This trait represents a resource that has been modified (or will be modified) inside an ARM block in such
 a way that the resulting value can be extracted outside of the &quot;ManagedResource&quot; monad.  There are two mechanisms
 for extracting resources.  One which returns an optional value, where None is returned if any error occurs during
 extraction.   The other returns an Either where the left side contains any error that occured during extraction
@@ -37,70 +38,59 @@ and the right side contains the extracted value.
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[A], AnyRef, <span name="scala.Any" class="extype">Any</span></div>
         </div></div>
-        
+    
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol><li class="alpha in"><span>Alphabetic</span></li><li class="inherit out"><span>By inheritance</span></li></ol>
+            </div>
+        <div id="ancestors">
+              <span class="filtertype">Inherited</span>
+              <ol><li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li></ol>
+              <ol id="linearization"><li name="resource.ExtractableManagedResource" class="in"><span>ExtractableManagedResource</span></li><li name="resource.ManagedResource" class="in"><span>ManagedResource</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
+            </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
 
       <div id="template">
-
-        <div id="mbrsel">
-          <div id="textfilter"><span class="pre"></span><span class="input"><input accesskey="/" type="text" /></span><span class="post"></span></div>
-          <div id="order">
-                <span class="filtertype">Ordering</span>
-                <ol><li class="alpha in"><span>Alphabetic</span></li><li class="inherit out"><span>By inheritance</span></li></ol>
-              </div>
-          <div id="ancestors">
-                <span class="filtertype">Inherited</span>
-                <ol><li class="hideall out"><span>Hide All</span></li>
-                <li class="showall in"><span>Show all</span></li></ol>
-                <ol id="linearization"><li name="resource.ExtractableManagedResource" class="in"><span>ExtractableManagedResource</span></li><li name="resource.ManagedResource" class="in"><span>ManagedResource</span></li><li name="scala.AnyRef" class="in"><span>AnyRef</span></li><li name="scala.Any" class="in"><span>Any</span></li></ol>
-              </div>
-          <div id="visbl">
-              <span class="filtertype">Visibility</span>
-              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
-            </div>
-        </div>
-
+        <div id="allMembers">
         
 
         
-        
+
         <div class="values members" id="values">
               <h3>Abstract Value Members</h3>
-              <ol><li visbl="pub" name="resource.ManagedResource#!" data-isabs="true">
-      <a id="!:A @scala.util.continuations.cpsParam[Unit,Unit]"></a>
-      <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">!</span>
-        
-        <span class="result">: A @scala.util.continuations.cpsParam[Unit,Unit]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Accesses this resource inside a suspendable CPS block
-</p><div class="fullcomment"><div class="comment cmt"><p>Accesses this resource inside a suspendable CPS block
-</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>abstract </dd><dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
-    </li><li visbl="pub" name="resource.ManagedResource#acquireAndGet" data-isabs="true">
+              <ol><li visbl="pub" name="resource.ManagedResource#acquireAndGet" data-isabs="true">
       <a id="acquireAndGet[B]((A) ⇒ B):B"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">acquireAndGet</span>
-        <span class="tparams">[<span name="B">B</span>]</span>
-        <span class="params">(<span name="f">f: (A) ⇒ B</span>)</span><span class="result">: B</span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">acquireAndGet</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (A) ⇒ B</span>)</span><span class="result">: B</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Acquires the resource for the Duration of a given function, The resource will automatically be opened and closed.</p><div class="fullcomment"><div class="comment cmt"><p>Acquires the resource for the Duration of a given function, The resource will automatically be opened and closed.
 The result will be returned immediately, except in the case of an error.   Upon error, the resource will be
 closed, and then the originating exception will be thrown.</p><p>Note: This method will throw the last exception encountered by the managed resource, whatever this happens to be.
 </p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>A function to execute against the handle returned by the resource</p></dd><dt>returns</dt><dd class="cmt"><p>The result of the passed in function
-</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>abstract </dd><dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
     </li><li visbl="pub" name="resource.ManagedResource#acquireFor" data-isabs="true">
       <a id="acquireFor[B]((A) ⇒ B):Either[List[Throwable], B]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">acquireFor</span>
-        <span class="tparams">[<span name="B">B</span>]</span>
-        <span class="params">(<span name="f">f: (A) ⇒ B</span>)</span><span class="result">: <span name="scala.Either" class="extype">Either</span>[List[Throwable], B]</span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">acquireFor</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (A) ⇒ B</span>)</span><span class="result">: <span name="scala.Either" class="extype">Either</span>[List[Throwable], B]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Aquires the resource for the Duration of a given function, The resource will automatically be opened and closed.</p><div class="fullcomment"><div class="comment cmt"><p>Aquires the resource for the Duration of a given function, The resource will automatically be opened and closed.
@@ -108,59 +98,63 @@ The result will be returned immediately in an Either container.   This container
 occurred during execution, or the resulting value.
 </p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>A function to execute against the raw resource.</p></dd><dt>returns</dt><dd class="cmt"><p>The result of the function (right) or the list of exceptions seen during the processing of the
            resource (left).
-</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>abstract </dd><dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
     </li><li visbl="pub" name="resource.ManagedResource#and" data-isabs="true">
       <a id="and[B](ManagedResource[B]):ManagedResource[(A, B)]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">and</span>
-        <span class="tparams">[<span name="B">B</span>]</span>
-        <span class="params">(<span name="that">that: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[B]</span>)</span><span class="result">: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[(A, B)]</span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">and</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="that">that: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[B]</span>)</span><span class="result">: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[(A, B)]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Creates a new resource that is the aggregation of this resource and another.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new resource that is the aggregation of this resource and another.
 </p></div><dl class="paramcmts block"><dt class="param">that</dt><dd class="cmt"><p>
          The other resource</p><p>@return
          A resource that is a tupled combination of this and that.
-</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>abstract </dd><dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
     </li><li visbl="pub" name="resource.ExtractableManagedResource#either" data-isabs="true">
       <a id="either:Either[Seq[Throwable], A]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">either</span>
-        
-        <span class="result">: <span name="scala.Either" class="extype">Either</span>[<span name="scala.collection.Seq" class="extype">Seq</span>[Throwable], A]</span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">either</span><span class="result">: <span name="scala.Either" class="extype">Either</span>[<span name="scala.collection.Seq" class="extype">Seq</span>[Throwable], A]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">This method is used to extract the resource being managed.</p><div class="fullcomment"><div class="comment cmt"><p>This method is used to extract the resource being managed.</p><p>This allows you to pull information out of the Managed resource, as such, the Resource will not be &quot;available&quot;
 after this method call.</p><p>@returns
        An either where the left hand side is the currently contained resource unless exceptions, in which case
        the right hand side will contain the sequence of throwable encountered.
-</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>abstract </dd></dl></div>
+</p></div></div>
     </li><li visbl="pub" name="resource.ManagedResource#flatMap" data-isabs="true">
       <a id="flatMap[B]((A) ⇒ ManagedResource[B]):ManagedResource[B]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">flatMap</span>
-        <span class="tparams">[<span name="B">B</span>]</span>
-        <span class="params">(<span name="f">f: (A) ⇒ <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[B]</span>)</span><span class="result">: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[B]</span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flatMap</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (A) ⇒ <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[B]</span>)</span><span class="result">: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[B]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">This method is used to immediately perform operations on a resource while it is open, ensuring the resource is
 closed before returning.</p><div class="fullcomment"><div class="comment cmt"><p>This method is used to immediately perform operations on a resource while it is open, ensuring the resource is
 closed before returning.
-</p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>The transformation function to apply against the raw resource.</p></dd><dt>returns</dt><dd class="cmt"><p>A new ManagedResource with the translated type or some other type if an appropriate translator was found.</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>abstract </dd><dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>The transformation function to apply against the raw resource.</p></dd><dt>returns</dt><dd class="cmt"><p>A new ManagedResource with the translated type or some other type if an appropriate translator was found.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
     </li><li visbl="pub" name="resource.ManagedResource#foreach" data-isabs="true">
       <a id="foreach((A) ⇒ Unit):Unit"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">foreach</span>
-        
-        <span class="params">(<span name="f">f: (A) ⇒ <span name="scala.Unit" class="extype">Unit</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">foreach</span><span class="params">(<span name="f">f: (A) ⇒ <span name="scala.Unit" class="extype">Unit</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">This method is used to immediately perform operations on a resource while it is open, ensuring the resource is
@@ -168,43 +162,60 @@ closed before returning.</p><div class="fullcomment"><div class="comment cmt"><p
 closed before returning.   Note:  This method *will* open and close the resource, performing the body of the
 method immediately.
 </p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>The function to apply against the raw resource.
-</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>abstract </dd><dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
     </li><li visbl="pub" name="resource.ManagedResource#map" data-isabs="true">
       <a id="map[B]((A) ⇒ B):ExtractableManagedResource[B]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">map</span>
-        <span class="tparams">[<span name="B">B</span>]</span>
-        <span class="params">(<span name="f">f: (A) ⇒ B</span>)</span><span class="result">: <a name="resource.ExtractableManagedResource" class="extype" href="">ExtractableManagedResource</a>[B]</span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">map</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (A) ⇒ B</span>)</span><span class="result">: <a name="resource.ExtractableManagedResource" class="extype" href="">ExtractableManagedResource</a>[B]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">This method is used to perform operations on a resource while the resource is open.</p><div class="fullcomment"><div class="comment cmt"><p>This method is used to perform operations on a resource while the resource is open.
 </p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>The transformation function to apply against the raw resource.
 </p></dd><dt>returns</dt><dd class="cmt"><p>A new ManagedResource with the translated type or some other type if an appropriate translator was found.
-</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>abstract </dd><dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
+    </li><li visbl="pub" name="resource.ManagedResource#now" data-isabs="true">
+      <a id="now:A @scala.util.continuations.cpsParam[Unit,Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">now</span><span class="result">: A @scala.util.continuations.cpsParam[Unit,Unit]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Accesses this resource inside a suspendable CPS block
+</p><div class="fullcomment"><div class="comment cmt"><p>Accesses this resource inside a suspendable CPS block
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
     </li><li visbl="pub" name="resource.ExtractableManagedResource#opt" data-isabs="true">
       <a id="opt:Option[A]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">opt</span>
-        
-        <span class="result">: <span name="scala.Option" class="extype">Option</span>[A]</span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">opt</span><span class="result">: <span name="scala.Option" class="extype">Option</span>[A]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">This method is used to extract the resource being managed.</p><div class="fullcomment"><div class="comment cmt"><p>This method is used to extract the resource being managed.</p><p>This allows you to pull information out of the Managed resource, as such, the Resource will not be &quot;available&quot;
 after this method call.</p><p>@returns
       Some(containedValue) if there have been no processing errors, None otherwise
-</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>abstract </dd></dl></div>
+</p></div></div>
     </li><li visbl="pub" name="resource.ManagedResource#reflect" data-isabs="true">
       <a id="reflect[B]:A @util.continuations.package.cps[Either[List[Throwable],B]]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">reflect</span>
-        <span class="tparams">[<span name="B">B</span>]</span>
-        <span class="result">: A @util.continuations.package.cps[Either[List[Throwable],B]]</span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">reflect</span><span class="tparams">[<span name="B">B</span>]</span><span class="result">: A @util.continuations.package.cps[Either[List[Throwable],B]]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Reflects the resource for use in a continuation.</p><div class="fullcomment"><div class="comment cmt"><p>Reflects the resource for use in a continuation.   This method is designed to be used inside a
@@ -218,22 +229,40 @@ withResources {
   }
 }
 </pre></p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>The raw resource, with appropriate continuation-context annotations.
-</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>abstract </dd><dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
     </li><li visbl="pub" name="resource.ManagedResource#toTraversable" data-isabs="true">
       <a id="toTraversable[B](&lt;:&lt;[A, TraversableOnce[B]]):Traversable[B]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">toTraversable</span>
-        <span class="tparams">[<span name="B">B</span>]</span>
-        <span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span name="scala.Predef.&lt;:&lt;" class="extype">&lt;:&lt;</span>[A, TraversableOnce[B]]</span>)</span><span class="result">: <span name="scala.collection.Traversable" class="extype">Traversable</span>[B]</span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toTraversable</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span name="scala.Predef.&lt;:&lt;" class="extype">&lt;:&lt;</span>[A, TraversableOnce[B]]</span>)</span><span class="result">: <span name="scala.collection.Traversable" class="extype">Traversable</span>[B]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">This method creates a Traversable in which all performed methods are done within the context of an &quot;open&quot;
 resource.</p><div class="fullcomment"><div class="comment cmt"><p>This method creates a Traversable in which all performed methods are done within the context of an &quot;open&quot;
 resource.   Note:  Every iteration will attempt to open and close the resource!
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A Traversable of elements of type B.
-</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>abstract </dd><dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
+    </li><li visbl="pub" name="resource.ManagedResource#!" data-isabs="true">
+      <a id="!:A @scala.util.continuations.cpsParam[Unit,Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="gt4s: $bang. Deprecated: (Since version 1.3) Use now instead of !">!</span><span class="result">: A @scala.util.continuations.cpsParam[Unit,Unit]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Accesses this resource inside a suspendable CPS block
+</p><div class="fullcomment"><div class="comment cmt"><p>Accesses this resource inside a suspendable CPS block
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 1.3)</i> Use now instead of !</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -242,77 +271,84 @@ resource.   Note:  Every iteration will attempt to open and close the resource!
               <ol><li visbl="pub" name="scala.AnyRef#!=" data-isabs="false">
       <a id="!=(AnyRef):Boolean"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">!=</span>
-        
-        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#!=" data-isabs="false">
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">!=</span>
-        
-        <span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $bang$eq">!=</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef###" data-isabs="false">
       <a id="##():Int"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">##</span>
-        
-        <span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $hash$hash">##</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#==" data-isabs="false">
       <a id="==(AnyRef):Boolean"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">==</span>
-        
-        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#==" data-isabs="false">
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">==</span>
-        
-        <span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name" title="gt4s: $eq$eq">==</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#asInstanceOf" data-isabs="false">
       <a id="asInstanceOf[T0]:T0"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">asInstanceOf</span>
-        <span class="tparams">[<span name="T0">T0</span>]</span>
-        <span class="result">: T0</span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: T0</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#clone" data-isabs="false">
       <a id="clone():AnyRef"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">clone</span>
-        
-        <span class="params">()</span><span class="result">: AnyRef</span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: AnyRef</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -322,33 +358,36 @@ resource.   Note:  Every iteration will attempt to open and close the resource!
     </li><li visbl="pub" name="scala.AnyRef#eq" data-isabs="false">
       <a id="eq(AnyRef):Boolean"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">eq</span>
-        
-        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#equals" data-isabs="false">
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">equals</span>
-        
-        <span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span name="scala.Any" class="extype">Any</span></span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li visbl="prt" name="scala.AnyRef#finalize" data-isabs="false">
       <a id="finalize():Unit"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">finalize</span>
-        
-        <span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a name="java.lang" class="extype" href="../java/lang/package.html">lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -358,175 +397,189 @@ resource.   Note:  Every iteration will attempt to open and close the resource!
     </li><li visbl="pub" name="resource.ManagedResource#flatMap" data-isabs="false">
       <a id="flatMap[B]((A) ⇒ B):ManagedResource[B]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">flatMap</span>
-        <span class="tparams">[<span name="B">B</span>]</span>
-        <span class="params">(<span name="f">f: (A) ⇒ B</span>)</span><span class="result">: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[B]</span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flatMap</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (A) ⇒ B</span>)</span><span class="result">: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[B]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">[use case] This method is used to immediately perform operations on a resource while it is open, ensuring the resource is
 closed before returning.</p><div class="fullcomment">[use case] <div class="comment cmt"><p>This method is used to immediately perform operations on a resource while it is open, ensuring the resource is
 closed before returning.
 </p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>The transformation function to apply against the raw resource.
-</p></dd><dt>returns</dt><dd class="cmt"><p>A new ManagedResource with the translated type or some other type if an appropriate translator was found.</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>abstract </dd><dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
+</p></dd><dt>returns</dt><dd class="cmt"><p>A new ManagedResource with the translated type or some other type if an appropriate translator was found.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
     </li><li visbl="pub" name="resource.ManagedResource#flatMap" data-isabs="false">
       <a id="flatMap[B]((A) ⇒ Traversable[B]):Traversable[B]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">flatMap</span>
-        <span class="tparams">[<span name="B">B</span>]</span>
-        <span class="params">(<span name="f">f: (A) ⇒ <span name="scala.collection.Traversable" class="extype">Traversable</span>[B]</span>)</span><span class="result">: <span name="scala.collection.Traversable" class="extype">Traversable</span>[B]</span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flatMap</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (A) ⇒ <span name="scala.collection.Traversable" class="extype">Traversable</span>[B]</span>)</span><span class="result">: <span name="scala.collection.Traversable" class="extype">Traversable</span>[B]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">[use case] This method is used to immediately perform operations on a resource while it is open, ensuring the resource is
 closed before returning.</p><div class="fullcomment">[use case] <div class="comment cmt"><p>This method is used to immediately perform operations on a resource while it is open, ensuring the resource is
 closed before returning.
 </p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>The transformation function to apply against the raw resource.
-</p></dd><dt>returns</dt><dd class="cmt"><p>A new ManagedResource with the translated type or some other type if an appropriate translator was found.</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>abstract </dd><dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
+</p></dd><dt>returns</dt><dd class="cmt"><p>A new ManagedResource with the translated type or some other type if an appropriate translator was found.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
     </li><li visbl="pub" name="resource.ManagedResource#flatMap" data-isabs="false">
       <a id="flatMap[B]((A) ⇒ ManagedResource[B]):ManagedResource[B]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">flatMap</span>
-        <span class="tparams">[<span name="B">B</span>]</span>
-        <span class="params">(<span name="f">f: (A) ⇒ <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[B]</span>)</span><span class="result">: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[B]</span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flatMap</span><span class="tparams">[<span name="B">B</span>]</span><span class="params">(<span name="f">f: (A) ⇒ <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[B]</span>)</span><span class="result">: <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[B]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">[use case] This method is used to immediately perform operations on a resource while it is open, ensuring the resource is
 closed before returning.</p><div class="fullcomment">[use case] <div class="comment cmt"><p>This method is used to immediately perform operations on a resource while it is open, ensuring the resource is
 closed before returning.
 </p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>The transformation function to apply against the raw resource.
-</p></dd><dt>returns</dt><dd class="cmt"><p>A new ManagedResource with the translated type or some other type if an appropriate translator was found.</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>abstract </dd><dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
+</p></dd><dt>returns</dt><dd class="cmt"><p>A new ManagedResource with the translated type or some other type if an appropriate translator was found.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a></dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#getClass" data-isabs="false">
       <a id="getClass():java.lang.Class[_]"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">getClass</span>
-        
-        <span class="params">()</span><span class="result">: java.lang.Class[_]</span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: java.lang.Class[_]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#hashCode" data-isabs="false">
       <a id="hashCode():Int"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">hashCode</span>
-        
-        <span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span name="scala.Int" class="extype">Int</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.Any#isInstanceOf" data-isabs="false">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">isInstanceOf</span>
-        <span class="tparams">[<span name="T0">T0</span>]</span>
-        <span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#ne" data-isabs="false">
       <a id="ne(AnyRef):Boolean"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">ne</span>
-        
-        <span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: AnyRef</span>)</span><span class="result">: <span name="scala.Boolean" class="extype">Boolean</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#notify" data-isabs="false">
       <a id="notify():Unit"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">notify</span>
-        
-        <span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#notifyAll" data-isabs="false">
       <a id="notifyAll():Unit"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">notifyAll</span>
-        
-        <span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#synchronized" data-isabs="false">
       <a id="synchronized[T0](⇒ T0):T0"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">synchronized</span>
-        <span class="tparams">[<span name="T0">T0</span>]</span>
-        <span class="params">(<span name="arg0">arg0: ⇒ T0</span>)</span><span class="result">: T0</span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ T0</span>)</span><span class="result">: T0</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#toString" data-isabs="false">
       <a id="toString():String"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">toString</span>
-        
-        <span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span name="java.lang.String" class="extype">String</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait():Unit"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">wait</span>
-        
-        <span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait(Long,Int):Unit"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">wait</span>
-        
-        <span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>, <span name="arg1">arg1: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>, <span name="arg1">arg1: <span name="scala.Int" class="extype">Int</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
     </li><li visbl="pub" name="scala.AnyRef#wait" data-isabs="false">
       <a id="wait(Long):Unit"></a>
       <h4 class="signature">
-      <span class="kind">def</span>
-      <span class="symbol"> 
-        <span class="name">wait</span>
-        
-        <span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span name="scala.Long" class="extype">Long</span></span>)</span><span class="result">: <span name="scala.Unit" class="extype">Unit</span></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>final </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">()</span>
               
         </dd></dl></div>
@@ -534,7 +587,9 @@ closed before returning.
             </div>
 
         
+        </div>
 
+        <div id="inheritedMembers">
         <div name="resource.ManagedResource" class="parent">
               <h3>Inherited from <a name="resource.ManagedResource" class="extype" href="ManagedResource.html">ManagedResource</a>[A]</h3>
             </div><div name="scala.AnyRef" class="parent">
@@ -542,10 +597,14 @@ closed before returning.
             </div><div name="scala.Any" class="parent">
               <h3>Inherited from <span name="scala.Any" class="extype">Any</span></h3>
             </div>
+        </div>
 
       </div>
-      
+
       <div id="tooltip"></div>
-      
+
+      <div id="footer">  </div>
+
+
     </body>
       </html>
