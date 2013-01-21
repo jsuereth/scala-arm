@@ -6,14 +6,19 @@ This project is an attempt to provide an Automatic-Resource-Management library f
 
 In SBT:
 
-    libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.2"
+    libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.3"
+
+*or*
+
+    libraryDependencies += "com.jsuereth" % "scala-arm_2.9.2" % "1.3"
+    libraryDependencies += "com.jsuereth" % "scala-arm_2.10" % "1.3"
 
 In Maven:
 
     <dependency>
        <groupId>com.jsuereth</groupId>
-       <artifactId>scala-arm_${scala.version}</artifactId>
-       <version>1.2</version>
+       <artifactId>scala-arm_${scala.binary.version}</artifactId>
+       <version>1.3</version>
     </dependency>
 
 
@@ -55,7 +60,7 @@ For more information on usage, see [Usage](http://jsuereth.com/scala-arm/usage.h
 
 ## SCALA LICENSE
 
-Copyright (c) 2002-2009 EPFL, Lausanne, unless otherwise specified.
+Copyright (c) 2002-2013 EPFL, Lausanne, unless otherwise specified.
 All rights reserved.
 
 This software was developed by the Programming Methods Laboratory of the
