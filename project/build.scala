@@ -70,7 +70,16 @@ object ArmDef extends Build {
     )
   )
 
-  def addContinuations = libraryDependencies += compilerPlugin("org.scala-lang.plugins" % "continuations" % scalaVersion.value)
+  def addContinuations = libraryDependencies ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      // if scala 2.11+ is used, add dependency on scala-xml module
+      case Some((2, scalaMajor)) if scalaMajor >= 11 =>
+        Seq(compilerPlugin("org.scala-lang.plugins" %% "scala-continuations-plugin" % "1.0.0"),
+          "org.scala-lang.plugins" %% "scala-continuations-library" % "1.0.0")
+      case _ =>
+        Seq(compilerPlugin("org.scala-lang.plugins" % "continuations" % scalaVersion.value))
+    }
+  }
 
   def dependencies = Seq(
     "junit" % "junit" % "4.10" % "test",
