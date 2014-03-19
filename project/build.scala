@@ -47,7 +47,7 @@ object ArmDef extends Build {
     
     // Maven central wants some extra metadata to keep things 'clean'.
     homepage := Some(url("http://jsuereth.com/scala-arm")),
-    licenses += "BSG-Style" -> url("http://www.opensource.org/licenses/bsd-license.php"),
+    licenses += "BSD-Style" -> url("http://www.opensource.org/licenses/bsd-license.php"),
     scmInfo := Some(ScmInfo(url("http://github.com/jsuereth/scala-arm"), "scm:git@github.com:jsuereth/scala-arm.git")),
     pomExtra := (
       <developers>
