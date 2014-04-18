@@ -14,8 +14,8 @@ object ArmDef extends Build {
     organization := "com.jsuereth",
     name := "scala-arm",
     version := "1.4-SNAPSHOT",
-    scalaVersion := "2.10.3",
-    crossScalaVersions := Seq("2.9.3", "2.10.3"),
+    scalaVersion := "2.11.0",
+    crossScalaVersions := Seq("2.9.3", "2.10.4", "2.11.0"),
     resolvers += "java.net repo" at "http://download.java.net/maven/2/",
     libraryDependencies ++= dependencies,
     autoCompilerPlugins := true,
@@ -74,8 +74,8 @@ object ArmDef extends Build {
     CrossVersion.partialVersion(scalaVersion.value) match {
       // if scala 2.11+ is used, add dependency on scala-xml module
       case Some((2, scalaMajor)) if scalaMajor >= 11 =>
-        Seq(compilerPlugin("org.scala-lang.plugins" %% "scala-continuations-plugin" % "1.0.0"),
-          "org.scala-lang.plugins" %% "scala-continuations-library" % "1.0.0")
+        Seq(compilerPlugin("org.scala-lang.plugins" % "scala-continuations-plugin_2.11.0" % "1.0.1"),
+          "org.scala-lang.plugins" %% "scala-continuations-library" % "1.0.1")
       case _ =>
         Seq(compilerPlugin("org.scala-lang.plugins" % "continuations" % scalaVersion.value))
     }
