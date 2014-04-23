@@ -7,13 +7,18 @@ import com.typesafe.sbt.SbtGhPages.ghpages
 import com.typesafe.sbt.SbtGit.git
 import com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
 import com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact
+import sbtrelease._
+import sbtrelease.ReleasePlugin._
+import ReleaseStateTransformations._
+import xerial.sbt.Sonatype._
+import SonatypeKeys._
+import com.typesafe.sbt.pgp.PgpKeys
 
 object ArmDef extends Build {
 
   val arm = (Project("scala-arm", file(".")) settings(
     organization := "com.jsuereth",
     name := "scala-arm",
-    version := "1.4-SNAPSHOT",
     scalaVersion := "2.11.0",
     crossScalaVersions := Seq("2.9.3", "2.10.4", "2.11.0"),
     resolvers += "java.net repo" at "http://download.java.net/maven/2/",
@@ -21,7 +26,7 @@ object ArmDef extends Build {
     autoCompilerPlugins := true,
     addContinuations,
     scalacOptions += "-P:continuations:enable"
-  ) settings(publishSettings:_*) settings(websiteSettings:_*)) settings(bcSettings:_*)
+  ) settings(releaseSettings:_*) settings(sonatypeSettings:_*) settings(publishSettings:_*) settings(websiteSettings:_*)) settings(bcSettings:_*)
 
   def bcSettings: Seq[Setting[_]] = mimaDefaultSettings ++ Seq(
     previousArtifact <<= scalaVersion apply { sv =>
@@ -56,7 +61,30 @@ object ArmDef extends Build {
           <name>Josh Suereth</name>
           <url>http://jsuereth.com</url>
         </developer>
-      </developers>)
+      </developers>),
+    ReleasePlugin.ReleaseKeys.releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      runClean,
+      runTest,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      ReleaseStep(
+        action = { state =>
+          val extracted = Project extract state
+          extracted.runAggregated(PgpKeys.publishSigned in Global in extracted.get(thisProjectRef), state)
+        },
+        enableCrossBuild = true
+      ),
+      ReleaseStep{ state =>
+        val extracted = Project extract state
+        extracted.runAggregated(SonatypeKeys.sonatypeReleaseAll in Global in extracted.get(thisProjectRef), state)
+      },
+      setNextVersion,
+      commitNextVersion,
+      pushChanges
+    )
   )
 
   def websiteSettings: Seq[Setting[_]] = (
