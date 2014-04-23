@@ -77,12 +77,12 @@ object ArmDef extends Build {
         },
         enableCrossBuild = true
       ),
-      setNextVersion,
-      commitNextVersion,
       ReleaseStep{ state =>
         val extracted = Project extract state
         extracted.runAggregated(SonatypeKeys.sonatypeReleaseAll in Global in extracted.get(thisProjectRef), state)
       },
+      setNextVersion,
+      commitNextVersion,
       pushChanges
     )
   )
