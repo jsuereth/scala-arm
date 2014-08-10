@@ -1,6 +1,10 @@
 package resource
 
 import _root_.java.{io => jio}
+import _root_.scala.util.Success
+import _root_.scala.concurrent.Await
+import _root_.scala.concurrent.duration.Duration
+import _root_.scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * This is a basic abstraction for an iterator that fetches new content as needed.
@@ -271,9 +275,9 @@ class TestManagedResource {
     val mr = managed(r)(Resource.reflectiveCloseableResource, implicitly[Manifest[FakeResource]])
     try {
       val result = mr.acquireAndGet { r => r.generateData }
-      fail("SHould not make it here, due to previous error!")
+      fail("Should not make it here, due to previous error!")
     } catch {
-      case e =>
+      case e: Throwable =>
           assertEquals("Failed to order exceptions appropriately", FakeResource.GEN_DATA_ERROR, e.getMessage)
     }
   }
@@ -346,7 +350,7 @@ class TestManagedResource {
 
       traversable.foreach( x => ())
     } catch {
-      case e =>
+      case e: Throwable =>
          caught = true
     }
     assertTrue("Exceptions during traversale are propogated by default!",caught)
@@ -354,7 +358,7 @@ class TestManagedResource {
   }
   @Test
   def mustAllowApplyUsage() {
-    val r = new FakeResource();
+    val r = new FakeResource()
 
     assertFalse("Failed to begin closed!", r.isOpened)
     val result = managed(r) acquireAndGet { r =>
@@ -366,7 +370,7 @@ class TestManagedResource {
 
   @Test
   def withResourceMustBeAwesome() {
-    val outer = new FakeResource
+    val outer = new FakeResource()
     val inners = List(new FakeResource, new FakeResource, new FakeResource)
     val all = outer :: inners
 
@@ -381,5 +385,40 @@ class TestManagedResource {
     for( r <- all) {
       assertFalse("Failed to close a resource!", r.isOpened)
     }
+  }
+
+  @Test
+  def mustBeSuccessFuture() {
+    val r = new FakeResource()
+
+    assertFalse("Failed to begin closed!", r.isOpened)
+
+    val result = try {
+      Await.result(managed(r).map[String](_ => "OK").toFuture, Duration("1s"))
+    } catch {
+      case _: Throwable => "KO"
+    }
+
+    assertEquals("Successful result", "OK", result)
+    assertFalse("Failed to close resource", r.isOpened)
+  }
+
+  @Test
+  def mustBeFailedFuture() {
+    val r = new FakeResource()
+
+    assertFalse("Failed to begin closed!", r.isOpened)
+
+    val result = try {
+      Await.result(managed(r).map[String](_ => {
+        sys.error("Error")
+        "OK"
+      }).toFuture, Duration("1s"))
+    } catch {
+      case _: Throwable => "KO"
+    }
+
+    assertEquals("Failure result", "KO", result)
+    assertFalse("Failed to close resource", r.isOpened)
   }
 }

@@ -16,6 +16,7 @@ package resource
 import _root_.scala.collection.Traversable
 import _root_.scala.collection.TraversableOnce
 import _root_.scala.util.continuations.{cps,shift, suspendable}
+import _root_.scala.concurrent.{ ExecutionContext, Future }
 /**
  * This class implements all ManagedResource methods except acquireFor.   This allows all new ManagedResource
  * implementations to be defined in terms of the acquireFor method.
@@ -30,6 +31,9 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
       override protected def internalForeach[U](resource: R, g : B => U) : Unit = 
         ev(resource).foreach(g) 
     }
+
+  def toFuture(implicit context: ExecutionContext): Future[R] = 
+    Future(acquireAndGet(identity))
 
   override def map[B](f : R => B): ExtractableManagedResource[B] =
     new DeferredExtractableManagedResource(self, f)
