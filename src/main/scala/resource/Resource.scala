@@ -117,6 +117,12 @@ sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicit
     override def close(r: JarFile): Unit = r.close()
     override def toString = "Resource[JarFile]"
   }
+  // HttpURLConnection requires a disconnect to be used.
+  import java.net.HttpURLConnection
+  implicit object HttpURLConnectionResource extends Resource[HttpURLConnection] {
+    override def close(c: HttpURLConnection) = c.disconnect()
+    override def toString = "Resource[HttpURLConnection]"
+  }
 }
 
 /**
