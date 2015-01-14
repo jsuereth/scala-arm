@@ -61,7 +61,7 @@ class FakeResource {
      }
    }
    protected def makeData = math.random
-   def generateData = if(opened.get) makeData else error(GEN_DATA_ERROR)
+   def generateData = if(opened.get) makeData else sys.error(GEN_DATA_ERROR)
    def isOpened = opened.get
 }
 
@@ -202,9 +202,9 @@ class TestManagedResource {
      val r2 = new FakeResource();
      val mr2 = managed(r2)
       val monad = for { r <- mr
-          val x = r.generateData
+          x = r.generateData
           r2 <- mr2 
-          val x2 = r2.generateData
+          x2 = r2.generateData
       } yield x + x2      
       //This can't compile as the monad is not an extractable resource!!!
       //assertTrue("Failed to extract a result", monad.opt.isDefined)
@@ -366,25 +366,6 @@ class TestManagedResource {
         r.generateData
     }
     assertFalse("Failed to close resource", r.isOpened)
-  }
-
-  @Test
-  def withResourceMustBeAwesome() {
-    val outer = new FakeResource()
-    val inners = List(new FakeResource, new FakeResource, new FakeResource)
-    val all = outer :: inners
-
-    val results = withResources {
-      val mo = managed(outer).reflect[Double]
-      //TODO - Figure out the stink here!
-      //for(r <- inners; val mi = managed(r).reflect[List[Double]]) yield mi.generateData + mo.generateData
-      mo.generateData
-    }
-    // If we have no exceptions, we were mostly awesome!
-
-    for( r <- all) {
-      assertFalse("Failed to close a resource!", r.isOpened)
-    }
   }
 
   @Test

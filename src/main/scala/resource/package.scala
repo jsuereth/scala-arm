@@ -24,19 +24,11 @@ package object resource {
   def makeManagedResource[R : Manifest](opener:  => R)(closer: R => Unit)(exceptions: List[Class[_<:Throwable]]) = {
     implicit val typeTrait: Resource[R] = new Resource[R] {
       override def close(r : R) = closer(r)
-      override val fatalExceptions = exceptions
+      override def isFatalException(t: Throwable): Boolean =
+        exceptions exists { cls => cls.isAssignableFrom(t.getClass) }
     }
     new DefaultManagedResource(opener)
   }
-
-  import scala.util.continuations._
-
-  /**
-   * Starts  block that will use continuation-based resource handling.   This is where you can nest resources directly
-   * without having to worry about closing the block.   Example:
-   * 
-   */
-  def withResources[C](f: => C @cps[Either[List[Throwable],C]]) = reset { Right(f) }
 
   /**
    * Combined two resources such that they are both opened/closed together.   The first resource is opened before
@@ -44,10 +36,9 @@ package object resource {
    * both are opened/closed together.
    * @return A ManagedResource of a tuple containing the initial two resources.
    */
-  def and[A,B](r1: ManagedResource[A], r2: ManagedResource[B]) = 
-    new ManagedResource[(A,B)] with ManagedResourceOperations[(A,B)] {
-      override def acquireFor[C](f: ((A,B)) => C) = 
-        withResources { f(Tuple2(r1.reflect[C], r2.reflect[C])) }
+  def and[A,B](r1: ManagedResource[A], r2: ManagedResource[B]) =
+    r1 flatMap { ther1 =>
+      r2 map { ther2 => (ther1, ther2) }
     }
 
   /**
@@ -55,7 +46,7 @@ package object resource {
    *
    * This is useful for dealing with many resources within the same scope.
    *
-   * @param resource   A collection of ManageResources of the same type
+   * @param resources   A collection of ManageResources of the same type
    * @return  A ManagedResoruce of a collection of types
    */
   def join[A, MR, CC](resources: CC)(implicit ev0: CC <:< Seq[ MR ], ev1: MR <:< ManagedResource[A]): ManagedResource[Seq[A]] = {

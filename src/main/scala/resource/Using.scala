@@ -16,7 +16,7 @@ import java.util.zip._
   * 2. Avoid frustrating errors when dealing with the filesystem, e.g. trying to write to a file whose parent directories
   *    do not exist yet.
   *
-  * Note: This code is ported from the sbt IO lirbary.
+  * Note: This code is ported from the sbt IO library.
   */
 object Using {
 
@@ -68,6 +68,9 @@ object Using {
   /** Constructs a file reader for a file.  Defaults to UTF-8 encoding if no other encoding is specified. */
   def fileReader(charset: Charset)(source: File): ManagedResource[BufferedReader] =
     file(f => new BufferedReader(new InputStreamReader(new FileInputStream(f), charset)))(source)
+  /** Constructs a Traversable which will open and read a file's lines every time it is traversed. */
+  def fileLines(charset: Charset)(source: File): Traversable[String] =
+     fileReader(charset)(source).map(makeBufferedReaderLineTraverser).toTraversable
   /** Constructs a new buffered reader for a URL. */
   def urlReader(charset: Charset)(u: java.net.URL): ManagedResource[BufferedReader] = managed(new BufferedReader(new InputStreamReader(u.openStream, charset)))
   /** Constructs a new JarFile reader. */
@@ -94,4 +97,21 @@ object Using {
   def jarInputStream(in: => InputStream): ManagedResource[JarInputStream] = managed(new JarInputStream(in))
   /** Creates a resource which opens/closes for a particular entry in a zip file. */
   def zipEntry(zip: ZipFile)(entry: ZipEntry): ManagedResource[InputStream] = managed(zip.getInputStream(entry))
+
+
+  /** Creates a new iterator which reads the lines of a file. */
+  private def makeBufferedReaderLineTraverser(reader: BufferedReader): TraversableOnce[String] = {
+    object traverser extends Traversable[String] {
+      def foreach[U](f: String => U): Unit = {
+        def read(): Unit =
+          reader.readLine match {
+            case null => ()
+            case line => f(line); read()
+          }
+        read()
+      }
+      override def toString = s"BufferedReaderLineIterator($reader)"
+    }
+    traverser
+  }
 }

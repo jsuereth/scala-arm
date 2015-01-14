@@ -7,7 +7,6 @@ import Assert._
 
 // Echoes what is sent to it once, then dies.
 class EchoServer extends Thread {
-
   override def run() : Unit = {
     import resource._
     for {
@@ -23,38 +22,9 @@ class EchoServer extends Thread {
   }
 }
 
-// Another server that echoes what is sent to it on a socket and then dies.
-class EchoServerCPS extends Thread {
-
-  import scala.util.continuations._
-  def each_line_from(r : BufferedReader) : String @suspendable = shift {
-    k =>
-      var line = r.readLine
-      while(line != null) {
-        k(line)
-        line = r.readLine
-      }
-  }
-
-  override def run() : Unit = {
-    reset {
-      val server = managed(new ServerSocket(8007)).now
-      val connection = managed(server.accept).now
-      val output = managed(connection.getOutputStream).now
-      val input = managed(connection.getInputStream).now
-      val writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(output)))
-      val reader = new BufferedReader(new InputStreamReader(input))
-      writer.println(each_line_from(reader))
-      writer.flush()
-    }
-    
-  }
-}
-
 class EchoClient {
   def sendAndCheckString(arg : String) : Boolean = { 
     import resource._
-
     val result = for { connection <- managed(new Socket("localhost", 8007))
       out <- managed(new PrintWriter(new BufferedWriter(new OutputStreamWriter(connection.getOutputStream))))
       in <- managed(new BufferedReader(new InputStreamReader(connection.getInputStream)))
@@ -73,10 +43,6 @@ class TestSocketServer {
   @Test
   def checkNormalARM() {
     socketTestHelper(new EchoServer)
-  }
-  @Test
-  def checkCPSARM() {
-    socketTestHelper(new EchoServerCPS)
   }
   def socketTestHelper(server : Thread) {
      val client = new EchoClient

@@ -30,11 +30,11 @@ trait Resource[R] {
   /**
    * Lets us know if an exception is one that should be fatal, or rethrown *immediately*.
    * 
-   * If this returns true, then the ARM block will not attmept to catch and hold the exception, but
-   * immediately throw it.
+   * If this returns true, then the ARM block will not attempt to catch and hold the exception, but
+   * immediately throw it.  By default this returns true for an VirtualMachineError.
    */
-  def isFatalException(t: Throwable): Boolean = 
-    fatalExceptions exists (c => c isAssignableFrom t.getClass)
+  def isFatalException(t: Throwable): Boolean =
+    t.isInstanceOf[java.lang.VirtualMachineError]
   
   /**
    * Lets us know if an exception should be rethrown *after* an arm block completes.
@@ -45,13 +45,6 @@ trait Resource[R] {
     case _: InterruptedException  => true
     case _                        => false    
   }
-  /**
-   * Returns the possible exceptions that a resource could throw.   This list is used to catch only relevant
-   * exceptions in ARM blocks.  This defaults to be any Exception (but not runtime exceptions, which are
-   * assumed to be fatal.
-   */
-  @deprecated("Please use isFatalException instead", "1.3")
-  def fatalExceptions: Seq[Class[_]] = List(classOf[java.lang.VirtualMachineError])
 }
 
 /**

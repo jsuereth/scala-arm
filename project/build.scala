@@ -23,9 +23,6 @@ object ArmDef extends Build {
     crossScalaVersions := Seq("2.9.3", "2.10.4", "2.11.0"),
     resolvers += "java.net repo" at "http://download.java.net/maven/2/",
     libraryDependencies ++= dependencies,
-    autoCompilerPlugins := true,
-    addContinuations,
-    scalacOptions += "-P:continuations:enable",
     scalacOptions += "-deprecation",
     scalacOptions += "-feature"
   ) settings(releaseSettings:_*) settings(sonatypeSettings:_*) settings(publishSettings:_*) settings(websiteSettings:_*)) settings(bcSettings:_*)
@@ -99,17 +96,6 @@ object ArmDef extends Build {
       includeFilter in Jekyll := ("*.html" | "*.png" | "*.js" | "*.css" | "CNAME")
     )
   )
-
-  def addContinuations = libraryDependencies ++= {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      // if scala 2.11+ is used, add dependency on scala-xml module
-      case Some((2, scalaMajor)) if scalaMajor >= 11 =>
-        Seq(compilerPlugin("org.scala-lang.plugins" % ("scala-continuations-plugin_" + scalaVersion.value) % "1.0.1"),
-          "org.scala-lang.plugins" %% "scala-continuations-library" % "1.0.1")
-      case _ =>
-        Seq(compilerPlugin("org.scala-lang.plugins" % "continuations" % scalaVersion.value))
-    }
-  }
 
   def dependencies = Seq(
     "junit" % "junit" % "4.10" % "test",
