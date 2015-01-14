@@ -16,6 +16,7 @@ package resource
 import _root_.scala.collection.Traversable
 import _root_.scala.collection.Iterator
 import _root_.scala.Either
+import _root_.scala.concurrent.{ ExecutionContext, Future }
 import util.continuations.{suspendable, cps}
 
 /**
@@ -97,6 +98,14 @@ trait ManagedResource[+R] {
    * @return A Traversable of elements of type B. 
    */
   def toTraversable[B](implicit ev: R <:< TraversableOnce[B]): Traversable[B]
+
+  /**
+   * This method creates a Future that will perform operations  
+   * within the context of an "open" resource. 
+   * Execution of Future will hold error as Failure, otherwise result will be 
+   * inside a Success.
+   */
+  def toFuture(implicit context: ExecutionContext): Future[R]
 
   /**
    * Creates a new resource that is the aggregation of this resource and another.
