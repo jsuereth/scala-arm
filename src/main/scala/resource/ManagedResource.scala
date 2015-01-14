@@ -79,6 +79,18 @@ trait ManagedResource[+R] {
   def acquireAndGet[B](f: R => B): B
 
   /**
+   * Acquires the resource for the Duration of a given function, The resource will automatically be opened and closed.
+   * The result will be returned immediately, except in the case of an error.   Upon error, the resource will be
+   * closed, and then the originating exception will be thrown.
+   *
+   * Note: This method will throw the last exception encountered by the managed resource, whatever this happens to be.
+   *
+   * @param f   A function to execute against the handle returned by the resource
+   * @return    The result of the passed in function
+   */
+  def apply[B](f: R => B): B
+
+  /**
    * Aquires the resource for the Duration of a given function, The resource will automatically be opened and closed.
    * The result will be returned immediately in an Either container.   This container will hold all errors, if any
    * occurred during execution, or the resulting value.

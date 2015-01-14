@@ -1,5 +1,8 @@
 package resource
 
+import java.util.jar.JarFile
+import java.util.zip.GZIPOutputStream
+
 import scala.util.control.ControlThrowable
 
 /**
@@ -56,6 +59,7 @@ trait Resource[R] {
  * line, so they can be easily overriden.
  */
 sealed trait LowPriorityResourceImplicits {
+  import scala.language.reflectiveCalls
   /** Structural type for disposable resources */
   type ReflectiveCloseable = { def close() }
   /**
@@ -107,6 +111,18 @@ sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicit
   implicit def pooledConnectionResource[A <: javax.sql.PooledConnection] = new Resource[A] {
     override def close(r: A) = r.close()
     override def toString = "Resource[javax.sql.PooledConnection]"
+  }
+
+  // GZIP must be "finished" when done.
+  implicit object gzipOuputStraemResource extends Resource[GZIPOutputStream] {
+    override def close(r: GZIPOutputStream): Unit = r.finish()
+    override def toString = "Resource[GZIPOutputStream]"
+  }
+
+  // JarFile does not extends java.io.Closeable on all JDKs.
+  implicit object jarFileResource extends Resource[JarFile] {
+    override def close(r: JarFile): Unit = r.close()
+    override def toString = "Resource[JarFile]"
   }
 }
 

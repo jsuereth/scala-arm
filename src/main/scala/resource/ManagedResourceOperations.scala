@@ -23,7 +23,8 @@ import _root_.scala.concurrent.{ ExecutionContext, Future }
  */
 trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
   //TODO - Can we always grab the top exception?
-  override def acquireAndGet[B](f: R => B): B = acquireFor(f).fold( liste => throw liste.head, x => x)
+  override def acquireAndGet[B](f: R => B): B = apply(f)
+  override def apply[B](f: R => B): B = acquireFor(f).fold( liste => throw liste.head, x => x)
 
   def toTraversable[B](implicit ev: R <:< TraversableOnce[B]): Traversable[B] = 
     new ManagedTraversable[B,R] {

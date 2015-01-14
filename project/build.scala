@@ -25,7 +25,9 @@ object ArmDef extends Build {
     libraryDependencies ++= dependencies,
     autoCompilerPlugins := true,
     addContinuations,
-    scalacOptions += "-P:continuations:enable"
+    scalacOptions += "-P:continuations:enable",
+    scalacOptions += "-deprecation",
+    scalacOptions += "-feature"
   ) settings(releaseSettings:_*) settings(sonatypeSettings:_*) settings(publishSettings:_*) settings(websiteSettings:_*)) settings(bcSettings:_*)
 
   def bcSettings: Seq[Setting[_]] = mimaDefaultSettings ++ Seq(

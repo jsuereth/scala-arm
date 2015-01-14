@@ -51,13 +51,13 @@ class FakeResource {
 
    def open() : Unit = {
       if(!opened.compareAndSet(false,true)) {
-         error(OPEN_ERROR)
+         sys.error(OPEN_ERROR)
       }
    }
 
    def close() : Unit = {
      if(!opened.compareAndSet(true, false)) {
-        error(CLOSE_ERROR)
+       sys.error(CLOSE_ERROR)
      }
    }
    protected def makeData = math.random
@@ -234,7 +234,7 @@ class TestManagedResource {
       assertFalse("Failed to begin closed!", r.isOpened)
       val result = mr.acquireFor { r =>
           assertTrue("Failed to open resource", r.isOpened)
-          error("Some Exception")
+          sys.error("Some Exception")
       }      
       assertFalse("Failed to close resource", r.isOpened)
       assertTrue("Failed to catch exception", result.isLeft)
@@ -345,7 +345,7 @@ class TestManagedResource {
         override protected def makeData = 1.0
       })
       val traversable : Traversable[Any] = resource.map(ignore => (new Traversable[Any] {
-        def foreach[U](f : Any => U) : Unit = error("Do not continue!")
+        def foreach[U](f : Any => U) : Unit = sys.error("Do not continue!")
       } : Traversable[Any])).toTraversable
 
       traversable.foreach( x => ())
