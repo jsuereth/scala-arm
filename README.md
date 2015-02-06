@@ -1,5 +1,7 @@
 # Scala Automatic Resource Management
 
+[![Join the chat at https://gitter.im/jsuereth/scala-arm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jsuereth/scala-arm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This project is an attempt to provide an Automatic-Resource-Management library for the scala distribution.  It is based off of code contributed to the Scalax project.
 
 ## Using scala-arm
