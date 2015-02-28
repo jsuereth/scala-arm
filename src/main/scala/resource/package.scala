@@ -36,7 +36,7 @@ package object resource {
    * both are opened/closed together.
    * @return A ManagedResource of a tuple containing the initial two resources.
    */
-  def and[A,B](r1: ManagedResource[A], r2: ManagedResource[B]) =
+  def and[A,B](r1: ManagedResource[A], r2: ManagedResource[B]): ManagedResource[(A,B)] =
     r1 flatMap { ther1 =>
       r2 map { ther2 => (ther1, ther2) }
     }
