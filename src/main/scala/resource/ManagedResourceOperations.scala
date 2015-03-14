@@ -13,26 +13,26 @@
 
 package resource
 
-import _root_.scala.collection.Traversable
-import _root_.scala.collection.TraversableOnce
-import _root_.scala.util.continuations.{cps,shift, suspendable}
+import _root_.scala.collection.{Traversable, TraversableOnce}
 import _root_.scala.concurrent.{ ExecutionContext, Future }
+
 /**
  * This class implements all ManagedResource methods except acquireFor.   This allows all new ManagedResource
  * implementations to be defined in terms of the acquireFor method.
  */
 trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
   //TODO - Can we always grab the top exception?
-  override def acquireAndGet[B](f: R => B): B = acquireFor(f).fold( liste => throw liste.head, x => x)
+  override def acquireAndGet[B](f: R => B): B = apply(f)
+  override def apply[B](f: R => B): B = acquireFor(f).fold( liste => throw liste.head, x => x)
 
-  def toTraversable[B](implicit ev: R <:< TraversableOnce[B]): Traversable[B] = 
+  override def toTraversable[B](implicit ev: R <:< TraversableOnce[B]): Traversable[B] = 
     new ManagedTraversable[B,R] {
       val resource = self
       override protected def internalForeach[U](resource: R, g : B => U) : Unit = 
         ev(resource).foreach(g) 
     }
 
-  def toFuture(implicit context: ExecutionContext): Future[R] = 
+  override def toFuture(implicit context: ExecutionContext): Future[R] = 
     Future(acquireAndGet(identity))
 
   override def map[B](f : R => B): ExtractableManagedResource[B] =
@@ -45,25 +45,8 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
 	  }
 	  override def toString = "FlattenedManagedResource[?](...)"
     }
-	  
   override def foreach(f: R => Unit): Unit = acquireAndGet(f)
-
   override def and[B](that: ManagedResource[B]) : ManagedResource[(R,B)] = resource.and(self,that)
-
-  override def reflect[B]: R @cps[Either[List[Throwable], B]] = shift {
-    k: (R => Either[List[Throwable],B]) =>
-      acquireFor(k).fold(list => Left(list), identity)
-  }
-  // Some wierd intersection of scaladoc2 + continuations plugin forces us to be explicit about types here!
-  override def now: R @suspendable = shift { (k : R => Unit) =>
-    acquireAndGet(k)
-    ()
-  } 
-  // You may be asking why now and ! have the same implementation?  Binary compatibility.... YIPIEE!!!
-  override def ! : R @suspendable = shift { (k : R => Unit) =>
-    acquireAndGet(k)
-    ()
-  } 
 }
 
 

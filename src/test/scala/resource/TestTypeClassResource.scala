@@ -12,17 +12,17 @@ class TypeClassResource {
 
    def open() : Unit = {
       if(!opened.compareAndSet(false,true)) {
-         error(OPEN_ERROR)
+        sys.error(OPEN_ERROR)
       }
    }
 
    def close() : Unit = {
      if(!opened.compareAndSet(true, false)) {
-        error(CLOSE_ERROR)
+       sys.error(CLOSE_ERROR)
      }
    }
    protected def makeData = math.random
-   def generateData = if(opened.get) makeData else error(GEN_DATA_ERROR)
+   def generateData = if(opened.get) makeData else sys.error(GEN_DATA_ERROR)
    def isOpened = opened.get
 }
 

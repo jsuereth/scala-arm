@@ -9,7 +9,6 @@ Links:
 * [Basic Usage](usage.html)
 * [Resource Type Class](resource.html)
 * [Mechanics of map and flatMap](flatmap.html)
-* [Delimited Continuations and ARM](continuations.html)
 * [SocketExample](sockets.html)
 * [Scaladoc API](latest/api/index.html)
 * Browsable Source
@@ -18,9 +17,10 @@ You can find the library on the maven central repository.
 
     groupId: com.jsuereth
     artifactId:  scala-arm_${scala-binary-version}
-    version: 1.3
+    version: 2.0
 
 
 Note: 
 * Release can be found on maven central, or for the impatient:  [Sonatype's OSSRH repository](https://oss.sonatype.org/content/groups/public/).
 * Snapshots can be found on [Sonatype's OSSRH snapshot repository](https://oss.sonatype.org/content/groups/public).
+* In the 2.0 version, all scala continuation based API has been removed, as the continuations plugin is now deprecated.

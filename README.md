@@ -26,7 +26,7 @@ In Maven:
 
 ## Examples
 
-Scala-arm provides many ways of managing resources and re-using code.  Here's a few examples.
+Scala-arm provides a way of managing resources and re-using code.  Here's an example:
 
 ### Imperative Style
     
@@ -40,22 +40,6 @@ Scala-arm provides many ways of managing resources and re-using code.  Here's a 
         case  n => output.write(buffer,0,size); read()
       }
       read()
-    }
-
-### Delimited continuation style
-
-    import resource._
-    import java.io.{File, FileInputStream => Fin, FileOutputStream => Fout}
-    def copyFile(from: File, to: File): Unit =
-      withResources {
-        val f = managed(new Fin(from)).reflect[Unit]
-        val t = managed(new Fout(to)).reflect[Unit]
-        val buffer = new Array[Byte](512)
-        def read(): Unit = f.read(buffer) match {
-          case -1 => ()
-          case  n => t.write(buffer,0,n); read()
-        }
-        read()
     }
 
 For more information on usage, see [Usage](http://jsuereth.com/scala-arm/usage.html)

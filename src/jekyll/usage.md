@@ -3,11 +3,10 @@ layout: default
 title: Basic Usage
 ---
 
-The Scala ARM library provides three "modes" of operations:
+The Scala ARM library provides two "modes" of operations:
 
 * Imperative style resource management functions.
 * A monadic style resource management class.
-* A delimited continuation style API.
 
 ## Imperative Style ##
 
@@ -80,43 +79,9 @@ The handy mechanism of `ManagedResource` is the ability to create a collection o
 {% highlight scala %}
 import scala.resource._
 import java.io._
-val stream = managed(new FileInputStream("text.txt"))
-val reader = stream map (new BufferedReader(new InputStreamReader(_)))
-val lines = stream map makeBufferedReaderLineIterator toTraversable
+import java.nio.charset.Charset
+val lines = Using.fileLines(Charset.defaultCharset)(new File("test.txt"))
 lines.view map (_.trim) foreach println
 {% endhighlight %}
 
 Much of the noise in the example is dealing with the java.io API.   The important piece is how we have a managed resource, convert it into a traversable and make some minor modification before aquiring.   This produces a traversable that will eventually read the file.   This allows us to pre-construct I/O related portions of our program to re-use over and over.   For example,  One could construct a `ManagedResource` that will read and parse configuration information.   Then you can use a listener that detects when the file's modification date changes, and re-extract the configuration information from the `ManagedResource`.
-
-## Delimited continuation style ##
-
-The scala-arm library also supports using delimited continuations.   This is done via the `reflect` method on `ManagedResource`.  This can be used to "flatten" the nested blocks required to use resources.   The best example is the `and` method defined on `scala.resource`.   This method can be used to combine two resources into a single `ManagedResource` class containing a tuple of the two resources.   It will jointly open and close both resources.   The code is below:
-
-{% highlight scala %}
-import resource._
-def and[A,B](r1 : ManagedResource[A], r2 : ManagedResource[B]) = 
-    new ManagedResource[(A,B)] with ManagedResourceOperations[(A,B)] {
-      override def acquireFor[C](f : ((A,B)) => C) = withResources {
-        f( (r1.reflect[C], r2.reflect[C]) )
-      }
-  }
-{% endhighlight %}
-
-compare that with the previous "imperative style" `and` method:
-
-{% highlight scala %}
-def and[A,B](r1 : ManagedResource[A], r2 : ManagedResource[B]) : ManagedResource[(A,B)] = 
-  new ManagedResource[(A,B)] with ManagedResourceOperations[(A,B)] {
-    override def acquireFor[C](f : ((A,B)) => C) : Either[List[Throwable], C] = {
-      val result = r1 acquireFor { opened1 =>
-        r2 acquireFor { opened2 =>
-          f((opened1, opened2))
-        }
-       }
-      result.fold( errors => Left(errors), y => y)
-      }
-    }
-}
-{% endhighlight %}
-
-The mechanism for using Delimited Continuations is outlines in more detail on the [Delimited Continuations and ARM](continuations.html) page.

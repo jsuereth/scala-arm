@@ -1,5 +1,8 @@
 package resource
 
+import java.util.jar.JarFile
+import java.util.zip.GZIPOutputStream
+
 import scala.util.control.ControlThrowable
 
 /**
@@ -27,11 +30,11 @@ trait Resource[R] {
   /**
    * Lets us know if an exception is one that should be fatal, or rethrown *immediately*.
    * 
-   * If this returns true, then the ARM block will not attmept to catch and hold the exception, but
-   * immediately throw it.
+   * If this returns true, then the ARM block will not attempt to catch and hold the exception, but
+   * immediately throw it.  By default this returns true for an VirtualMachineError.
    */
-  def isFatalException(t: Throwable): Boolean = 
-    fatalExceptions exists (c => c isAssignableFrom t.getClass)
+  def isFatalException(t: Throwable): Boolean =
+    t.isInstanceOf[java.lang.VirtualMachineError]
   
   /**
    * Lets us know if an exception should be rethrown *after* an arm block completes.
@@ -42,13 +45,6 @@ trait Resource[R] {
     case _: InterruptedException  => true
     case _                        => false    
   }
-  /**
-   * Returns the possible exceptions that a resource could throw.   This list is used to catch only relevant
-   * exceptions in ARM blocks.  This defaults to be any Exception (but not runtime exceptions, which are
-   * assumed to be fatal.
-   */
-  @deprecated("Please use isFatalException instead", "1.3")
-  def fatalExceptions: Seq[Class[_]] = List(classOf[java.lang.VirtualMachineError])
 }
 
 /**
@@ -56,6 +52,7 @@ trait Resource[R] {
  * line, so they can be easily overriden.
  */
 sealed trait LowPriorityResourceImplicits {
+  import scala.language.reflectiveCalls
   /** Structural type for disposable resources */
   type ReflectiveCloseable = { def close() }
   /**
@@ -107,6 +104,24 @@ sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicit
   implicit def pooledConnectionResource[A <: javax.sql.PooledConnection] = new Resource[A] {
     override def close(r: A) = r.close()
     override def toString = "Resource[javax.sql.PooledConnection]"
+  }
+
+  // GZIP must be "finished" when done.
+  implicit object gzipOuputStraemResource extends Resource[GZIPOutputStream] {
+    override def close(r: GZIPOutputStream): Unit = r.finish()
+    override def toString = "Resource[GZIPOutputStream]"
+  }
+
+  // JarFile does not extends java.io.Closeable on all JDKs.
+  implicit object jarFileResource extends Resource[JarFile] {
+    override def close(r: JarFile): Unit = r.close()
+    override def toString = "Resource[JarFile]"
+  }
+  // HttpURLConnection requires a disconnect to be used.
+  import java.net.HttpURLConnection
+  implicit object HttpURLConnectionResource extends Resource[HttpURLConnection] {
+    override def close(c: HttpURLConnection) = c.disconnect()
+    override def toString = "Resource[HttpURLConnection]"
   }
 }
 

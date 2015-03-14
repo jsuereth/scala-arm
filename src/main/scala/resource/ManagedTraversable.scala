@@ -13,7 +13,6 @@
 package resource
 
 import _root_.scala.collection.Traversable
-import scala.util.continuations._
 
 /** 
  * This trait provides a means to ensure traversable access to items inside a resource, while ensuring that the
@@ -58,4 +57,6 @@ trait ManagedTraversable[+B, A] extends Traversable[B] {
     //If there are errors -> Handle them appropriately
     result.left foreach handleErrorsDuringTraversal
   }
+  // Prevent toString from doing work.
+  override def toString = s"ManagedTraversable($resource)"
 }

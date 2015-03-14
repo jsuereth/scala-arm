@@ -17,7 +17,6 @@ import _root_.scala.collection.Traversable
 import _root_.scala.collection.Iterator
 import _root_.scala.Either
 import _root_.scala.concurrent.{ ExecutionContext, Future }
-import util.continuations.{suspendable, cps}
 
 /**
  * This class encapsulates a method of ensuring a resource is opened/closed during critical stages of its lifecycle.
@@ -47,7 +46,6 @@ trait ManagedResource[+R] {
    * closed before returning.
    *
    * @param f The transformation function to apply against the raw resource.
-   * @param translator  The translation implementation used to determine if we can extract from the ManagedResource.
    *
    * @return A new ManagedResource with the translated type or some other type if an appropriate translator was found.
    *
@@ -77,6 +75,18 @@ trait ManagedResource[+R] {
    * @return    The result of the passed in function
    */
   def acquireAndGet[B](f: R => B): B
+
+  /**
+   * Acquires the resource for the Duration of a given function, The resource will automatically be opened and closed.
+   * The result will be returned immediately, except in the case of an error.   Upon error, the resource will be
+   * closed, and then the originating exception will be thrown.
+   *
+   * Note: This method will throw the last exception encountered by the managed resource, whatever this happens to be.
+   *
+   * @param f   A function to execute against the handle returned by the resource
+   * @return    The result of the passed in function
+   */
+  def apply[B](f: R => B): B
 
   /**
    * Aquires the resource for the Duration of a given function, The resource will automatically be opened and closed.
@@ -117,36 +127,6 @@ trait ManagedResource[+R] {
    *          A resource that is a tupled combination of this and that.
    */
   def and[B](that: ManagedResource[B]): ManagedResource[(R,B)]
-
-  /**
-   * Reflects the resource for use in a continuation.   This method is designed to be used inside a
-   * <code>scala.resource.withResources</code> call.
-   *
-   * For example:
-   *
-   * <pre>
-   * import scala.resource._
-   * withResources {
-   *   val output = managed(new FileInputStream("output.txt")).reflect[Unit]
-   *   for(i <- 1 to 10) {
-   *     val input = managed(new FileInputStream("sample"+i+".txt")).reflect[Unit]
-   *     input lines foreach (output writeLine _)
-   *   }
-   * }
-   * </pre>
-   * @return The raw resource, with appropriate continuation-context annotations.
-   */
-  def reflect[B]: R @cps[Either[List[Throwable], B]]
-  /**
-   * Accesses this resource inside a suspendable CPS block
-   */
-  @deprecated("Use now instead of !", "1.3")
-  def ! : R @suspendable
-
-  /**
-   * Accesses this resource inside a suspendable CPS block
-   */
-  def now: R @suspendable
 }
 
 
