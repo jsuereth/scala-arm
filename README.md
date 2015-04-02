@@ -39,7 +39,9 @@ Scala-arm provides a way of managing resources and re-using code.  Here's an exa
       val buffer = new Array[Byte](512)
       def read(): Unit = input.read(buffer) match {
         case -1 => ()
-        case  n => output.write(buffer,0,size); read()
+        case  n =>
+          output.write(buffer,0,n)
+          read()
       }
       read()
     }
