@@ -8,19 +8,20 @@ This project is an attempt to provide an Automatic-Resource-Management library f
 
 In SBT:
 
-    libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.3"
+    libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.4"
 
-*or*
+*or* (if you want to manually specify the Scala version for some reason)
 
-    libraryDependencies += "com.jsuereth" % "scala-arm_2.9.2" % "1.3"
-    libraryDependencies += "com.jsuereth" % "scala-arm_2.10" % "1.3"
+    libraryDependencies += "com.jsuereth" % "scala-arm_2.9.2" % "1.4"
+    libraryDependencies += "com.jsuereth" % "scala-arm_2.10" % "1.4"
+    libraryDependencies += "com.jsuereth" % "scala-arm_2.11" % "1.4"
 
 In Maven:
 
     <dependency>
        <groupId>com.jsuereth</groupId>
        <artifactId>scala-arm_${scala.binary.version}</artifactId>
-       <version>1.3</version>
+       <version>1.4</version>
     </dependency>
 
 
@@ -28,12 +29,13 @@ In Maven:
 
 Scala-arm provides a way of managing resources and re-using code.  Here's an example:
 
-### Imperative Style
-    
+```scala
     import resource._
     // Copy input into output.
-    for(input <- managed(new java.io.FileInputStream("test.txt"));
-        output <- managed(new java.io.FileOutputStream("test2.txt"))) {
+    for {
+      input <- managed(new java.io.FileInputStream("test.txt"))
+      output <- managed(new java.io.FileOutputStream("test2.txt"))
+    } {
       val buffer = new Array[Byte](512)
       def read(): Unit = input.read(buffer) match {
         case -1 => ()
@@ -41,6 +43,7 @@ Scala-arm provides a way of managing resources and re-using code.  Here's an exa
       }
       read()
     }
+```
 
 For more information on usage, see [Usage](http://jsuereth.com/scala-arm/usage.html)
 
