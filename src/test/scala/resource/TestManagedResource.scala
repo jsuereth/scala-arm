@@ -65,9 +65,9 @@ class FakeResource {
    def isOpened = opened.get
 }
 
-class ThrowingFakeResource extends FakeResource {
+class ThrowingFakeResource(message: scala.Option[String] = None) extends FakeResource {
   override def close(): Unit = {
-    throw new IllegalStateException
+    throw message.map(new IllegalStateException(_)).getOrElse(new IllegalStateException)
   }
 }
 
@@ -193,7 +193,59 @@ class TestManagedResource {
      assertTrue("Failed to extract a result", monad.map(identity[Double]).opt.isDefined)            
      assertFalse("Failed to close resource", r.isOpened)
      assertFalse("Failed to close resource", r2.isOpened)
-   }  
+   }
+
+  @Test
+  def mustReturnCaptureAllExceptions(): Unit = {
+    val r = new ThrowingFakeResource()
+
+    val result = managed(r).map {
+      case o =>
+        throw new RuntimeException
+    }.either
+
+    val actualExceptions = result.left.map(_.length).right.map(_ => 0).merge
+    assertEquals("Failed to capture all exceptions", 2, actualExceptions)
+  }
+
+  @Test
+  def mustNestCaptureAllExceptions() {
+    val r = new ThrowingFakeResource(Some("outer close"))
+    val r2 = new ThrowingFakeResource(Some("inner close"))
+
+    val result = managed(r).map { o =>
+      managed(r2).map { o2 =>
+        throw new RuntimeException("runtime")
+      }.either
+    }.either
+
+    val actualExceptions = result.left.map(_.length).right.map(_ => 0).merge
+    assertEquals("Failed to capture all exceptions", 3, actualExceptions)
+
+    //check the ordering of the exceptions
+    assertEquals("runtime", result.left.get(0).getMessage)
+    assertEquals("inner close", result.left.get(1).getMessage)
+    assertEquals("outer close", result.left.get(2).getMessage)
+  }
+
+   @Test
+   def mustNestCaptureAllExceptions_and() {
+     val r = new ThrowingFakeResource(Some("outer close"))
+     val r2 = new ThrowingFakeResource(Some("inner close"))
+
+     val result = managed(r).and(managed(r2)).map {
+       case (o, o2) =>
+         throw new RuntimeException("runtime")
+     }.either
+
+     val actualExceptions = result.left.map(_.length).right.map(_ => 0).merge
+     assertEquals("Failed to capture all exceptions", 3, actualExceptions)
+
+     //check the ordering of the exceptions
+     assertEquals("runtime", result.left.get(0).getMessage)
+     assertEquals("inner close", result.left.get(1).getMessage)
+     assertEquals("outer close", result.left.get(2).getMessage)
+   }
 
    @Test
    def mustSupportValInFor() {
