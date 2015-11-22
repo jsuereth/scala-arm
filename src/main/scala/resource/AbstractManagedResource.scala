@@ -24,11 +24,11 @@ import _root_.scala.util.control.ControlThrowable
 private[resource] class DeferredExtractableManagedResource[+A,R](val resource: ManagedResource[R], val translate: R => A)
   extends ExtractableManagedResource[A] with ManagedResourceOperations[A] { self =>
 
-  override def acquireFor[B](f: A => B) : Either[List[Throwable], B] = resource acquireFor (translate andThen f)
+  override def acquireFor[B](f: A => B) : ExtractedEither[List[Throwable], B] = resource acquireFor (translate andThen f)
 
-  override def either = resource acquireFor translate
+  override def either = ExtractedEither(resource acquireFor translate)
 
-  override def opt = either.right.toOption
+  override def opt = either.either.right.toOption
 
   override def equals(that: Any) = that match {
     case x : DeferredExtractableManagedResource[A,R] => (x.resource == resource) && (x.translate == translate)
@@ -80,19 +80,21 @@ abstract class AbstractManagedResource[R] extends ManagedResource[R] with Manage
     (new Exception.Catch(Exception.mkThrowableCatcher(e => !isFatal(e), throw _), None, _ => false) 
      withDesc "<non-fatal>")
 
-  override def acquireFor[B](f : R => B) : Either[List[Throwable], B] = {
+  override def acquireFor[B](f : R => B) : ExtractedEither[List[Throwable], B] = {
     import Exception._
     val handle = open
     val result = catchingNonFatal either (f(handle))
     val close  = catchingNonFatal either unsafeClose(handle, result.left.toOption)
     // Here we pattern match to make sure we get all the errors.
-    (result, close) match {
-      case (Left(t1), _       ) if isRethrown(t1) => throw t1
-      case (Left(t1), Left(t2))                   => Left(t1 :: t2 :: Nil)
-      case (Left(t1), _       )                   => Left(t1 :: Nil)
-      case (_,        Left(t2))                   => Left(t2 :: Nil)
-      case (Right(r), _       )                   => Right(r)
+    val either = (result, close) match {
+      case (Left(t1), _       ) if isRethrown(t1)       => throw t1
+      case (Left(t1), Left(t2))                         => Left(t1 :: t2 :: Nil)
+      case (Left(t1), _       )                         => Left(t1 :: Nil)
+      case (Right(ExtractedEither(Left(ts))), Left(t2)) => Left(ts.asInstanceOf[List[Throwable]] :+ t2)
+      case (_,        Left(t2))                         => Left(t2 :: Nil)
+      case (Right(r), _       )                         => Right(r)
     }
+    ExtractedEither(either)
   }
 }
 

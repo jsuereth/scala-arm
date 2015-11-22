@@ -40,8 +40,8 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
   
   override def flatMap[B](f : R => ManagedResource[B]): ManagedResource[B] = 
     new ManagedResourceOperations[B] {
-      override def acquireFor[C](f2 : B => C) : Either[List[Throwable], C] = {
-	    self.acquireFor(r => f(r).acquireFor(f2)).fold(x => Left(x), x => x)
+      override def acquireFor[C](f2 : B => C) : ExtractedEither[List[Throwable], C] = {
+	    self.acquireFor(r => f(r).acquireFor(f2)).fold(x => ExtractedEither(Left(x)), x => x)
 	  }
 	  override def toString = "FlattenedManagedResource[?](...)"
     }
