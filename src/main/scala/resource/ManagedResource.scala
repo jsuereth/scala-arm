@@ -97,7 +97,7 @@ trait ManagedResource[+R] {
    * @return    The result of the function (right) or the list of exceptions seen during the processing of the
    *            resource (left).
    */
-  def acquireFor[B](f: R => B): Either[List[Throwable], B]
+  def acquireFor[B](f: R => B): ExtractedEither[List[Throwable], B]
 
   /**
    * This method creates a Traversable in which all performed methods are done within the context of an "open"

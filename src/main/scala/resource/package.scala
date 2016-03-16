@@ -61,7 +61,7 @@ package object resource {
       val r1 = toReturn
       val r2: ManagedResource[A] = itr.next
       toReturn = new ManagedResource[Seq[A]] with ManagedResourceOperations[Seq[A]] {
-        override def acquireFor[B](f : Seq[A] => B) : Either[List[Throwable], B] = r1.acquireFor {
+        override def acquireFor[B](f : Seq[A] => B) : ExtractedEither[List[Throwable], B] = r1.acquireFor {
           r1seq =>
             r2.acquireAndGet { r2item =>
               f( r2item :: r1seq.toList)
@@ -71,5 +71,8 @@ package object resource {
     }
     toReturn
   }
+
+  import scala.language.implicitConversions
+  implicit def extractedEitherToEither[A, B](extracted: ExtractedEither[A, B]) : Either[A, B] = extracted.either
 }
 
