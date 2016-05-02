@@ -15,6 +15,11 @@ package object resource {
   def managed[A : Resource : Manifest](opener: => A) : ManagedResource[A] = new DefaultManagedResource(opener)
 
   /**
+    * Use this to encapsulate a constant value inside a ManagedResource with no resource management.
+    */
+  def constant[V](value: V) : ManagedResource[V] = new ConstantManagedResource(value)
+
+  /**
    * Constructs a managed resource using function objects for each abstract method.
    *
    * @param opener  The by-name parameter that will open the resource.

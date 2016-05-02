@@ -53,7 +53,7 @@ abstract class AbstractManagedResource[R] extends ManagedResource[R] with Manage
   protected def open: R
 
   /**
-   * Closes a resource using the handle.  This method will throw any exceptions normally occuring during the close of
+   * Closes a resource using the handle. This method will throw any exceptions normally occurring during the closing of
    * a resource.
    */
   protected def unsafeClose(handle: R, errors: Option[Throwable]): Unit
@@ -122,4 +122,22 @@ final class DefaultManagedResource[R : Resource : Manifest](r : => R) extends Ab
   override def hashCode(): Int = (typeTrait.hashCode << 7) + super.hashCode + 13
   // That's right, we use manifest solely for nicer toStrings!
   override def toString = "Default[" + implicitly[Manifest[R]] + " : " + typeTrait + "](...)"
+}
+
+/**
+  * ConstantManagedResource encapsulates a constant value with no associated resource management.
+  */
+final class ConstantManagedResource[V](value: V) extends AbstractManagedResource[V] {
+
+  /**
+   * Simply return the value given at construction.
+   */
+  override protected def open: V = {
+    value
+  }
+
+  /**
+   * Nothing needs to be done to close.
+   */
+  override protected def unsafeClose(handle: V, errors: Option[Throwable]): Unit = {}
 }
