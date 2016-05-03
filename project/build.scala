@@ -20,7 +20,7 @@ object ArmDef extends Build {
     organization := "com.jsuereth",
     name := "scala-arm",
     scalaVersion := "2.11.0",
-    crossScalaVersions := Seq("2.9.3", "2.10.4", "2.11.0"),
+    crossScalaVersions := Seq("2.10.4", "2.11.6"),
     resolvers += "java.net repo" at "http://download.java.net/maven/2/",
     libraryDependencies ++= dependencies,
     scalacOptions += "-deprecation",
