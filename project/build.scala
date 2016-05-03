@@ -27,6 +27,18 @@ object ArmDef extends Build {
     scalacOptions += "-feature"
   ) settings(releaseSettings:_*) settings(sonatypeSettings:_*) settings(publishSettings:_*) settings(websiteSettings:_*)) settings(bcSettings:_*)
 
+
+  // TODO - share settings
+  val catsArm = Project("scala-arm-cats", file("cats"))  settings(
+    organization := "com.jsuereth",
+    name := "scala-arm-cats",
+    scalaVersion := "2.11.0",
+    crossScalaVersions := Seq("2.10.4", "2.11.6"),
+    resolvers += "java.net repo" at "http://download.java.net/maven/2/",
+    libraryDependencies ++= catsDependencies,
+    scalacOptions += "-deprecation",
+    scalacOptions += "-feature") dependsOn(arm)
+
   def bcSettings: Seq[Setting[_]] = mimaDefaultSettings ++ Seq(
     previousArtifact <<= scalaVersion apply { sv =>
       if(sv startsWith "2.9") Some("com.jsuereth" % "scala-arm_2.9.1" % "1.2")
@@ -102,6 +114,10 @@ object ArmDef extends Build {
     "com.novocode" % "junit-interface" % "0.10" % "test",
     "org.apache.derby" % "derby" % "10.5.3.0_1" % "test",
     "javax.transaction" % "jta" % "1.1" % "provided"
+  )
+
+  def catsDependencies = Seq(
+    "org.typelevel" %% "cats" % "0.4.1"
   )
 
   
