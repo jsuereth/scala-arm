@@ -30,6 +30,8 @@ private[resource] class DeferredExtractableManagedResource[+A,R](val resource: M
 
   override def opt = either.either.right.toOption
 
+  override def tried = scala.util.Try(resource apply translate)
+
   override def equals(that: Any) = that match {
     case x : DeferredExtractableManagedResource[A,R] => (x.resource == resource) && (x.translate == translate)
     case _ => false

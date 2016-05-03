@@ -454,4 +454,30 @@ class TestManagedResource {
     assertEquals("Failure result", "KO", result)
     assertFalse("Failed to close resource", r.isOpened)
   }
+
+
+    @Test
+  def mustBeSuccessTry() {
+    val r = new FakeResource()
+
+    assertFalse("Failed to begin closed!", r.isOpened)
+    val result = managed(r).map[String](_ => "OK").tried
+    assertTrue("Successful result", result.isSuccess)
+    assertFalse("Failed to close resource", r.isOpened)
+  }
+
+  @Test
+  def mustBeFailedTry() {
+    val r = new FakeResource()
+
+    assertFalse("Failed to begin closed!", r.isOpened)
+
+    val result = managed(r).map[String](_ => {
+        sys.error("Error")
+        "OK"
+      }).tried
+
+    assertFalse("Failure result", result.isSuccess)
+    assertFalse("Failed to close resource", r.isOpened)
+  }
 }

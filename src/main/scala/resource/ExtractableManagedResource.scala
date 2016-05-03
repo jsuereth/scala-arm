@@ -14,6 +14,7 @@
 package resource
 
 import collection.Seq
+import util.Try
 
 /**
  * This trait represents a resource that has been modified (or will be modified) inside an ARM block in such
@@ -47,6 +48,17 @@ trait ExtractableManagedResource[+A] extends ManagedResource[A] {
    *        the right hand side will contain the sequence of throwable encountered.
    */
   def either: ExtractedEither[Seq[Throwable], A]
-}
 
-case class ExtractedEither[+A, +B](either: Either[A, B])
+  /**
+   * This method is used to extract the resource being managed.
+   *
+   * This allows you to pull information out of the Managed resource, as such, the reosurce will not be "available"
+   * after this method call.
+   *
+   * @returns
+   *        A [[scala.util.Try]] instance, which is [[scala.util.Success]] if there were no exceptions pulling out the 
+   *        resource, or a [[scala.util.Failure]] if there were.  In the event of multiple failures, they will
+   *        be added to the supressed exception list of the resulting Failure.
+   */
+  def tried: Try[A]
+}
