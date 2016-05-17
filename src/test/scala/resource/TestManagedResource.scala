@@ -421,6 +421,23 @@ class TestManagedResource {
   }
 
   @Test
+  def mustBeShared(): Unit = {
+    val r = new FakeResource()
+    val sharedReference = shared(r)
+
+    assertFalse("Failed to begin closed!", r.isOpened)
+    val result = sharedReference acquireAndGet { scoped =>
+      assertEquals(scoped, r)
+      assertTrue("Failed to open resource", scoped.isOpened)
+      for (scoped2 <- sharedReference) {
+        assertEquals(scoped, scoped2)
+      }
+      r.generateData
+    }
+    assertFalse("Failed to close resource", r.isOpened)
+  }
+
+  @Test
   def mustBeSuccessFuture() {
     val r = new FakeResource()
 
