@@ -78,7 +78,7 @@ package object resource {
   }
 
   /**
-    * Creates a [[ManagedResource]] that shared by all users for any type with a [[Resource]] type class implementation.
+    * Creates a [[ManagedResource]] shared by all users for any type with a [[Resource]] type class implementation.
     *
     * There is only one instance of the resource at the same time for all the users.
     * The instance will be closed once no user is still using it.
