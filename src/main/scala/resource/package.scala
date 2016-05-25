@@ -105,21 +105,24 @@ package object resource {
     val resource = new Resource[A] {
 
       override def close(r: A): Unit = {
-        lock.synchronized {
+        val newValue = lock.synchronized {
           sharedReference match {
             case Some((oldReferenceCount, sc)) =>
               if (r != sc) {
                 throw new IllegalArgumentException
               }
-              if (oldReferenceCount == 1) {
-                implicitly[Resource[A]].close(sc)
-                sharedReference = None
+              val newValue = if (oldReferenceCount == 1) {
+                None
               } else {
-                sharedReference = Some((oldReferenceCount - 1, sc))
+                Some((oldReferenceCount - 1, sc))
               }
+              sharedReference = newValue
             case None =>
               throw new IllegalStateException
           }
+        }
+        if (newValue.isEmpty) {
+          implicitly[Resource[A]].close(sc)
         }
       }
     }
