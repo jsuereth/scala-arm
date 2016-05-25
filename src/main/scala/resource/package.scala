@@ -117,12 +117,13 @@ package object resource {
                 Some((oldReferenceCount - 1, sc))
               }
               sharedReference = newValue
+              newValue
             case None =>
               throw new IllegalStateException
           }
         }
         if (newValue.isEmpty) {
-          implicitly[Resource[A]].close(sc)
+          implicitly[Resource[A]].close(r)
         }
       }
     }
