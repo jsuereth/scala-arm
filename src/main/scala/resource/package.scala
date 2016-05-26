@@ -83,7 +83,7 @@ package object resource {
     * There is only one instance of the resource at the same time for all the users.
     * The instance will be closed once no user is still using it.
     */
-  def shared[A: Resource : Manifest](opener: => A): ManagedResource[A] = new SharedResource[A](opener)
+  def shared[A <: AnyRef : Resource : Manifest](opener: => A): ManagedResource[A] = new SharedResource[A](opener)
   
   import scala.language.implicitConversions
   implicit def extractedEitherToEither[A, B](extracted: ExtractedEither[A, B]) : Either[A, B] = extracted.either

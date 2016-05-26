@@ -3,50 +3,58 @@ package resource
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.atomic.AtomicInteger
 
-final class SharedResource[A : Resource : Manifest](opener: => A) extends AbstractManagedResource[A] {
-	private val resource = implicitly[Resource[A]]
-	// A referencing counting atomic variable we use to "guard" this resource.
-	// Currently, we spin-lock accessing this ref because we don't expect opening to block a thread for very long.
-	private val ref = new AtomicReference[Option[A]](None)
-	private val count = new AtomicInteger(0)
 
-	protected def open: A = {
-		val myCount = count.addAndGet(1)
-		// If we win the race, we construct the resource
-		if (myCount == 1) {
-			// We must construct the reference
-			// We may want to CAS here and fail if we're inconsistent.
-			val r = opener
-			ref.lazySet(Some(r))
-			resource open r
+/**
+ * Shared resources are an attempt to share a resourcce between threads IFF the underlying resource is threadsafe.
+ *  Shared resources will open the resource the first time `open` is called, and close the resource after the reference
+ *  count has returned to zero.
+ *
+ *  On failure - The resource will be immediately closed.  Any future open request will attempt to open a new
+ *               resource for sharing.  Existing users of a failed resource will have thier close methods silently
+ *               do nothing, but we have no way of notifying them of the failure
+ *
+ * Intended usage - TODO - write this
+ *                         
+ */
+final class SharedResource[A <: AnyRef : Resource : Manifest](opener: => A) extends AbstractManagedResource[A] {
+	private def resource = implicitly[Resource[A]]
+
+	private object resourceShare {
+		private var ref: A = null.asInstanceOf[A]
+		private var count: Int = 0
+		def open: A = synchronized {
+			if (ref == null) {
+				ref = opener
+				resource.open(ref)
+			}
+			count += 1
+			ref
 		}
-		// Lazy spin to get the current value
-		def get(): A = 
-		   ref.get match {
-		     case Some(r) => r
-		     case None => 
-		       // TODO - backoff strategy
-		       Thread.`yield`()
-		       get()
-		   }
-		get()
+		def flagError(ref: A, t: Throwable): Unit = synchronized {
+			if (ref eq this.ref) {
+			  count = 0
+			  this.ref = null.asInstanceOf[A]
+			  resource.closeAfterException(ref, t)
+			}
+
+		}
+		def close(ref: A): Unit = synchronized {
+			if (this.ref eq ref) {
+				count -= 1
+				if (count == 0) {
+					resource.close(ref)
+					this.ref = null.asInstanceOf[A]
+				}
+			}
+		}
 	}
-	protected def unsafeClose(handle: A, errors: Option[Throwable]): Unit = {
-		val cnt = count.decrementAndGet()
-		// TODO - Throw error if cnt reaches negative?
-		if (cnt == 0) {
-			// Mark the resource as closed, while we clean up behind the scenes.
-			// If the CAS fails, it means someone else has already opened the resource again.
-			ref.compareAndSet(Some(handle), None)
-			// Cleanup the resource
-			// TODO - We don't know if an error occurred on a different thread, so we need to figure out how to flag that.
-			//        We porbably need some kind of atomic reference of failure on a thread so we can call this appropriately.
-			errors match {
-              case None    => resource.close(handle)
-              case Some(t) => resource.closeAfterException(handle, t)
-            }
-		}
 
+	protected def open: A = resourceShare.open
+	protected def unsafeClose(handle: A, errors: Option[Throwable]): Unit = {
+		errors match {
+          case None    => resourceShare.close(handle)
+          case Some(t) => resourceShare.flagError(handle, t)
+        }
 	}
 
   override protected def isFatal(t: Throwable): Boolean =
