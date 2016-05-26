@@ -83,50 +83,8 @@ package object resource {
     * There is only one instance of the resource at the same time for all the users.
     * The instance will be closed once no user is still using it.
     */
-  def shared[A: Resource : Manifest](opener: => A): ManagedResource[A] = {
-    @volatile var sharedReference: Option[(Int, A)] = None
-    val lock = new AnyRef
-
-    def acquire = {
-      lock.synchronized {
-        val (referenceCount, sc) = sharedReference match {
-          case None =>
-            val r = opener
-            implicitly[Resource[A]].open(r)
-            (1, r)
-          case Some((oldReferenceCount, sc)) =>
-            (oldReferenceCount + 1, sc)
-        }
-        sharedReference = Some((referenceCount, sc))
-        sc
-      }
-    }
-
-    val resource = new Resource[A] {
-
-      override def close(r: A): Unit = {
-        lock.synchronized {
-          sharedReference match {
-            case Some((oldReferenceCount, sc)) =>
-              if (r != sc) {
-                throw new IllegalArgumentException
-              }
-              if (oldReferenceCount == 1) {
-                implicitly[Resource[A]].close(sc)
-                sharedReference = None
-              } else {
-                sharedReference = Some((oldReferenceCount - 1, sc))
-              }
-            case None =>
-              throw new IllegalStateException
-          }
-        }
-      }
-    }
-
-    new DefaultManagedResource[A](acquire)(resource, implicitly[Manifest[A]])
-  }
-
+  def shared[A <: AnyRef : Resource : Manifest](opener: => A): ManagedResource[A] = new SharedResource[A](opener)
+  
   import scala.language.implicitConversions
   implicit def extractedEitherToEither[A, B](extracted: ExtractedEither[A, B]) : Either[A, B] = extracted.either
 }
