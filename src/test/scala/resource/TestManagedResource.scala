@@ -324,7 +324,7 @@ class TestManagedResource {
   @Test
   def mustReturnFirstExceptionInAcquireAndGet() {
     val r = new FakeResource()
-    val mr = managed(r)(Resource.reflectiveCloseableResource, implicitly[Manifest[FakeResource]])
+    val mr = managed(r)(Resource.reflectiveCloseableResource, implicitly[OptManifest[FakeResource]])
     try {
       val result = mr.acquireAndGet { r => r.generateData }
       fail("Should not make it here, due to previous error!")
