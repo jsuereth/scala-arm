@@ -19,19 +19,26 @@ object ArmDef extends Build {
   val arm = (Project("scala-arm", file(".")) settings(
     organization := "com.jsuereth",
     name := "scala-arm",
-    scalaVersion := "2.11.0",
-    crossScalaVersions := Seq("2.10.4", "2.11.6"),
+    scalaVersion := "2.12.0",
+    crossScalaVersions := Seq("2.10.4", "2.11.6", "2.12.0"),
     resolvers += "java.net repo" at "http://download.java.net/maven/2/",
     libraryDependencies ++= dependencies,
     scalacOptions += "-deprecation",
     scalacOptions += "-feature"
-  ) settings(releaseSettings:_*) settings(sonatypeSettings:_*) settings(publishSettings:_*) settings(websiteSettings:_*)) settings(bcSettings:_*)
+  ) settings(releaseSettings:_*) settings(sonatypeSettings:_*) settings(publishSettings:_*) settings(websiteSettings:_*)) settings(bcSettings:_*) settings(jvmSettings:_*)
 
   def bcSettings: Seq[Setting[_]] = mimaDefaultSettings ++ Seq(
     previousArtifact <<= scalaVersion apply { sv =>
       if(sv startsWith "2.9") Some("com.jsuereth" % "scala-arm_2.9.1" % "1.2")
       else if(sv startsWith "2.10") Some("com.jsuereth" % "scala-arm_2.10" % "1.2")
       else None
+    }
+  )
+
+  def jvmSettings: Seq[Setting[_]] = Seq(
+    scalacOptions <++= scalaVersion map { sv =>
+      if (sv startsWith "2.12") Seq("-target:jvm-1.8")
+      else Seq()
     }
   )
 
