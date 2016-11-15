@@ -19,8 +19,8 @@ object ArmDef extends Build {
   val arm = (Project("scala-arm", file(".")) settings(
     organization := "com.jsuereth",
     name := "scala-arm",
-    scalaVersion := "2.11.0",
-    crossScalaVersions := Seq("2.10.4", "2.11.6"),
+    scalaVersion := "2.12.0",
+    crossScalaVersions := Seq("2.10.4", "2.11.6", "2.12.0"),
     resolvers += "java.net repo" at "http://download.java.net/maven/2/",
     libraryDependencies ++= dependencies,
     scalacOptions += "-deprecation",
