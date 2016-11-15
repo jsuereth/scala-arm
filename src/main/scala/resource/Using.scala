@@ -33,7 +33,7 @@ object Using {
     * Note: This ensures that the directory in which the file lives is created prior to opening the resource, which is
     *       why it has a bit of an odd signature.
     */
-  def file[T: Resource : Manifest](in : File => T)(source: File): ManagedResource[T] = {
+  def file[T: Resource : OptManifest](in : File => T)(source: File): ManagedResource[T] = {
     def open: T = {
       val parent = source.getParentFile
       if(parent != null) {

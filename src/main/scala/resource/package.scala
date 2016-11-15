@@ -12,7 +12,7 @@ package object resource {
    * java.io.Closeable subclasses, and any types that have a close or dispose method.  You can also provide your own
    * resource type class implementations in your own scope.
    */
-  def managed[A : Resource : Manifest](opener: => A) : ManagedResource[A] = new DefaultManagedResource(opener)
+  def managed[A : Resource : OptManifest](opener: => A) : ManagedResource[A] = new DefaultManagedResource(opener)
 
   /**
     * Use this to encapsulate a constant value inside a ManagedResource with no resource management.
@@ -26,7 +26,7 @@ package object resource {
    * @param closer  A closure that will close the resource.
    * @param exceptions  A list of exception classes that cannot be ignored to close a resource.
    */
-  def makeManagedResource[R : Manifest](opener:  => R)(closer: R => Unit)(exceptions: List[Class[_<:Throwable]]) = {
+  def makeManagedResource[R : OptManifest](opener:  => R)(closer: R => Unit)(exceptions: List[Class[_<:Throwable]]) = {
     implicit val typeTrait: Resource[R] = new Resource[R] {
       override def close(r : R) = closer(r)
       override def isFatalException(t: Throwable): Boolean =
@@ -83,7 +83,7 @@ package object resource {
     * There is only one instance of the resource at the same time for all the users.
     * The instance will be closed once no user is still using it.
     */
-  def shared[A: Resource : Manifest](opener: => A): ManagedResource[A] = {
+  def shared[A: Resource : OptManifest](opener: => A): ManagedResource[A] = {
     @volatile var sharedReference: Option[(Int, A)] = None
     val lock = new AnyRef
 
@@ -124,7 +124,7 @@ package object resource {
       }
     }
 
-    new DefaultManagedResource[A](acquire)(resource, implicitly[Manifest[A]])
+    new DefaultManagedResource[A](acquire)(resource, implicitly[OptManifest[A]])
   }
 
   import scala.language.implicitConversions

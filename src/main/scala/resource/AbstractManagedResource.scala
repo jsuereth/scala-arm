@@ -103,7 +103,7 @@ abstract class AbstractManagedResource[R] extends ManagedResource[R] with Manage
 /**
  * This is the default implementation of a ManagedResource that makes use of the Resource type trait.
  */
-final class DefaultManagedResource[R : Resource : Manifest](r : => R) extends AbstractManagedResource[R] { self =>
+final class DefaultManagedResource[R : Resource : OptManifest](r : => R) extends AbstractManagedResource[R] { self =>
   /** Stable reference to the Resource type trait.*/
   protected val typeTrait = implicitly[Resource[R]]
   override protected def open: R = {
@@ -123,7 +123,7 @@ final class DefaultManagedResource[R : Resource : Manifest](r : => R) extends Ab
   /* You cannot serialize resource and send them, so referential equality should be sufficient. */
   override def hashCode(): Int = (typeTrait.hashCode << 7) + super.hashCode + 13
   // That's right, we use manifest solely for nicer toStrings!
-  override def toString = "Default[" + implicitly[Manifest[R]] + " : " + typeTrait + "](...)"
+  override def toString = "Default[" + implicitly[OptManifest[R]] + " : " + typeTrait + "](...)"
 }
 
 /**
