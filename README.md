@@ -8,20 +8,19 @@ This project is an attempt to provide an Automatic-Resource-Management library f
 
 In SBT:
 
-    libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.4"
+    libraryDependencies += "com.jsuereth" %% "scala-arm" % "2.0"
 
 *or* (if you want to manually specify the Scala version for some reason)
 
-    libraryDependencies += "com.jsuereth" % "scala-arm_2.9.2" % "1.4"
-    libraryDependencies += "com.jsuereth" % "scala-arm_2.10" % "1.4"
-    libraryDependencies += "com.jsuereth" % "scala-arm_2.11" % "1.4"
+    libraryDependencies += "com.jsuereth" % "scala-arm_2.11" % "2.0"
+    libraryDependencies += "com.jsuereth" % "scala-arm_2.12" % "2.0"
 
 In Maven:
 
     <dependency>
        <groupId>com.jsuereth</groupId>
        <artifactId>scala-arm_${scala.binary.version}</artifactId>
-       <version>1.4</version>
+       <version>2.0</version>
     </dependency>
 
 
