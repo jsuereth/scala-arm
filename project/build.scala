@@ -25,13 +25,20 @@ object ArmDef extends Build {
     libraryDependencies ++= dependencies,
     scalacOptions += "-deprecation",
     scalacOptions += "-feature"
-  ) settings(releaseSettings:_*) settings(sonatypeSettings:_*) settings(publishSettings:_*) settings(websiteSettings:_*)) settings(bcSettings:_*)
+  ) settings(releaseSettings:_*) settings(sonatypeSettings:_*) settings(publishSettings:_*) settings(websiteSettings:_*)) settings(bcSettings:_*) settings(jvmSettings:_*)
 
   def bcSettings: Seq[Setting[_]] = mimaDefaultSettings ++ Seq(
     previousArtifact <<= scalaVersion apply { sv =>
       if(sv startsWith "2.9") Some("com.jsuereth" % "scala-arm_2.9.1" % "1.2")
       else if(sv startsWith "2.10") Some("com.jsuereth" % "scala-arm_2.10" % "1.2")
       else None
+    }
+  )
+
+  def jvmSettings: Seq[Setting[_]] = Seq(
+    scalacOptions <++= scalaVersion map { sv =>
+      if (sv startsWith "2.12") Seq("-target:jvm-1.8")
+      else Seq()
     }
   )
 
