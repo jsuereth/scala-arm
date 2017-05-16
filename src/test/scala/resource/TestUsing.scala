@@ -2,7 +2,7 @@ package resource
 
 import java.io._
 import java.nio.charset.Charset
-import java.util.zip.{GZIPInputStream, GZIPOutputStream}
+import java.util.zip.{DeflaterOutputStream, GZIPInputStream, GZIPOutputStream}
 
 import org.junit.Test
 import org.junit.Assert._
@@ -80,5 +80,18 @@ class TestUsing {
 
     val result = new String(buf)
     assertEquals("Failed to successfully read from gzip", expected, result)
+  }
+
+  @Test
+  def testGzipClose(): Unit = {
+    val l = new GZIPOutputStream(new ByteArrayOutputStream())
+    managed(l).acquireFor { _ => }
+    assertTrue("GZIPOutputStream was closed after write", streamClosed(l))
+  }
+
+  def streamClosed(gzipOut: DeflaterOutputStream): Boolean = {
+    val privateField = classOf[DeflaterOutputStream].getDeclaredField("closed")
+    privateField.setAccessible(true)
+    privateField.get(gzipOut).asInstanceOf[Boolean]
   }
 }
