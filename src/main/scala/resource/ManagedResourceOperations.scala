@@ -50,7 +50,7 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
 	  }
 	  override def toString = "FlattenedManagedResource[?](...)"
     }
-  override def foreach(f: R => Unit): Unit = acquireAndGet(f)
+  override def foreach[U](f: R => U): Unit = acquireAndGet(f)
   override def and[B](that: ManagedResource[B]) : ManagedResource[(R,B)] = resource.and(self,that)
 }
 
