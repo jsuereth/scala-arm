@@ -62,7 +62,7 @@ trait ManagedResource[+R] {
    *
    * @param f The function to apply against the raw resource.
    */
-  def foreach(f: R => Unit) : Unit
+  def foreach[U](f: R => U) : Unit
 
   /**
    * Acquires the resource for the Duration of a given function, The resource will automatically be opened and closed.
