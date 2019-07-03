@@ -13,29 +13,27 @@
 
 package resource
 
-import _root_.scala.collection.{Traversable, TraversableOnce}
 import _root_.scala.concurrent.{ ExecutionContext, Future }
 
 /**
- * This class implements all ManagedResource methods except acquireFor.   This allows all new ManagedResource
- * implementations to be defined in terms of the acquireFor method.
+ * This class implements all ManagedResource methods except acquireFor.
+ * This allows all new ManagedResource implementations to be defined 
+ * in terms of the acquireFor method.
+ * 
+ * @tparam R the resource type
  */
-trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
+trait ManagedResourceOperations[+R]
+    extends ManagedResource[R] with OperationsCompat[R] { self =>
+
   //TODO - Can we always grab the top exception?
   override def acquireAndGet[B](f: R => B): B = apply(f)
+
   override def apply[B](f: R => B): B = acquireFor(f).fold( 
-    liste => throw liste reduce { (prev, next) =>
+    errors => throw errors.reduce { (prev, next) =>
       prev.addSuppressed(next)
       prev
     }, 
     x => x)
-
-  override def toTraversable[B](implicit ev: R <:< TraversableOnce[B]): Traversable[B] = 
-    new ManagedTraversable[B,R] {
-      val resource = self
-      override protected def internalForeach[U](resource: R, g : B => U) : Unit = 
-        ev(resource).foreach(g) 
-    }
 
   override def toFuture(implicit context: ExecutionContext): Future[R] = 
     Future(acquireAndGet(identity))
@@ -53,6 +51,3 @@ trait ManagedResourceOperations[+R] extends ManagedResource[R] { self =>
   override def foreach(f: R => Unit): Unit = acquireAndGet(f)
   override def and[B](that: ManagedResource[B]) : ManagedResource[(R,B)] = resource.and(self,that)
 }
-
-
-

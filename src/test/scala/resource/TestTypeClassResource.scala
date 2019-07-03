@@ -43,7 +43,7 @@ import Assert._
 
 class TestTypeClassResource {
   @Test
-  def mustOpenAndClose() {
+  def mustOpenAndClose(): Unit = {
     val r = new TypeClassResource();
     assertFalse("Failed to begin closed!", r.isOpened)
     val mr = managed(r)

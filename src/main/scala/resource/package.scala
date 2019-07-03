@@ -1,5 +1,3 @@
-import resource._
-
 /**
  * Package related methods for managed resources.
  */

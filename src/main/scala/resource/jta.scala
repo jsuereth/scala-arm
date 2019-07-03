@@ -8,6 +8,9 @@ package object jta {
   implicit def transactionSupport[A <: javax.transaction.Transaction]: Resource[A] = 
     new Resource[A] {
       override def close(r: A) = r.commit()
+
+      @com.github.ghik.silencer.silent
       override def closeAfterException(r: A, t: Throwable) = r.rollback()
     }
+
 }
