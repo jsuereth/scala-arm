@@ -1,27 +1,21 @@
-# Use Docker-based container (instead of OpenVZ)
-sudo: false
+language: scala
+sudo: true
+dist: trusty
 
 cache:
   directories:
     - $HOME/.ivy2/cache
     - $HOME/.sbt/boot
 
-language: scala
-
-# TODO - we'd like to actually test everything, but the process library has a deadlock right now
 jdk:
-  - oraclejdk8
-
-env:
-  matrix:
-    - SCRIPTED_TEST="test"
+  - openjdk8
 
 notifications:
   email:
     - joshua.suereth@typesafe.com
 
 script:
-  - sbt -J-XX:ReservedCodeCacheSize=128m "$SCRIPTED_TEST"
+  - sbt -J-XX:ReservedCodeCacheSize=128m "+test"
 
   # Tricks to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm

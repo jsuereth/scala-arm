@@ -32,8 +32,7 @@ trait ExtractableManagedResource[+A] extends ManagedResource[A] {
    * This allows you to pull information out of the Managed resource, as such, the Resource will not be "available"
    * after this method call.
    *
-   * @returns
-   *       Some(containedValue) if there have been no processing errors, None otherwise
+   * @return Some(containedValue) if there have been no processing errors, None otherwise
    */
   def opt: Option[A]
 
@@ -43,8 +42,7 @@ trait ExtractableManagedResource[+A] extends ManagedResource[A] {
    * This allows you to pull information out of the Managed resource, as such, the Resource will not be "available"
    * after this method call.
    *
-   * @returns
-   *        An either where the left hand side is the currently contained resource unless exceptions, in which case
+   * @return An either where the left hand side is the currently contained resource unless exceptions, in which case
    *        the right hand side will contain the sequence of throwable encountered.
    */
   def either: ExtractedEither[Seq[Throwable], A]
@@ -55,9 +53,8 @@ trait ExtractableManagedResource[+A] extends ManagedResource[A] {
    * This allows you to pull information out of the Managed resource, as such, the reosurce will not be "available"
    * after this method call.
    *
-   * @returns
-   *        A [[scala.util.Try]] instance, which is [[scala.util.Success]] if there were no exceptions pulling out the 
-   *        resource, or a [[scala.util.Failure]] if there were.  In the event of multiple failures, they will
+   * @return A `Try` instance, which is `Success` if there were no exceptions pulling out the 
+   *        resource, or a `Failure` if there were.  In the event of multiple failures, they will
    *        be added to the supressed exception list of the resulting Failure.
    */
   def tried: Try[A]
