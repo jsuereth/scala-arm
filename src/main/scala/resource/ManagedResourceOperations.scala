@@ -41,11 +41,16 @@ trait ManagedResourceOperations[+R]
   override def map[B](f : R => B): ExtractableManagedResource[B] =
     new DeferredExtractableManagedResource(self, f)
   
-  override def flatMap[B](f : R => ManagedResource[B]): ManagedResource[B] = 
+  override def flatMap[B](f : R => ManagedResource[B]): ManagedResource[B] =
     new ManagedResourceOperations[B] {
       override def acquireFor[C](f2 : B => C) : ExtractedEither[List[Throwable], C] = {
-	    self.acquireFor(r => f(r).acquireFor(f2)).fold(x => ExtractedEither(Left(x)), x => x)
-	  }
+        var extracted: ExtractedEither[List[Throwable], C] = ExtractedEither(Left(Nil))
+        self.acquireFor { r =>
+          extracted = f(r).acquireFor(f2)
+          extracted.fold(a => throw a.head, _ => ())
+        }.fold(x => ExtractedEither(Left(extracted.fold(_ ++ x.tail, _ => x))), _ => extracted)
+      }
+
 	  override def toString = "FlattenedManagedResource[?](...)"
     }
   override def foreach(f: R => Unit): Unit = acquireAndGet(f)

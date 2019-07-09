@@ -37,6 +37,12 @@ object TypeClassResource {
   }
 }
 
+class UnitResourceMock extends Resource[Unit] {
+  var closed = false
+  var closedAfterException = false
+  override def close(r: Unit) = closed = true
+  override def closeAfterException(r: Unit, t: Throwable) = closedAfterException = true
+}
 
 import org.junit._
 import Assert._
@@ -52,5 +58,20 @@ class TestTypeClassResource {
       assertTrue("Failed to open resource", r.isOpened)
     }
     assertFalse("Failed to close resource", r.isOpened)
+  }
+
+  @Test
+  def mustCloseAfterExcetpion() = {
+    implicit val resource1 = new UnitResourceMock
+    implicit val resource2 = new UnitResourceMock
+    val r = for {
+      a <- managed(())(resource1, implicitly)
+      b <- managed(())(resource2, implicitly)
+    } yield sys.error("error")
+    r.acquireFor(_ => ())
+    assertFalse(resource1.closed)
+    assertTrue(resource1.closedAfterException)
+    assertFalse(resource2.closed)
+    assertTrue(resource2.closedAfterException)
   }
 }
