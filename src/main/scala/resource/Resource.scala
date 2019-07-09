@@ -116,20 +116,6 @@ sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicit
     override def close(r: A) = r.close()
     override def toString = "Resource[javax.sql.PooledConnection]"
   }
-
-  // GZIP must be "finished" when done.
-  @deprecated("Use `gzipOuputStreamResource`", "3.0")
-  object gzipOuputStraemResource extends Resource[GZIPOutputStream] {
-    override def close(r: GZIPOutputStream): Unit = r.finish()
-    override def toString = "Resource[GZIPOutputStream]"
-  }
-
-  // GZIP must be "finished" when done.
-  implicit object gzipOuputStreamResource extends Resource[GZIPOutputStream] {
-    override def close(r: GZIPOutputStream): Unit = r.finish()
-    override def toString = "Resource[GZIPOutputStream]"
-  }
-
   // JarFile does not extends java.io.Closeable on all JDKs.
   implicit object jarFileResource extends Resource[JarFile] {
     override def close(r: JarFile): Unit = r.close()
