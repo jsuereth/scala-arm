@@ -2,7 +2,7 @@ package resource
 
 import java.io._
 import java.nio.charset.Charset
-import java.util.zip.{GZIPInputStream, GZIPOutputStream}
+import java.util.zip.{DeflaterOutputStream, GZIPInputStream, GZIPOutputStream}
 
 import org.junit.Test
 import org.junit.Assert._
@@ -17,9 +17,9 @@ class TestUsing {
   def fileReaderWriter(): Unit = {
     val tmp = File.createTempFile("test", "txt")
     val expected = "Example file"
-    for {
-      out <- Using.fileWriter(Charset.defaultCharset)(tmp)
-    } out.write(expected)
+
+    Using.fileWriter(Charset.defaultCharset)(tmp).foreach(_.write(expected))
+
     val read =
       Using.fileReader(Charset.defaultCharset)(tmp).acquireAndGet(_.readLine)
     assertEquals("Failed to successfully read from files", expected, read)
@@ -32,26 +32,30 @@ class TestUsing {
     for {
       out <- Using.fileOutputStream(tmp)
     } out.write(expected)
+
     val buf = new Array[Byte](4)
-    Using.fileInputStream(tmp).foreach(_.read(buf, 0, 4))
+
+    Using.fileInputStream(tmp).foreach { i => i.read(buf, 0, 4); () }
+
     assertEquals("Failed to successfully read from files", expected.toSeq, buf.toSeq)
   }
+
   @Test
   def fileChannels(): Unit = {
     val tmp = File.createTempFile("test", "txt")
     val tmp2 = File.createTempFile("test2", "txt")
     val expected = "Example file"
-    for {
-      out <- Using.fileWriter(Charset.defaultCharset)(tmp)
-    } out.write(expected)
+
+    Using.fileWriter(Charset.defaultCharset)(tmp).foreach(_.write(expected))
 
     // Use channels to copy the file.
-    for {
-      in <- Using.fileInputChannel(tmp)
-      out <- Using.fileOuputChannel(tmp2)
-    } out.transferFrom(in, 0, in.size)
+    (Using.fileInputChannel(tmp) and Using.fileOuputChannel(tmp2)).foreach {
+      case (in, out) => out.transferFrom(in, 0, in.size); ()
+    }
+
     val read =
       Using.fileReader(Charset.defaultCharset)(tmp2).acquireAndGet(_.readLine)
+
     assertEquals("Failed to successfully read from files", expected, read)
   }
 
@@ -80,5 +84,18 @@ class TestUsing {
 
     val result = new String(buf)
     assertEquals("Failed to successfully read from gzip", expected, result)
+  }
+
+  @Test
+  def testGzipClose(): Unit = {
+    val l = new GZIPOutputStream(new ByteArrayOutputStream())
+    managed(l).acquireFor { _ => }
+    assertTrue("GZIPOutputStream was closed after write", streamClosed(l))
+  }
+
+  def streamClosed(gzipOut: DeflaterOutputStream): Boolean = {
+    val privateField = classOf[DeflaterOutputStream].getDeclaredField("closed")
+    privateField.setAccessible(true)
+    privateField.get(gzipOut).asInstanceOf[Boolean]
   }
 }

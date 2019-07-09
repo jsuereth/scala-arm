@@ -13,24 +13,26 @@
 
 package resource
 
-import _root_.scala.collection.Traversable
-import _root_.scala.collection.Iterator
-import _root_.scala.Either
 import _root_.scala.concurrent.{ ExecutionContext, Future }
 
 /**
- * This class encapsulates a method of ensuring a resource is opened/closed during critical stages of its lifecycle.
- * It is monadic in nature, although not a monad, and provides several combinators to use with other managed resources.
+ * This class encapsulates a method of ensuring a resource 
+ * is opened/closed during critical stages of its lifecycle.
+ * 
+ * It is monadic in nature, although not a monad, 
+ * and provides several combinators to use with other managed resources.
  *
  * For example:
- * <pre>
+ * 
+ * {{{
+ * import resource._
+ * 
  * val x = managed(newResource)
  * val y = managed(newResource)
- * val z : ManagedResource[Z] = x and y map { case (x,y) => f(x,y) }
- * </pre>
- * 
+ * val z: ManagedResource[Z] = x and y map { case (x,y) => f(x,y) }
+ * }}}
  */
-trait ManagedResource[+R] {
+trait ManagedResource[+R] extends ManagedResourceCompat[R] {
 
   /**
    * This method is used to perform operations on a resource while the resource is open.
@@ -48,10 +50,6 @@ trait ManagedResource[+R] {
    * @param f The transformation function to apply against the raw resource.
    *
    * @return A new ManagedResource with the translated type or some other type if an appropriate translator was found.
-   *
-   * @usecase def flatMap[B](f: R => B): ManagedResource[B]
-   * @usecase def flatMap[B](f : R => Traversable[B]) : Traversable[B]
-   * @usecase def flatMap[B](f : R => ManagedResource[B]) : ManagedResource[B]
    */ 
   def flatMap[B](f: R => ManagedResource[B]): ManagedResource[B]
 
@@ -100,16 +98,6 @@ trait ManagedResource[+R] {
   def acquireFor[B](f: R => B): ExtractedEither[List[Throwable], B]
 
   /**
-   * This method creates a Traversable in which all performed methods are done within the context of an "open"
-   * resource.   Note:  Every iteration will attempt to open and close the resource!
-   *
-   * @param f  A function that transforms the raw resource into an Iterator of elements of type B.
-   *
-   * @return A Traversable of elements of type B. 
-   */
-  def toTraversable[B](implicit ev: R <:< TraversableOnce[B]): Traversable[B]
-
-  /**
    * This method creates a Future that will perform operations  
    * within the context of an "open" resource. 
    * Execution of Future will hold error as Failure, otherwise result will be 
@@ -120,11 +108,8 @@ trait ManagedResource[+R] {
   /**
    * Creates a new resource that is the aggregation of this resource and another.
    *
-   * @param that
-   *          The other resource
-   *
-   * @return
-   *          A resource that is a tupled combination of this and that.
+   * @param that the other resource
+   * @return A resource that is a tupled combination of this and that.
    */
   def and[B](that: ManagedResource[B]): ManagedResource[(R,B)]
 }
