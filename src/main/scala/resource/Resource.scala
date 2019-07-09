@@ -6,14 +6,17 @@ import java.util.zip.GZIPOutputStream
 import scala.util.control.ControlThrowable
 
 /**
- * This is a type trait for types that are considered 'resources'.   These types must be opened (potentially) and
- * closed at some point.
+ * This is a type trait for types that are considered 'resources'.
+ * These types must be opened (potentially) and closed at some point.
  */
 trait Resource[R] {
   /**
-   * Opens a resource for manipulation.  Note:  If the resource is already open by definition of existence, then
+   * Opens a resource for manipulation.
+   * 
+   * *Note:* If the resource is already open by definition of existence, then
    * this method should perform a no-op (the default implementation).
    */
+  @com.github.ghik.silencer.silent
   def open(r: R): Unit = ()
 
   /**
@@ -22,13 +25,16 @@ trait Resource[R] {
   def close(r: R): Unit
   
   /**
-   * This is called if the resource should be closed *after* an exception was thrown.  The
-   * default implementation is to call close itself.
+   * This is called if the resource should be closed 
+   * *after* an exception was thrown.
+   * The default implementation is to call close itself.
    */
+  @com.github.ghik.silencer.silent
   def closeAfterException(r: R, t: Throwable): Unit = close(r)
 
   /**
-   * Lets us know if an exception is one that should be fatal, or rethrown *immediately*.
+   * Lets us know if an exception is one that should be fatal, 
+   * or rethrown *immediately*.
    * 
    * If this returns true, then the ARM block will not attempt to catch and hold the exception, but
    * immediately throw it.  By default this returns true for an VirtualMachineError.
@@ -53,8 +59,10 @@ trait Resource[R] {
  */
 sealed trait LowPriorityResourceImplicits {
   import scala.language.reflectiveCalls
+
   /** Structural type for disposable resources */
-  type ReflectiveCloseable = { def close() }
+  type ReflectiveCloseable = { def close(): Unit }
+
   /**
    * This is the type class implementation for reflectively assuming a class with a close method is
    * a resource.
@@ -63,8 +71,10 @@ sealed trait LowPriorityResourceImplicits {
     override def close(r: A) = r.close()
     override def toString = "Resource[{ def close() : Unit }]"
   }
+
   /** Structural type for disposable resources */
-  type ReflectiveDisposable = { def dispose() }
+  type ReflectiveDisposable = { def dispose(): Unit }
+
   /**
    * This is the type class implementation for reflectively assuming a class with a dispose method is
    * a resource.
@@ -77,7 +87,7 @@ sealed trait LowPriorityResourceImplicits {
 
 sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicits {
   import _root_.java.io.Closeable
-  import _root_.java.io.IOException
+
   implicit def closeableResource[A <: Closeable] = new Resource[A] {
     override def close(r: A) = r.close()
     // TODO - Should we actually catch less?   What if there is a user exception not under IOException during
@@ -101,11 +111,11 @@ sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicit
     override def close(r: A) = r.close()
     override def toString = "Resource[java.sql.ResultSet]"
   }
+
   implicit def pooledConnectionResource[A <: javax.sql.PooledConnection] = new Resource[A] {
     override def close(r: A) = r.close()
     override def toString = "Resource[javax.sql.PooledConnection]"
   }
-
   // JarFile does not extends java.io.Closeable on all JDKs.
   implicit object jarFileResource extends Resource[JarFile] {
     override def close(r: JarFile): Unit = r.close()
@@ -120,6 +130,7 @@ sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicit
 }
 
 /**
- * Companion object to the Resource type trait.   This contains all the default implicits in appropriate priority order.
+ * Companion object to the Resource type trait.   
+ * This contains all the default implicits in appropriate priority order.
  */
 object Resource extends MediumPriorityResourceImplicits

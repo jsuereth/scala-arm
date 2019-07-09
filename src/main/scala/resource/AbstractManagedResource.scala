@@ -13,9 +13,7 @@
 
 package resource
 
-import _root_.scala.collection.Seq
-import _root_.scala.util.control.Exception
-import _root_.scala.util.control.ControlThrowable
+import _root_.scala.util.control.{ ControlThrowable, Exception }
 
 /**
  * An implementation of an ExtractableManagedResource that defers all processing until the user pulls out information using
@@ -28,7 +26,7 @@ private[resource] class DeferredExtractableManagedResource[+A,R](val resource: M
 
   override def either = ExtractedEither(resource acquireFor translate)
 
-  override def opt = either.either.right.toOption
+  override def opt = Compat.toRightOption(either.either)
 
   override def tried = scala.util.Try(resource apply translate)
 
@@ -83,7 +81,6 @@ abstract class AbstractManagedResource[R] extends ManagedResource[R] with Manage
      withDesc "<non-fatal>")
 
   override def acquireFor[B](f : R => B) : ExtractedEither[List[Throwable], B] = {
-    import Exception._
     val handle = open
     val result = catchingNonFatal either (f(handle))
     val close  = catchingNonFatal either unsafeClose(handle, result.left.toOption)

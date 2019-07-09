@@ -1,6 +1,5 @@
 import java.net.{ServerSocket, Socket}
 import java.io._
-import resource._
 
 import org.junit._
 import Assert._
@@ -41,10 +40,11 @@ class EchoClient {
 
 class TestSocketServer {
   @Test
-  def checkNormalARM() {
+  def checkNormalARM(): Unit = {
     socketTestHelper(new EchoServer)
   }
-  def socketTestHelper(server : Thread) {
+
+  def socketTestHelper(server : Thread): Unit = {
      val client = new EchoClient
      server.start
      Thread.sleep(500)

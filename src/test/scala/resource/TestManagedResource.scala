@@ -1,7 +1,7 @@
 package resource
 
 import _root_.java.{io => jio}
-import _root_.scala.util.Success
+
 import _root_.scala.concurrent.Await
 import _root_.scala.concurrent.duration.Duration
 import _root_.scala.concurrent.ExecutionContext.Implicits.global
@@ -74,7 +74,7 @@ class ThrowingFakeResource(message: scala.Option[String] = None) extends FakeRes
 import org.junit._
 import Assert._
 
-class TestManagedResource {
+class TestManagedResource extends TestManagedResourceCompat {
   /**
    * This type trait is used to override the default type trait and  give us
    * the use of the managed function for slightly nicer API.   We create this implicit
@@ -89,7 +89,7 @@ class TestManagedResource {
   }
 
    @Test
-   def mustOpenAndClose() {     
+   def mustOpenAndClose(): Unit = {     
      val r = new FakeResource();
      assertFalse("Failed to begin closed!", r.isOpened)
      val mr = managed(r)
@@ -101,7 +101,7 @@ class TestManagedResource {
    }  
 
    @Test
-   def mustCloseWhenClosureThrows() {
+   def mustCloseWhenClosureThrows(): Unit = {
      val r = new FakeResource()
      assertFalse("Failed to begin closed!", r.isOpened)
      val mr = managed(r)
@@ -119,7 +119,7 @@ class TestManagedResource {
    }
 
    @Test(expected=classOf[IllegalStateException])
-   def mustThrowCloseException() {
+   def mustThrowCloseException(): Unit = {
      val r = new ThrowingFakeResource()
      assertFalse("Failed to begin closed!", r.isOpened)
      val mr = managed(r)
@@ -130,7 +130,7 @@ class TestManagedResource {
    }
 
    @Test
-   def mustThrowClosureExceptionIfBothClosureAndCloseThrow() {
+   def mustThrowClosureExceptionIfBothClosureAndCloseThrow(): Unit = {
      val r = new ThrowingFakeResource()
      assertFalse("Failed to begin closed!", r.isOpened)
      val mr = managed(r)
@@ -148,7 +148,7 @@ class TestManagedResource {
    }
 
    @Test
-   def mustExtractValue() {
+   def mustExtractValue(): Unit = {
      val r = new FakeResource();
      val mr = managed(r)
       assertFalse("Failed to begin closed!", r.isOpened)
@@ -162,7 +162,7 @@ class TestManagedResource {
    }  
 
    @Test
-   def mustNest() {
+   def mustNest(): Unit = {
      val r = new FakeResource();
      val mr = managed(r)
      val r2 = new FakeResource();
@@ -180,7 +180,7 @@ class TestManagedResource {
    
 
    @Test
-   def mustNestForYield() {
+   def mustNestForYield(): Unit = {
      val r = new FakeResource();
      val mr = managed(r)
      val r2 = new FakeResource();
@@ -200,55 +200,52 @@ class TestManagedResource {
     val r = new ThrowingFakeResource()
 
     val result = managed(r).map {
-      case o =>
-        throw new RuntimeException
+      case _ => throw new RuntimeException
     }.either
 
-    val actualExceptions = result.left.map(_.length).right.map(_ => 0).merge
-    assertEquals("Failed to capture all exceptions", 2, actualExceptions)
+    assertTrue("Failed to capture all exceptions",
+      result.left.exists(_.length == 2))
   }
 
   @Test
-  def mustNestCaptureAllExceptions() {
+  def mustNestCaptureAllExceptions(): Unit = {
     val r = new ThrowingFakeResource(Some("outer close"))
     val r2 = new ThrowingFakeResource(Some("inner close"))
 
-    val result = managed(r).map { o =>
-      managed(r2).map { o2 =>
-        throw new RuntimeException("runtime")
+    val result = managed(r).map { _ =>
+      managed(r2).map { _ => throw new RuntimeException("runtime")
       }.either
     }.either
 
-    val actualExceptions = result.left.map(_.length).right.map(_ => 0).merge
-    assertEquals("Failed to capture all exceptions", 3, actualExceptions)
+    assertTrue("Failed to capture all exceptions",
+      result.left.exists(_.length == 3))
 
     //check the ordering of the exceptions
-    assertEquals("runtime", result.left.get(0).getMessage)
-    assertEquals("inner close", result.left.get(1).getMessage)
-    assertEquals("outer close", result.left.get(2).getMessage)
+    assertEquals(
+      List("runtime", "inner close", "outer close"),
+      result.left.toSeq.flatMap(_.map(_.getMessage)))
   }
 
    @Test
-   def mustNestCaptureAllExceptions_and() {
+   def mustNestCaptureAllExceptions_and(): Unit = {
      val r = new ThrowingFakeResource(Some("outer close"))
      val r2 = new ThrowingFakeResource(Some("inner close"))
 
      val result = managed(r).and(managed(r2)).map {
-       case (o, o2) =>
-         throw new RuntimeException("runtime")
+       case (_, _) => throw new RuntimeException("runtime")
      }.either
 
-     val actualExceptions = result.left.map(_.length).right.map(_ => 0).merge
-     assertEquals("Failed to capture all exceptions", 3, actualExceptions)
+     assertTrue("Failed to capture all exceptions",
+       result.left.exists(_.length == 3))
 
      //check the ordering of the exceptions
-     assertEquals("runtime", result.left.get(0).getMessage)
-     assertEquals("inner close", result.left.get(1).getMessage)
-     assertEquals("outer close", result.left.get(2).getMessage)
+    assertEquals(
+      List("runtime", "inner close", "outer close"),
+      result.left.toSeq.flatMap(_.map(_.getMessage)))
    }
 
    @Test
-   def mustSupportValInFor() {
+   def mustSupportValInFor(): Unit = {
      val r = new FakeResource();
      val mr = managed(r)
      val r2 = new FakeResource();
@@ -268,7 +265,7 @@ class TestManagedResource {
 
 
    @Test
-   def mustAcquireFor() {
+   def mustAcquireFor(): Unit = {
      val r = new FakeResource();
      val mr = managed(r)
       assertFalse("Failed to begin closed!", r.isOpened)
@@ -280,7 +277,7 @@ class TestManagedResource {
    }  
 
   @Test
-   def mustCloseOnException() {
+   def mustCloseOnException(): Unit = {
      val r = new FakeResource();
      val mr = managed(r)
       assertFalse("Failed to begin closed!", r.isOpened)
@@ -292,23 +289,29 @@ class TestManagedResource {
       assertTrue("Failed to catch exception", result.isLeft)
    }  
   @Test
-  def mustCloseOnReturn() {
+  def mustCloseOnReturn(): Unit = {
     val r = new FakeResource();
+
     def foo(): Boolean = {
       val mr = managed(r)
+      var result: Boolean = false
+
       assertFalse("Failed to begin closed!", r.isOpened)
-      mr foreach { r =>
+
+      mr.foreach { r =>
         assertTrue("Failed to open resource", r.isOpened)
-        return true
+        result = true
       }  
-      false
+
+      result
     }    
+
     assertTrue("Failed to return from function", foo())
     assertFalse("Failed to close resource", r.isOpened)
    }  
 
   @Test
-  def mustAcquireAndGet() {
+  def mustAcquireAndGet(): Unit = {
    val r = new FakeResource();
    val mr = managed(r)
     assertFalse("Failed to begin closed!", r.isOpened)
@@ -322,11 +325,11 @@ class TestManagedResource {
   }
 
   @Test
-  def mustReturnFirstExceptionInAcquireAndGet() {
+  def mustReturnFirstExceptionInAcquireAndGet(): Unit = {
     val r = new FakeResource()
     val mr = managed(r)(Resource.reflectiveCloseableResource, implicitly[OptManifest[FakeResource]])
     try {
-      val result = mr.acquireAndGet { r => r.generateData }
+      val _ = mr.acquireAndGet { r => r.generateData }
       fail("Should not make it here, due to previous error!")
     } catch {
       case e: Throwable =>
@@ -335,12 +338,12 @@ class TestManagedResource {
   }
 
   @Test
-  def mustJoinSequence() {
-    val resources =  (1 to 10).map(i => new FakeResource()).toSeq
+  def mustJoinSequence(): Unit = {
+    val resources =  (1 to 10).map(_ => new FakeResource()).toSeq
     val managedResources = resources.map(managed(_))
     val unified = join(managedResources)
 
-    for(all <- unified) {
+    for (all <- unified) {
       assertTrue("Failed to open resources!", all.forall(_.isOpened))
       all.map(_.generateData).sum      //Make sure no errors are thrown...
 
@@ -351,69 +354,13 @@ class TestManagedResource {
 
   }
 
-
   @Test
-  def mustCreateTraversable() {
-    val resource : ManagedResource[FakeResource] = managed(new FakeResource {
-      override protected def makeData = 1.0
-    })
-    val traversable : Traversable[Double] = resource.map(_.generateData).map(List(_)).toTraversable
-    traversable.foreach { x =>
-      assertTrue("Failed to traverse correct data!", math.abs(1.0 - x) < 0.0001)
-    }
-  }
-
-  @Test
-  def mustCreateTraversableForExpression() {
-    val resource : ManagedResource[FakeResource] = managed(new FakeResource {
-      override protected def makeData = 1.0
-    })
-    val traversable = for( r <- resource ) yield List(r.generateData)
-    traversable.toTraversable.foreach { x =>
-      assertTrue("Failed to traverse correct data!", math.abs(1.0 - x) < 0.0001)
-    }
-  }
-
-  @Test
-  def mustCreateTraversableMultiLevelForExpression() {
-    def resource : ManagedResource[FakeResource] = managed(new FakeResource {
-      override protected def makeData = 1.0
-    })
-    val traversable = for {
-      r1 <- resource
-      r2 <- resource
-      r3 <- resource
-    } yield List(r1.generateData, r2.generateData, r3.generateData)
-    traversable.toTraversable.foreach { x =>
-      assertTrue("Failed to traverse correct data!", math.abs(1.0 - x) < 0.0001)
-    }
-  }
-
-  @Test
-  def mustErrorOnTraversal() {
-    var caught = false
-    try {
-      val resource = managed(new FakeResource {
-        override protected def makeData = 1.0
-      })
-      val traversable : Traversable[Any] = resource.map(ignore => (new Traversable[Any] {
-        def foreach[U](f : Any => U) : Unit = sys.error("Do not continue!")
-      } : Traversable[Any])).toTraversable
-
-      traversable.foreach( x => ())
-    } catch {
-      case e: Throwable =>
-         caught = true
-    }
-    assertTrue("Exceptions during traversale are propogated by default!",caught)
-
-  }
-  @Test
-  def mustAllowApplyUsage() {
+  def mustAllowApplyUsage(): Unit = {
     val r = new FakeResource()
 
     assertFalse("Failed to begin closed!", r.isOpened)
-    val result = managed(r) acquireAndGet { r =>
+
+    val _ = managed(r) acquireAndGet { r =>
         assertTrue("Failed to open resource", r.isOpened)
         r.generateData
     }
@@ -426,7 +373,7 @@ class TestManagedResource {
     val sharedReference = shared(r)
 
     assertFalse("Failed to begin closed!", r.isOpened)
-    val result = sharedReference acquireAndGet { scoped =>
+    val _ = sharedReference acquireAndGet { scoped =>
       assertEquals(scoped, r)
       assertTrue("Failed to open resource", scoped.isOpened)
       for (scoped2 <- sharedReference) {
@@ -438,7 +385,7 @@ class TestManagedResource {
   }
 
   @Test
-  def mustBeSuccessFuture() {
+  def mustBeSuccessFuture(): Unit = {
     val r = new FakeResource()
 
     assertFalse("Failed to begin closed!", r.isOpened)
@@ -454,7 +401,7 @@ class TestManagedResource {
   }
 
   @Test
-  def mustBeFailedFuture() {
+  def mustBeFailedFuture(): Unit = {
     val r = new FakeResource()
 
     assertFalse("Failed to begin closed!", r.isOpened)
@@ -462,7 +409,6 @@ class TestManagedResource {
     val result = try {
       Await.result(managed(r).map[String](_ => {
         sys.error("Error")
-        "OK"
       }).toFuture, Duration("1s"))
     } catch {
       case _: Throwable => "KO"
@@ -474,25 +420,26 @@ class TestManagedResource {
 
 
     @Test
-  def mustBeSuccessTry() {
+  def mustBeSuccessTry(): Unit = {
     val r = new FakeResource()
 
     assertFalse("Failed to begin closed!", r.isOpened)
+
     val result = managed(r).map[String](_ => "OK").tried
+
     assertTrue("Successful result", result.isSuccess)
     assertFalse("Failed to close resource", r.isOpened)
   }
 
   @Test
-  def mustBeFailedTry() {
+  def mustBeFailedTry(): Unit = {
     val r = new FakeResource()
 
     assertFalse("Failed to begin closed!", r.isOpened)
 
     val result = managed(r).map[String](_ => {
-        sys.error("Error")
-        "OK"
-      }).tried
+      sys.error("Error")
+    }).tried
 
     assertFalse("Failure result", result.isSuccess)
     assertFalse("Failed to close resource", r.isOpened)
