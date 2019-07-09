@@ -61,6 +61,7 @@ class TestTypeClassResource {
   }
 
   @Test
+  @com.github.ghik.silencer.silent
   def mustCloseAfterExcetpion() = {
     implicit val resource1 = new UnitResourceMock
     implicit val resource2 = new UnitResourceMock
