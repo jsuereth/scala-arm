@@ -42,8 +42,9 @@ trait ExtractableManagedResource[+A] extends ManagedResource[A] {
    * This allows you to pull information out of the Managed resource, as such, the Resource will not be "available"
    * after this method call.
    *
-   * @return An either where the left hand side is the currently contained resource unless exceptions, in which case
-   *        the right hand side will contain the sequence of throwable encountered.
+   * @returns
+   *        An either where the right hand side is the currently contained resource unless exceptions, in which case
+   *        the left hand side will contain the sequence of throwable encountered.
    */
   def either: ExtractedEither[Seq[Throwable], A]
 
