@@ -28,10 +28,17 @@ Type classes in scala are encoded using implicit parameters.   Due to the mechan
     override def close(r : A) = r.close()
     override def toString = "Resource[{ def close() : Unit }]"
   }
+
   type ReflectiveDisposable = { def dispose() }
   implicit def reflectiveDisposableResource[A <: ReflectiveDisposable] = new Resource[A] {
     override def close(r : A) = r.dispose()
     override def toString = "Resource[{ def dispose() : Unit }]"
+  }
+
+  type ReflectiveReleasable = { def release() }
+  implicit def reflectiveReleasableResource[A <: ReflectiveReleasable] = new Resource[A] {
+    override def close(r : A) = r.release()
+    override def toString = "Resource[{ def release() : Unit }]"
   }
 {% endhighlight %}
 

@@ -69,7 +69,7 @@ sealed trait LowPriorityResourceImplicits {
    */
   implicit def reflectiveCloseableResource[A <: ReflectiveCloseable] = new Resource[A] {
     override def close(r: A) = r.close()
-    override def toString = "Resource[{ def close() : Unit }]"
+    override def toString = "Resource[{ def close(): Unit }]"
   }
 
   /** Structural type for disposable resources */
@@ -81,7 +81,19 @@ sealed trait LowPriorityResourceImplicits {
    */
   implicit def reflectiveDisposableResource[A <: ReflectiveDisposable] = new Resource[A] {
     override def close(r: A) = r.dispose()
-    override def toString = "Resource[{ def dispose() : Unit }]"
+    override def toString = "Resource[{ def dispose(): Unit }]"
+  }
+
+  /** Structural type for releasable resources */
+  type ReflectiveReleasable = { def release(): Unit }
+
+  /**
+   * This is the type class implementation for reflectively assuming a class with a release method is
+   * a resource.
+   */
+  implicit def reflectiveReleasableResource[A <: ReflectiveReleasable] = new Resource[A] {
+    override def close(r: A) = r.release()
+    override def toString = "Resource[{ def release(): Unit }]"
   }
 }
 
@@ -116,6 +128,21 @@ sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicit
     override def close(r: A) = r.close()
     override def toString = "Resource[javax.sql.PooledConnection]"
   }
+
+  @deprecated("", "")
+  def gzipOuputStraemResource = gzipOuputStreamResource
+
+  // GZIP must be "finished" when done.
+  implicit object gzipOuputStreamResource extends Resource[GZIPOutputStream] {
+    override def close(r: GZIPOutputStream): Unit = try {
+      r.finish()
+    } finally {
+      r.close() // required for Java 1.9+
+    }
+
+    override def toString = "Resource[GZIPOutputStream]"
+  }
+
   // JarFile does not extends java.io.Closeable on all JDKs.
   implicit object jarFileResource extends Resource[JarFile] {
     override def close(r: JarFile): Unit = r.close()
@@ -130,7 +157,7 @@ sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicit
 }
 
 /**
- * Companion object to the Resource type trait.   
+ * Companion object to the Resource type trait.
  * This contains all the default implicits in appropriate priority order.
  */
 object Resource extends MediumPriorityResourceImplicits

@@ -10,9 +10,7 @@ import org.junit.Assert._
 /**
  * Tests for the Using helpers.
  */
-class TestUsing {
-
-
+final class TestUsing {
   @Test
   def fileReaderWriter(): Unit = {
     val tmp = File.createTempFile("test", "txt")
@@ -89,6 +87,8 @@ class TestUsing {
   @Test
   def testGzipClose(): Unit = {
     val l = new GZIPOutputStream(new ByteArrayOutputStream())
+    println(s"x = ${implicitly[Resource[GZIPOutputStream]]}")
+
     managed(l).acquireFor { _ => }
     assertTrue("GZIPOutputStream was closed after write", streamClosed(l))
   }
