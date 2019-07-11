@@ -121,7 +121,7 @@ val arm = project.in(file(".")).
     libraryDependencies ++= Seq(
       //"junit" % "junit" % "4.10" % "test",
       "com.novocode" % "junit-interface" % "0.10" % Test,
-      "org.apache.derby" % "derby" % "10.5.3.0_1" % Test,
+      "org.apache.derby" % "derby" % "10.15.1.3" % Test,
       "javax.transaction" % "jta" % "1.1" % Provided
     ),
     scalacOptions ++= Seq("-deprecation", "-feature"),
