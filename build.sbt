@@ -120,7 +120,7 @@ val arm = project.in(file(".")).
     resolvers += "java.net repo" at "http://download.java.net/maven/2/",
     libraryDependencies ++= Seq(
       "com.novocode" % "junit-interface" % "0.11" % Test,
-      "org.apache.derby" % "derby" % "10.5.3.0_1" % Test,
+      "org.apache.derby" % "derby" % "10.15.1.3" % Test,
       "javax.transaction" % "jta" % "1.1" % Provided
     ),
     scalacOptions ++= Seq("-deprecation", "-feature"),
