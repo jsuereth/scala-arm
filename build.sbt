@@ -119,8 +119,7 @@ val arm = project.in(file(".")).
       "2.10.7", "2.11.12", scalaVersion.value, "2.13.0"),
     resolvers += "java.net repo" at "http://download.java.net/maven/2/",
     libraryDependencies ++= Seq(
-      //"junit" % "junit" % "4.10" % "test",
-      "com.novocode" % "junit-interface" % "0.10" % Test,
+      "com.novocode" % "junit-interface" % "0.11" % Test,
       "org.apache.derby" % "derby" % "10.15.1.3" % Test,
       "javax.transaction" % "jta" % "1.1" % Provided
     ),
