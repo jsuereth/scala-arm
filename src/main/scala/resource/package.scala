@@ -7,7 +7,7 @@ package object resource {
   type ErrorHolder[A] = Either[List[Throwable],A]
   /**
    * Creates a ManagedResource for any type with a Resource type class implementation.   This includes all
-   * java.io.Closeable subclasses, and any types that have a close or dispose method.  You can also provide your own
+   * java.lang.AutoCloseable subclasses, and any types that have a close or dispose method.  You can also provide your own
    * resource type class implementations in your own scope.
    */
   def managed[A : Resource : OptManifest](opener: => A) : ManagedResource[A] = new DefaultManagedResource(opener)
