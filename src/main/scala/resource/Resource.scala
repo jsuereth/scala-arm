@@ -98,14 +98,14 @@ sealed trait LowPriorityResourceImplicits {
 }
 
 sealed trait MediumPriorityResourceImplicits extends LowPriorityResourceImplicits {
-  import _root_.java.io.Closeable
+  import _root_.java.lang.AutoCloseable
 
-  implicit def closeableResource[A <: Closeable] = new Resource[A] {
+  implicit def closeableResource[A <: AutoCloseable] = new Resource[A] {
     override def close(r: A) = r.close()
     // TODO - Should we actually catch less?   What if there is a user exception not under IOException during
     // processing of a resource.   We should still close it.
     //override val possibleExceptions = List(classOf[IOException])
-    override def toString = "Resource[java.io.Closeable]"
+    override def toString = "Resource[java.lang.AutoCloseable]"
   }
   
   //Add All JDBC related handlers.
